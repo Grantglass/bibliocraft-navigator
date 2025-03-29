@@ -1,19 +1,22 @@
 
 import React from 'react';
 import { BibliographyEntry } from '../data/bibliographyData';
+import PdfUploader from './PdfUploader';
 
 interface BibliographyContentProps {
   entries: BibliographyEntry[];
   isLoading?: boolean;
   searchQuery?: string;
   selectedCategory?: string;
+  onEntriesExtracted?: (entries: BibliographyEntry[]) => void;
 }
 
 const BibliographyContent: React.FC<BibliographyContentProps> = ({ 
   entries, 
   isLoading, 
   searchQuery,
-  selectedCategory 
+  selectedCategory,
+  onEntriesExtracted
 }) => {
   if (isLoading) {
     return (
@@ -35,6 +38,8 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
     }
   };
 
+  const showPdfUploader = entries.length === 0 && !searchQuery;
+
   return (
     <div className="bibliography-content">
       <div className="border-b border-biblio-lightGray pb-4 mb-6">
@@ -44,19 +49,26 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
         )}
       </div>
 
+      {showPdfUploader && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-biblio-navy mb-4">Import Bibliography from PDF</h2>
+          <PdfUploader onBibliographyExtracted={onEntriesExtracted || (() => {})} />
+        </div>
+      )}
+
       {entries.length > 0 ? (
-        <div>
+        <div className="space-y-6">
           {entries.map((entry) => (
-            <div key={entry.id} className="bibliography-entry">
+            <div key={entry.id} className="bibliography-entry p-4 border border-biblio-lightGray rounded-md hover:shadow-md transition-shadow">
               <h2 className="text-xl font-semibold text-biblio-navy">{entry.title}</h2>
-              <p className="text-biblio-darkGray">{entry.authors} ({entry.year})</p>
-              <p className="text-biblio-gray italic">{entry.publication}</p>
-              <p className="mt-2">{entry.content}</p>
+              <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
+              <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
+              <p className="mt-3 text-gray-700">{entry.content}</p>
             </div>
           ))}
         </div>
       ) : (
-        !searchQuery && (
+        !searchQuery && !showPdfUploader && (
           <div className="text-center p-8">
             <p className="text-biblio-gray">Select a category or search for entries to begin.</p>
           </div>

@@ -8,16 +8,20 @@ import {
   getEntryById,
   searchEntries,
   BibliographyEntry,
-  bibliographyCategories
+  bibliographyCategories,
+  categorizeEntries
 } from '@/data/bibliographyData';
 import { Menu } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [entries, setEntries] = useState<BibliographyEntry[]>([]);
+  const [allEntries, setAllEntries] = useState<BibliographyEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { toast } = useToast();
   
   // For responsiveness
   useEffect(() => {
@@ -46,7 +50,7 @@ const Index = () => {
     setSelectedCategory(categoryId);
     
     setTimeout(() => {
-      const categoryEntries = getEntriesByCategory(categoryId);
+      const categoryEntries = getEntriesByCategory(categoryId, allEntries);
       setEntries(categoryEntries);
       setIsLoading(false);
       // On mobile, close sidebar after selection
@@ -62,7 +66,7 @@ const Index = () => {
     setSelectedCategory('');
     
     setTimeout(() => {
-      const entry = getEntryById(entryId);
+      const entry = getEntryById(entryId, allEntries);
       setEntries(entry ? [entry] : []);
       setIsLoading(false);
       // On mobile, close sidebar after selection
@@ -80,7 +84,7 @@ const Index = () => {
     setSelectedCategory('');
     
     setTimeout(() => {
-      const results = searchEntries(query);
+      const results = searchEntries(query, allEntries);
       setEntries(results);
       setIsLoading(false);
       // On mobile, close sidebar after search
@@ -88,6 +92,18 @@ const Index = () => {
         setIsSidebarOpen(false);
       }
     }, 300);
+  };
+
+  const handleBibliographyExtracted = (extractedEntries: BibliographyEntry[]) => {
+    // Categorize the entries
+    const categorizedEntries = categorizeEntries(extractedEntries);
+    setAllEntries(categorizedEntries);
+    setEntries(categorizedEntries);
+    
+    toast({
+      title: "Bibliography Imported",
+      description: `Successfully imported ${categorizedEntries.length} entries.`,
+    });
   };
 
   const getCategoryName = (categoryId: string) => {
@@ -115,6 +131,7 @@ const Index = () => {
           onSearch={handleSearch}
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
+          entries={allEntries}
         />
         
         <div className="flex-1 overflow-auto transition-all duration-300 ease-in-out">
@@ -124,6 +141,7 @@ const Index = () => {
               isLoading={isLoading} 
               searchQuery={searchQuery}
               selectedCategory={getCategoryName(selectedCategory)}
+              onEntriesExtracted={handleBibliographyExtracted}
             />
           </div>
         </div>
