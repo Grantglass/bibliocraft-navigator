@@ -152,24 +152,62 @@ export const getAllEntries = (): BibliographyEntry[] => {
   return bibliographyEntries;
 };
 
-export const getEntriesByCategory = (categoryId: string): BibliographyEntry[] => {
+export const getEntriesByCategory = (categoryId: string, entries: BibliographyEntry[] = bibliographyEntries): BibliographyEntry[] => {
   const category = bibliographyCategories.find(cat => cat.id === categoryId);
   if (!category || !category.entries) return [];
   
   return category.entries.map(entryId => 
-    bibliographyEntries.find(entry => entry.id === entryId)
+    entries.find(entry => entry.id === entryId)
   ).filter((entry): entry is BibliographyEntry => entry !== undefined);
 };
 
-export const getEntryById = (entryId: string): BibliographyEntry | undefined => {
-  return bibliographyEntries.find(entry => entry.id === entryId);
+export const getEntryById = (entryId: string, entries: BibliographyEntry[] = bibliographyEntries): BibliographyEntry | undefined => {
+  return entries.find(entry => entry.id === entryId);
 };
 
-export const searchEntries = (query: string): BibliographyEntry[] => {
+export const searchEntries = (query: string, entries: BibliographyEntry[] = bibliographyEntries): BibliographyEntry[] => {
   const lowercaseQuery = query.toLowerCase();
-  return bibliographyEntries.filter(entry => 
+  return entries.filter(entry => 
     entry.title.toLowerCase().includes(lowercaseQuery) ||
     entry.authors.toLowerCase().includes(lowercaseQuery) ||
     entry.content.toLowerCase().includes(lowercaseQuery)
   );
+};
+
+// Add the missing categorizeEntries function
+export const categorizeEntries = (entries: BibliographyEntry[]): BibliographyEntry[] => {
+  return entries.map(entry => {
+    // Simple categorization logic based on content keywords
+    // This is a basic implementation - you may want to implement more sophisticated logic
+    let category = 'academic_papers'; // Default category
+    
+    const contentLower = entry.content.toLowerCase();
+    const titleLower = entry.title.toLowerCase();
+    
+    if (contentLower.includes('methodology') || titleLower.includes('methodology') || 
+        contentLower.includes('standard') || titleLower.includes('standard')) {
+      category = 'methodology';
+    } else if (contentLower.includes('digital') || titleLower.includes('digital') ||
+               contentLower.includes('software') || titleLower.includes('software') ||
+               contentLower.includes('technology') || titleLower.includes('technology') ||
+               contentLower.includes('ai') || titleLower.includes('ai')) {
+      category = 'digital';
+    } else if (contentLower.includes('humanities') || titleLower.includes('humanities')) {
+      category = 'humanities';
+    } else if (contentLower.includes('history') || titleLower.includes('history') ||
+               contentLower.includes('historical') || titleLower.includes('historical')) {
+      category = 'history';
+    } else if (contentLower.includes('open access') || titleLower.includes('open access') ||
+               contentLower.includes('sharing') || titleLower.includes('sharing')) {
+      category = 'open_access';
+    } else if (contentLower.includes('social') || titleLower.includes('social') ||
+               contentLower.includes('society') || titleLower.includes('society')) {
+      category = 'social';
+    }
+    
+    return {
+      ...entry,
+      category
+    };
+  });
 };
