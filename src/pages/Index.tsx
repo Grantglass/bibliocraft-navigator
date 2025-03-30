@@ -1,293 +1,110 @@
 
-import React, { useState, useEffect } from 'react';
-import BibliographySidebar from '@/components/BibliographySidebar';
-import BibliographyContent from '@/components/BibliographyContent';
-import { 
-  getAllEntries, 
-  searchEntries,
-  BibliographyEntry,
-  categorizeEntries
-} from '@/data/bibliographyData';
-import { Menu } from 'lucide-react';
-import { useToast } from "@/components/ui/use-toast";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { BookOpen, List, Info } from 'lucide-react';
 
 const Index = () => {
-  const [entries, setEntries] = useState<BibliographyEntry[]>([]);
-  const [allEntries, setAllEntries] = useState<BibliographyEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedSubheading, setSelectedSubheading] = useState('');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [chapters, setChapters] = useState<string[]>([]);
-  const [subheadings, setSubheadings] = useState<Record<string, string[]>>({});
-  const { toast } = useToast();
-  
-  // For responsiveness
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsSidebarOpen(true);
-      } else {
-        setIsSidebarOpen(false);
-      }
-    };
-
-    // Set initial state
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Extract unique chapters from entries
-  useEffect(() => {
-    if (allEntries.length > 0) {
-      // Extract all PART chapters (I-X)
-      const partChapters = [
-        "PART I. TEACHING WILLIAM BLAKE",
-        "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
-        "PART III. EDITIONS OF BLAKE'S WRITING",
-        "PART IV. BIOGRAPHIES",
-        "PART V. BIBLIOGRAPHIES",
-        "PART VI. CATALOGUES",
-        "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
-        "PART VIII. SPECIFIC WORKS BY BLAKE",
-        "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
-        "PART X. APPENDICES"
-      ];
-      
-      // Get chapters that exist in the entries
-      const availableChapters = allEntries
-        .filter(entry => entry.chapter)
-        .map(entry => entry.chapter as string);
-      
-      // Create a set of unique chapters focusing only on full chapter names
-      const uniqueChapters = new Set<string>();
-      
-      // First add all the predefined part chapters that exist in availableChapters
-      partChapters.forEach(chapter => {
-        // Check if this chapter or any chapter starting with this prefix exists
-        const exists = availableChapters.some(availableChapter => 
-          availableChapter === chapter || 
-          availableChapter.startsWith(chapter + ' ') ||
-          availableChapter.startsWith(chapter + '.')
-        );
-        
-        if (exists) {
-          uniqueChapters.add(chapter);
-        }
-      });
-      
-      // Filter out abbreviated chapter versions (e.g., "PART V") 
-      // when the full version (e.g., "PART V. BIBLIOGRAPHIES") exists
-      const chaptersList = Array.from(uniqueChapters);
-      const filteredChapters = chaptersList.filter(chapter => {
-        // If this is a full chapter name (contains a dot), keep it
-        if (chapter.includes('.')) {
-          return true;
-        }
-        
-        // If this is an abbreviated chapter name, check if a full version exists
-        const prefix = chapter.trim();
-        const fullVersionExists = chaptersList.some(fullChapter => 
-          fullChapter !== chapter && fullChapter.startsWith(prefix + '.')
-        );
-        
-        // Only keep if no full version exists
-        return !fullVersionExists;
-      });
-      
-      const sortedChapters = filteredChapters.sort((a, b) => {
-        // Extract Roman numerals or numbers for sorting
-        const getPartNumber = (str: string) => {
-          const match = str.match(/PART\s+([IVXLCDM]+|[0-9]+)/i);
-          return match ? match[1] : '';
-        };
-        
-        const aNum = getPartNumber(a);
-        const bNum = getPartNumber(b);
-        
-        // Convert Roman numerals to numbers for comparison
-        const romanToNum = (roman: string) => {
-          if (/^[0-9]+$/.test(roman)) return parseInt(roman, 10);
-          
-          const romanValues: Record<string, number> = {
-            I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000
-          };
-          
-          let result = 0;
-          for (let i = 0; i < roman.length; i++) {
-            const current = romanValues[roman[i] as keyof typeof romanValues] || 0;
-            const next = romanValues[roman[i + 1] as keyof typeof romanValues] || 0;
-            if (current < next) {
-              result -= current;
-            } else {
-              result += current;
-            }
-          }
-          return result;
-        };
-        
-        return romanToNum(aNum) - romanToNum(bNum);
-      });
-      
-      setChapters(sortedChapters);
-      
-      // If chapters are available and no category is selected, select the first chapter
-      if (sortedChapters.length > 0 && !selectedCategory) {
-        handleSelectCategory(sortedChapters[0]);
-      }
-    }
-  }, [allEntries, selectedCategory]);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const handleSelectCategory = (categoryId: string) => {
-    setIsLoading(true);
-    setSearchQuery('');
-    
-    // Check if this is a category.subheading format
-    if (categoryId.includes('.')) {
-      const [chapter, subheading] = categoryId.split('.');
-      setSelectedCategory(chapter);
-      setSelectedSubheading(subheading);
-      
-      setTimeout(() => {
-        // Filter entries by the selected chapter and subheading
-        const subheadingEntries = allEntries.filter(entry => 
-          entry.chapter === chapter && entry.subheading === subheading
-        );
-        
-        setEntries(subheadingEntries);
-        setIsLoading(false);
-        
-        // On mobile, close sidebar after selection
-        if (window.innerWidth < 768) {
-          setIsSidebarOpen(false);
-        }
-      }, 300);
-      
-    } else {
-      setSelectedCategory(categoryId);
-      setSelectedSubheading('');
-      
-      setTimeout(() => {
-        // Filter entries by the selected chapter
-        const chapterEntries = allEntries.filter(entry => {
-          // Match entries that have this exact chapter or are part of this chapter
-          return entry.chapter === categoryId || 
-                (entry.chapter && entry.chapter.startsWith(categoryId + '.'));
-        });
-        
-        setEntries(chapterEntries);
-        setIsLoading(false);
-        
-        // On mobile, close sidebar after selection
-        if (window.innerWidth < 768) {
-          setIsSidebarOpen(false);
-        }
-      }, 300);
-    }
-  };
-
-  const handleSelectEntry = (entryId: string) => {
-    setIsLoading(true);
-    setSearchQuery('');
-    
-    setTimeout(() => {
-      const selectedEntry = allEntries.find(entry => entry.id === entryId);
-      setEntries(selectedEntry ? [selectedEntry] : []);
-      if (selectedEntry?.chapter) {
-        setSelectedCategory(selectedEntry.chapter);
-        setSelectedSubheading(selectedEntry.subheading || '');
-      }
-      setIsLoading(false);
-      
-      // On mobile, close sidebar after selection
-      if (window.innerWidth < 768) {
-        setIsSidebarOpen(false);
-      }
-    }, 300);
-  };
-
-  const handleSearch = (query: string) => {
-    if (query.trim() === '') return;
-    
-    setIsLoading(true);
-    setSearchQuery(query);
-    setSelectedCategory('');
-    setSelectedSubheading('');
-    
-    setTimeout(() => {
-      const results = searchEntries(query, allEntries);
-      setEntries(results);
-      setIsLoading(false);
-      
-      // On mobile, close sidebar after search
-      if (window.innerWidth < 768) {
-        setIsSidebarOpen(false);
-      }
-    }, 300);
-  };
-
-  const handleBibliographyExtracted = (extractedEntries: BibliographyEntry[], extractedSubheadings?: Record<string, string[]>) => {
-    // Categorize the entries
-    const categorizedEntries = categorizeEntries(extractedEntries);
-    setAllEntries(categorizedEntries);
-    setEntries(categorizedEntries);
-    
-    // Set subheadings if provided
-    if (extractedSubheadings) {
-      setSubheadings(extractedSubheadings);
-    }
-    
-    toast({
-      title: "Bibliography Imported",
-      description: `Successfully imported ${categorizedEntries.length} entries.`,
-    });
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-biblio-lightBlue">
-      {/* Mobile header with menu button */}
-      <div className="bg-biblio-navy text-white p-4 md:hidden flex items-center justify-between">
-        <h1 className="text-lg font-bold">Bibliography Navigator</h1>
-        <button 
-          className="p-2 rounded-md hover:bg-sidebar-accent"
-          onClick={toggleSidebar}
-        >
-          <Menu size={24} />
-        </button>
-      </div>
+      <header className="bg-biblio-navy text-white py-8">
+        <div className="max-w-4xl mx-auto px-6">
+          <h1 className="text-4xl font-bold">William Blake Bibliography</h1>
+          <p className="mt-2 text-biblio-lightBlue">
+            An annotated bibliography of William Blake scholarship
+          </p>
+        </div>
+      </header>
       
-      <div className="flex flex-1 overflow-hidden">
-        <BibliographySidebar 
-          onSelectCategory={handleSelectCategory} 
-          onSelectEntry={handleSelectEntry}
-          onSearch={handleSearch}
-          isSidebarOpen={isSidebarOpen}
-          toggleSidebar={toggleSidebar}
-          entries={allEntries}
-          chapters={chapters}
-          subheadings={subheadings}
-        />
-        
-        <div className="flex-1 overflow-auto transition-all duration-300 ease-in-out">
-          <div className="max-w-4xl mx-auto p-6 bg-white shadow-sm rounded-md my-6 mx-4 md:mx-auto">
-            <BibliographyContent 
-              entries={entries} 
-              isLoading={isLoading} 
-              searchQuery={searchQuery}
-              selectedCategory={selectedCategory}
-              selectedSubheading={selectedSubheading}
-              onEntriesExtracted={handleBibliographyExtracted}
-            />
+      <main className="flex-1">
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="bg-white shadow-sm rounded-md p-8 my-6">
+            <h2 className="text-3xl font-bold text-biblio-navy mb-6">
+              WILLIAM BLAKE: AN ANNOTATED BIBLIOGRAPHY
+            </h2>
+            
+            <p className="text-lg mb-6">
+              This is an updated version of G. E. Bentley, Jr.'s William Blake: 
+              The Critical Heritage (London: Routledge, 1975) and Blake Books 
+              (Oxford: Clarendon Press, 1977) and Blake Books Supplement (Oxford: 
+              Clarendon Press, 1995), plus materials from Blake Books (2000) and Blake (2001, 2006).
+            </p>
+            
+            <p className="mb-8">
+              Edited by Jason Whittaker (2018, 2021, 2023) and produced by the 
+              William Blake Archive with assistance from the Bibliography Team.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+              <Link to="/bibliography">
+                <Button className="w-full h-24 text-lg flex flex-col items-center justify-center gap-2 bg-biblio-navy hover:bg-biblio-navy/90">
+                  <BookOpen size={24} />
+                  <span>Browse Bibliography</span>
+                </Button>
+              </Link>
+              
+              <Link to="/about">
+                <Button variant="outline" className="w-full h-24 text-lg flex flex-col items-center justify-center gap-2 border-biblio-navy text-biblio-navy hover:bg-biblio-lightBlue/50">
+                  <Info size={24} />
+                  <span>About this Bibliography</span>
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="mt-12 pt-6 border-t border-gray-200">
+              <h3 className="text-xl font-semibold text-biblio-navy mb-4">Contents Overview</h3>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART I. Teaching William Blake
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART II. Introductions & Handbooks
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART III. Editions of Blake's Writing
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART IV. Biographies
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART V. Bibliographies
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART VI. Catalogues
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART VII. Studies by Subject
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART VIII. Specific Works by Blake
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART IX. Collections of Essays
+                </li>
+                <li className="flex items-center gap-2">
+                  <List size={16} className="text-biblio-navy" />
+                  PART X. Appendices
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
+      </main>
+      
+      <footer className="bg-biblio-navy text-white py-4">
+        <div className="max-w-4xl mx-auto px-6 text-center text-sm">
+          <p>William Blake Bibliography Navigator © {new Date().getFullYear()}</p>
+        </div>
+      </footer>
     </div>
   );
 };
