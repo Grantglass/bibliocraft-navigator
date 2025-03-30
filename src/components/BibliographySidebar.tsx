@@ -4,6 +4,11 @@ import { ChevronDown, ChevronRight, Search, Menu, BookOpen } from 'lucide-react'
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { BibliographyEntry } from '@/data/bibliographyData';
+import { 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger 
+} from '@/components/ui/collapsible';
 
 interface BibliographySidebarProps {
   onSelectCategory: (categoryId: string) => void;
@@ -43,7 +48,7 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
     chapters.forEach(chapter => {
       // For each chapter, find entries that belong to it
       result[chapter] = entries
-        .filter(entry => entry.chapter === chapter)
+        .filter(entry => entry.chapter === chapter || (entry.chapter && entry.chapter.startsWith(chapter + '.')))
         .map(entry => entry.id);
     });
     
@@ -110,45 +115,51 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
         <div className="overflow-y-auto flex-grow">
           <div className="p-2">
             {chapters.length > 0 ? (
-              // Display PDF chapters
+              // Display PDF chapters using Collapsible component
               chapters.map((chapter) => {
                 const chapterEntries = entriesByChapter[chapter] || [];
                 const hasEntries = chapterEntries.length > 0;
                 
                 return (
-                  <div key={chapter} className="mb-2">
-                    <div 
-                      className={`flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent ${!hasEntries ? 'opacity-75' : ''}`}
-                      onClick={() => {
-                        toggleCategory(chapter);
-                        onSelectCategory(chapter);
-                      }}
-                    >
-                      <span className="mr-2">
-                        {expandedCategories[chapter] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                      </span>
-                      <BookOpen size={16} className="mr-2" />
-                      <span className="font-medium text-sm">{chapter}</span>
-                      {hasEntries && <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">{chapterEntries.length}</span>}
-                    </div>
-                    
-                    {expandedCategories[chapter] && hasEntries && (
-                      <div className="ml-6 pl-2 border-l border-sidebar-border">
-                        {chapterEntries.map((entryId) => {
-                          const entry = entries.find(e => e.id === entryId);
-                          return (
-                            <div 
-                              key={entryId}
-                              className="p-2 text-sm cursor-pointer hover:bg-sidebar-accent rounded-md my-1"
-                              onClick={() => onSelectEntry(entryId)}
-                            >
-                              {entry ? entry.title.substring(0, 28) + (entry.title.length > 28 ? '...' : '') : entryId}
-                            </div>
-                          );
-                        })}
+                  <Collapsible 
+                    key={chapter} 
+                    open={expandedCategories[chapter]} 
+                    onOpenChange={(open) => setExpandedCategories(prev => ({ ...prev, [chapter]: open }))}
+                    className="mb-2"
+                  >
+                    <CollapsibleTrigger className="w-full">
+                      <div 
+                        className="flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent w-full text-left"
+                        onClick={() => onSelectCategory(chapter)}
+                      >
+                        <span className="mr-2">
+                          {expandedCategories[chapter] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </span>
+                        <BookOpen size={16} className="mr-2" />
+                        <span className="font-medium text-sm">{chapter}</span>
+                        {hasEntries && <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">{chapterEntries.length}</span>}
                       </div>
-                    )}
-                  </div>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent>
+                      {hasEntries && (
+                        <div className="ml-6 pl-2 border-l border-sidebar-border">
+                          {chapterEntries.map((entryId) => {
+                            const entry = entries.find(e => e.id === entryId);
+                            return (
+                              <div 
+                                key={entryId}
+                                className="p-2 text-sm cursor-pointer hover:bg-sidebar-accent rounded-md my-1"
+                                onClick={() => onSelectEntry(entryId)}
+                              >
+                                {entry ? entry.title.substring(0, 28) + (entry.title.length > 28 ? '...' : '') : entryId}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
                 );
               })
             ) : (
