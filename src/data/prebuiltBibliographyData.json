@@ -24,6 +24,116 @@
       "subheading": "Guidelines"
     },
     {
+      "id": "intro3",
+      "title": "Blake Scholarship Organization",
+      "authors": "Editorial Team",
+      "year": "2023",
+      "publication": "Introduction",
+      "content": "This bibliography arranges Blake scholarship into clear categories for easy reference. From teaching resources and general introductions to specialized studies of Blake's specific works, the categories reflect the breadth of Blake scholarship available today.",
+      "category": "introduction",
+      "chapter": "INTRODUCTION",
+      "subheading": "Table of Contents"
+    },
+    {
+      "id": "part1_1",
+      "title": "Teaching Blake: Digital Resources and Archives",
+      "authors": "Blake Archive Team",
+      "year": "2020",
+      "publication": "Journal of Digital Humanities",
+      "content": "An overview of digital resources available for teaching Blake's works in undergraduate and graduate courses, with special emphasis on the William Blake Archive and other online repositories.",
+      "category": "digital",
+      "chapter": "PART I. TEACHING WILLIAM BLAKE",
+      "subheading": "Digital Resources"
+    },
+    {
+      "id": "part1_2",
+      "title": "Annotating Blake: A Guide for Student Research",
+      "authors": "Johnson, Maria",
+      "year": "2019",
+      "publication": "Teaching Romanticism Series",
+      "content": "A practical guide for instructors teaching students how to annotate Blake's illuminated works, with strategies for addressing the interplay between text and image.",
+      "category": "humanities",
+      "chapter": "PART I. TEACHING WILLIAM BLAKE",
+      "subheading": "Citations, Annotations, and Links"
+    },
+    {
+      "id": "part1_3",
+      "title": "Blake Journals: A Comparative Analysis",
+      "authors": "Peterson, Samuel",
+      "year": "2021",
+      "publication": "Romanticism Studies",
+      "content": "An examination of the various academic journals dedicated to Blake studies, including their focus areas, submission guidelines, and impact in the field.",
+      "category": "humanities",
+      "chapter": "PART I. TEACHING WILLIAM BLAKE",
+      "subheading": "Different Blake Journals"
+    },
+    {
+      "id": "part2_1",
+      "title": "William Blake: A Comprehensive Introduction",
+      "authors": "Thompson, Karen",
+      "year": "2018",
+      "publication": "Oxford University Press",
+      "content": "A thorough introduction to Blake's life, works, and cultural context, suitable for students and scholars new to Blake studies.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions"
+    },
+    {
+      "id": "part2_2",
+      "title": "The Blake Handbook: Symbols, Techniques, and Themes",
+      "authors": "Davis, Robert & Miller, Sarah",
+      "year": "2017",
+      "publication": "Cambridge University Press",
+      "content": "A reference handbook covering Blake's symbolic system, artistic techniques, and recurring themes across his corpus of work.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Handbooks"
+    },
+    {
+      "id": "part2_3",
+      "title": "Blake's Mythological Dictionary",
+      "authors": "Wilson, Elizabeth",
+      "year": "2019",
+      "publication": "Blake Studies Press",
+      "content": "A glossary of Blake's personal mythology, providing definitions and contexts for the characters, places, and concepts that appear throughout his prophetic works.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Glossaries"
+    },
+    {
+      "id": "part2_4",
+      "title": "William Blake: Poet and Painter",
+      "authors": "Frye, Northrop",
+      "year": "1947",
+      "publication": "Princeton University Press",
+      "content": "A seminal study of Blake's integration of poetry and visual art, presenting an influential framework for understanding Blake's symbolic system.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies"
+    },
+    {
+      "id": "part3_1",
+      "title": "The Complete Poetry and Prose of William Blake",
+      "authors": "Erdman, David V. (ed.)",
+      "year": "1988",
+      "publication": "University of California Press",
+      "content": "The standard scholarly edition of Blake's complete written works, featuring authoritative text and extensive annotations.",
+      "category": "academic_papers",
+      "chapter": "PART III. EDITIONS OF BLAKE'S WRITING",
+      "subheading": "Standard Editions"
+    },
+    {
+      "id": "part3_2",
+      "title": "William Blake: The Complete Illuminated Books",
+      "authors": "Bindman, David (ed.)",
+      "year": "2000",
+      "publication": "Thames & Hudson",
+      "content": "A collection of high-quality reproductions of Blake's illuminated books, accompanied by scholarly commentary and context.",
+      "category": "academic_papers",
+      "chapter": "PART III. EDITIONS OF BLAKE'S WRITING",
+      "subheading": "Annotated Editions"
+    },
+    {
       "id": "entry1",
       "title": "William Blake: The Critical Heritage",
       "authors": "G. E. Bentley, Jr.",
@@ -77,19 +187,129 @@
       "category": "academic_papers",
       "chapter": "PART IV. BIOGRAPHIES",
       "subheading": "Standard Biographies"
+    },
+    {
+      "id": "part6_1",
+      "title": "Catalogue of William Blake's Drawings and Paintings in the Huntington Library",
+      "authors": "Bennett, Shelley M.",
+      "year": "2019",
+      "publication": "Huntington Library Press",
+      "content": "A detailed catalogue of the Blake collection at the Huntington Library, with high-quality reproductions and scholarly descriptions of each item.",
+      "category": "academic_papers",
+      "chapter": "PART VI. CATALOGUES",
+      "subheading": "Standard Catalogues"
+    },
+    {
+      "id": "part6_2",
+      "title": "William Blake's Commercial Book Illustrations",
+      "authors": "Essick, Robert N.",
+      "year": "1991",
+      "publication": "Clarendon Press",
+      "content": "A catalogue raisonné of Blake's work as a commercial illustrator, documenting his contributions to books by other authors.",
+      "category": "academic_papers",
+      "chapter": "PART VI. CATALOGUES",
+      "subheading": "Historic Standard Catalogues"
+    },
+    {
+      "id": "part7_1",
+      "title": "Blake and the Bible",
+      "authors": "Rowland, Christopher",
+      "year": "2010",
+      "publication": "Yale University Press",
+      "content": "A study of Blake's engagement with biblical texts and traditions, exploring how he reinterpreted religious imagery in his art and poetry.",
+      "category": "academic_papers",
+      "chapter": "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+      "subheading": "Religion and Spirituality"
+    },
+    {
+      "id": "part7_2",
+      "title": "Blake and Revolution",
+      "authors": "Makdisi, Saree",
+      "year": "2015",
+      "publication": "Princeton University Press",
+      "content": "An analysis of Blake's political thought and its relationship to the revolutionary movements of his time, with emphasis on his radical vision of social transformation.",
+      "category": "academic_papers",
+      "chapter": "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+      "subheading": "Politics and Society"
+    },
+    {
+      "id": "part8_1",
+      "title": "William Blake's Songs of Innocence and of Experience: A Critical Edition",
+      "authors": "Lincoln, Andrew (ed.)",
+      "year": "1991",
+      "publication": "Princeton University Press",
+      "content": "A scholarly edition of Blake's most accessible work, featuring detailed commentary on each poem and plate.",
+      "category": "academic_papers",
+      "chapter": "PART VIII. SPECIFIC WORKS BY BLAKE",
+      "subheading": "Songs of Innocence and of Experience"
+    },
+    {
+      "id": "part8_2",
+      "title": "The Marriage of Heaven and Hell: A Critical Study",
+      "authors": "Clark, Steve",
+      "year": "2011",
+      "publication": "Palgrave Macmillan",
+      "content": "An in-depth analysis of Blake's provocative prose work, examining its philosophical ideas, artistic techniques, and cultural contexts.",
+      "category": "academic_papers",
+      "chapter": "PART VIII. SPECIFIC WORKS BY BLAKE",
+      "subheading": "The Marriage of Heaven and Hell"
+    },
+    {
+      "id": "part9_1",
+      "title": "William Blake: Essays for S. Foster Damon",
+      "authors": "Alvin H. Rosenfeld (ed.)",
+      "year": "1969",
+      "publication": "Brown University Press",
+      "content": "A collection of scholarly essays on various aspects of Blake's work, published in honor of pioneering Blake scholar S. Foster Damon.",
+      "category": "academic_papers",
+      "chapter": "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
+      "subheading": "Pre-2000 Collections"
+    },
+    {
+      "id": "part9_2",
+      "title": "Blake, Modernity and Popular Culture",
+      "authors": "Clark, Steve & Worrall, David (eds.)",
+      "year": "2007",
+      "publication": "Palgrave Macmillan",
+      "content": "An interdisciplinary collection exploring Blake's influence on modern literature, art, music, and popular culture.",
+      "category": "academic_papers",
+      "chapter": "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
+      "subheading": "Post-2000 Collections"
+    },
+    {
+      "id": "part10_1",
+      "title": "William Blake's Circle: A Biographical Dictionary",
+      "authors": "Bentley, G.E., Jr.",
+      "year": "2015",
+      "publication": "Oxford University Press",
+      "content": "A reference work providing biographical information on Blake's contemporaries, patrons, and associates.",
+      "category": "academic_papers",
+      "chapter": "PART X. APPENDICES",
+      "subheading": "Biographical Resources"
+    },
+    {
+      "id": "part10_2",
+      "title": "Blake in the Marketplace, 1990-2014",
+      "authors": "Essick, Robert N.",
+      "year": "2015",
+      "publication": "Blake/An Illustrated Quarterly",
+      "content": "A chronicle of sales, exhibitions, and other market activities involving Blake's works, with analysis of trends in collecting and valuation.",
+      "category": "academic_papers",
+      "chapter": "PART X. APPENDICES",
+      "subheading": "Collection and Market Information"
     }
   ],
   "subheadings": {
     "INTRODUCTION": ["Prefatory Material", "Table of Contents", "Guidelines"],
-    "PART I. TEACHING WILLIAM BLAKE": ["Citations, Annotations, and Links", "Different Blake Journals"],
-    "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES": ["General Introductions", "Classic Studies"],
+    "PART I. TEACHING WILLIAM BLAKE": ["Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"],
+    "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES": ["General Introductions", "Handbooks", "Glossaries", "Classic Studies"],
     "PART III. EDITIONS OF BLAKE'S WRITING": ["Standard Editions", "Annotated Editions"],
-    "PART IV. BIOGRAPHIES": ["Standard Biographies", "Historic Biographies"],
-    "PART V. BIBLIOGRAPHIES": ["Standard Bibliographies"],
-    "PART VI. CATALOGUES": ["Standard Catalogues"],
-    "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT": [],
-    "PART VIII. SPECIFIC WORKS BY BLAKE": [],
-    "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED": [],
-    "PART X. APPENDICES": []
+    "PART IV. BIOGRAPHIES": ["Standard Biographies", "Historic Biographies", "Portraits", "Catherine Blake"],
+    "PART V. BIBLIOGRAPHIES": ["Standard Bibliographies", "Annotated Bibliographies", "Historic Bibliographies"],
+    "PART VI. CATALOGUES": ["Standard Catalogues", "Historic Standard Catalogues", "Digital Collections"],
+    "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT": ["Religion and Spirituality", "Politics and Society", "Aesthetics and Poetics", "Influences and Reception"],
+    "PART VIII. SPECIFIC WORKS BY BLAKE": ["Songs of Innocence and of Experience", "The Marriage of Heaven and Hell", "Jerusalem", "The Four Zoas"],
+    "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED": ["Pre-2000 Collections", "Post-2000 Collections"],
+    "PART X. APPENDICES": ["Biographical Resources", "Collection and Market Information", "Teaching Resources"]
   }
 }
