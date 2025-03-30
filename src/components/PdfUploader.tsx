@@ -18,13 +18,21 @@ interface PdfUploaderProps {
   onBibliographyExtracted: (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => void;
 }
 
-class PdfUploader extends React.Component<PdfUploaderProps> {
-  state = {
+interface PdfUploaderState {
+  isLoading: boolean;
+  progress: number;
+  processingInfo: string;
+  debugInfo: string[];
+  error: string | null;
+}
+
+class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
+  state: PdfUploaderState = {
     isLoading: false,
     progress: 0,
     processingInfo: '',
     debugInfo: [] as string[],
-    error: null as string | null,
+    error: null,
   };
 
   // Automatically load the PDF when the component mounts
