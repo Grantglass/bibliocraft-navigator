@@ -5,23 +5,25 @@ import {
   getAllEntries, 
   searchEntries,
   BibliographyEntry,
-  categorizeEntries
+  categorizeEntries,
+  bibliographyEntries,
+  bibliographySubheadings
 } from '@/data/bibliographyData';
 import { Menu, ArrowLeft } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 const Bibliography = () => {
-  const [entries, setEntries] = useState<BibliographyEntry[]>([]);
-  const [allEntries, setAllEntries] = useState<BibliographyEntry[]>([]);
+  // Initialize with the pre-built data immediately
+  const [entries, setEntries] = useState<BibliographyEntry[]>(bibliographyEntries);
+  const [allEntries, setAllEntries] = useState<BibliographyEntry[]>(bibliographyEntries);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubheading, setSelectedSubheading] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chapters, setChapters] = useState<string[]>([]);
-  const [subheadings, setSubheadings] = useState<Record<string, string[]>>({});
+  const [subheadings, setSubheadings] = useState<Record<string, string[]>>(bibliographySubheadings);
   const { toast } = useToast();
   
   // For responsiveness
@@ -41,7 +43,7 @@ const Bibliography = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Extract unique chapters from entries
+  // Extract unique chapters from entries - now using pre-loaded data
   useEffect(() => {
     if (allEntries.length > 0) {
       // Extract all PART chapters (I-X)

@@ -1,6 +1,7 @@
 
-import React from 'react';
-import { BibliographyEntry } from '../data/bibliographyData';
+import React, { useEffect } from 'react';
+import { BibliographyEntry, bibliographyEntries, bibliographySubheadings } from '../data/bibliographyData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface BibliographyContentProps {
   entries: BibliographyEntry[];
@@ -16,12 +17,31 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   isLoading, 
   searchQuery,
   selectedCategory,
-  selectedSubheading
+  selectedSubheading,
+  onEntriesExtracted
 }) => {
+  // Auto-load entries when the component mounts
+  useEffect(() => {
+    if (onEntriesExtracted) {
+      // Use the pre-built data directly, no PDF loading needed
+      onEntriesExtracted(bibliographyEntries, bibliographySubheadings);
+    }
+  }, [onEntriesExtracted]);
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-biblio-navy"></div>
+      <div className="space-y-6">
+        <div className="border-b border-biblio-lightGray pb-4 mb-6">
+          <Skeleton className="h-8 w-3/4 mb-2" />
+        </div>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bibliography-entry p-4 border rounded-md">
+            <Skeleton className="h-6 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-1/2 mb-2" />
+            <Skeleton className="h-4 w-1/3 mb-2" />
+            <Skeleton className="h-20 w-full mt-2" />
+          </div>
+        ))}
       </div>
     );
   }
