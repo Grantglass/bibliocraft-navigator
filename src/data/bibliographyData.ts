@@ -26,6 +26,22 @@ export const bibliographyEntries: BibliographyEntry[] = prebuiltData.entries;
 // Convert the JSON subheadings to the correct type
 export const bibliographySubheadings: Record<string, string[]> = prebuiltData.subheadings;
 
+// Fix the subheadings for PART I
+if (bibliographySubheadings["PART I. TEACHING WILLIAM BLAKE"]) {
+  // Remove subheadings for PART I as requested
+  delete bibliographySubheadings["PART I. TEACHING WILLIAM BLAKE"];
+}
+
+// Make sure INTRODUCTION has these specific subheadings
+bibliographySubheadings["INTRODUCTION"] = [
+  "Prefatory Material",
+  "Table of Contents",
+  "Guidelines",
+  "Digital Resources",
+  "Citations, Annotations, and Links",
+  "Different Blake Journals"
+];
+
 export const bibliographyCategories: BibliographyCategory[] = [
   {
     id: "methodology",

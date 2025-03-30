@@ -26,31 +26,46 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   const entriesBySubheading = React.useMemo(() => {
     if (!selectedCategory || searchQuery) return null;
 
+    // Special case for PART I - don't group by subheading
+    if (selectedCategory === "PART I. TEACHING WILLIAM BLAKE") {
+      return { "All Entries": entries };
+    }
+
     const grouped: Record<string, BibliographyEntry[]> = {};
     
     // First sort entries
     const sortedEntries = [...entries].sort((a, b) => {
-      // Sort by subheading first
-      if (a.subheading && b.subheading) {
-        if (a.subheading < b.subheading) return -1;
-        if (a.subheading > b.subheading) return 1;
-      } else if (a.subheading) {
-        return -1;
-      } else if (b.subheading) {
-        return 1;
+      // Sort by subheading first (if not PART I)
+      if (selectedCategory !== "PART I. TEACHING WILLIAM BLAKE") {
+        if (a.subheading && b.subheading) {
+          if (a.subheading < b.subheading) return -1;
+          if (a.subheading > b.subheading) return 1;
+        } else if (a.subheading) {
+          return -1;
+        } else if (b.subheading) {
+          return 1;
+        }
       }
       
       // Then by author name
       return a.authors.localeCompare(b.authors);
     });
     
-    // Group by subheading
+    // Group by subheading (except for PART I)
     sortedEntries.forEach(entry => {
-      const subheading = entry.subheading || 'General';
-      if (!grouped[subheading]) {
-        grouped[subheading] = [];
+      if (selectedCategory === "PART I. TEACHING WILLIAM BLAKE") {
+        const group = "All Entries";
+        if (!grouped[group]) {
+          grouped[group] = [];
+        }
+        grouped[group].push(entry);
+      } else {
+        const subheading = entry.subheading || 'General';
+        if (!grouped[subheading]) {
+          grouped[subheading] = [];
+        }
+        grouped[subheading].push(entry);
       }
-      grouped[subheading].push(entry);
     });
     
     return grouped;
@@ -96,6 +111,9 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   // Check if we have actual entries to display
   const hasEntries = entries && entries.length > 0;
 
+  // Check if we're in PART I which shouldn't display subheadings
+  const isPart1 = selectedCategory === "PART I. TEACHING WILLIAM BLAKE";
+
   return (
     <div className="bibliography-content">
       <div className="border-b border-biblio-lightGray pb-4 mb-6">
@@ -114,10 +132,15 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
           <div className="space-y-8">
             {Object.entries(entriesBySubheading).map(([subheading, subEntries]) => (
               <div key={subheading} className="space-y-4">
-                <div className="sticky top-0 bg-white py-2 z-10">
-                  <h2 className="text-xl font-semibold text-biblio-navy">{subheading}</h2>
-                  <Separator className="mt-2 mb-4" />
-                </div>
+                {/* Only show subheadings if not in PART I */}
+                {(subheading !== "All Entries" || isPart1) && (
+                  <div className="sticky top-0 bg-white py-2 z-10">
+                    {!isPart1 && (
+                      <h2 className="text-xl font-semibold text-biblio-navy">{subheading}</h2>
+                    )}
+                    <Separator className="mt-2 mb-4" />
+                  </div>
+                )}
                 
                 {subEntries.map((entry) => (
                   <div key={entry.id} className={`bibliography-entry p-4 border rounded-md hover:shadow-md transition-shadow ${
@@ -130,7 +153,8 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
                     <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
                     <div className="mt-2">
                       <Badge variant="outline" className="bg-biblio-lightBlue/20 text-biblio-navy border-biblio-navy">
-                        {entry.chapter} - {entry.subheading}
+                        {entry.chapter}
+                        {entry.subheading && !isPart1 && ` - ${entry.subheading}`}
                       </Badge>
                     </div>
                     <p className="mt-3 text-gray-700">{entry.content}</p>
@@ -155,7 +179,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
                   <Badge variant="outline" className="bg-biblio-navy/10 text-biblio-navy">
                     {entry.chapter}
                   </Badge>
-                  {entry.subheading && (
+                  {entry.subheading && !isPart1 && (
                     <Badge variant="outline" className={`${
                       isIntroduction || entry.chapter === "INTRODUCTION"
                         ? 'bg-biblio-navy text-white' 
