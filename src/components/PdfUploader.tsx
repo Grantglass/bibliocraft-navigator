@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 // Set worker source path
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-// Path to the PDF file in the public directory
+// Path to the PDF file in the public directory - make sure this matches the actual filename
 const PDF_FILE_PATH = '/blake_bibliography.pdf';
 
 interface PdfUploaderProps {
@@ -23,6 +22,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
   const [progress, setProgress] = useState(0);
   const [processingInfo, setProcessingInfo] = useState('');
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Automatically load the PDF when the component mounts
@@ -35,17 +35,20 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
     setProgress(5);
     setProcessingInfo('Loading bibliography from repository...');
     setDebugInfo([`Starting to process file: ${PDF_FILE_PATH}`]);
+    setError(null);
     
     try {
       setProcessingInfo('Preparing PDF document...');
       setProgress(10);
       
       // Load the PDF from the public folder
+      const pdfUrl = PDF_FILE_PATH;
+      setDebugInfo(prev => [...prev, `Attempting to load PDF from: ${pdfUrl}`]);
+      
       const loadingTask = pdfjsLib.getDocument({
-        url: PDF_FILE_PATH,
+        url: pdfUrl,
         cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
         cMapPacked: true,
-        disableFontFace: true,
       });
       
       loadingTask.onProgress = (progressData) => {
@@ -106,6 +109,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
           description: `Extracted ${entries.length} bibliography entries from ${totalPages} pages`,
         });
       } else {
+        setError("No bibliography entries found in the PDF.");
         toast({
           title: "No Bibliography Entries Found",
           description: "The PDF was processed but no bibliography entries were detected.",
@@ -114,7 +118,9 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       }
     } catch (error) {
       console.error('Error processing PDF:', error);
-      setDebugInfo(prev => [...prev, `Error: ${error instanceof Error ? error.message : String(error)}`]);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setError(`Failed to load PDF: ${errorMessage}`);
+      setDebugInfo(prev => [...prev, `Error: ${errorMessage}`]);
       toast({
         title: "Error Loading Bibliography",
         description: "There was a problem extracting data from the PDF. Please try again later.",
@@ -405,6 +411,15 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
           <p className="text-sm text-biblio-gray mt-2">
             This will load the Blake bibliography data stored in the repository.
           </p>
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       ) : (
         <div className="mt-4 space-y-3">

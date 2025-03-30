@@ -1,108 +1,86 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { BookOpen, List, Info } from 'lucide-react';
+import { BookOpen, Info, Search } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-biblio-lightBlue">
-      <header className="bg-biblio-navy text-white py-8">
-        <div className="max-w-4xl mx-auto px-6">
-          <h1 className="text-4xl font-bold">William Blake Bibliography</h1>
-          <p className="mt-2 text-biblio-lightBlue">
-            An annotated bibliography of William Blake scholarship
-          </p>
+    <div className="min-h-screen bg-biblio-lightBlue">
+      <header className="bg-biblio-navy text-white py-6">
+        <div className="container mx-auto px-4">
+          <h1 className="text-3xl font-bold">William Blake: An Annotated Bibliography</h1>
+          <p className="mt-2 text-biblio-lightBlue">A comprehensive guide to Blake scholarship and resources</p>
         </div>
       </header>
-      
-      <main className="flex-1">
-        <div className="max-w-4xl mx-auto p-6">
-          <div className="bg-white shadow-sm rounded-md p-8 my-6">
-            <h2 className="text-3xl font-bold text-biblio-navy mb-6">
-              WILLIAM BLAKE: AN ANNOTATED BIBLIOGRAPHY
-            </h2>
-            
-            <p className="text-lg mb-6">
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-8">
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold text-biblio-navy mb-4">About This Bibliography</h2>
+            <p className="mb-3">
               This is an updated version of G. E. Bentley, Jr.'s William Blake: 
               The Critical Heritage (London: Routledge, 1975) and Blake Books 
               (Oxford: Clarendon Press, 1977) and Blake Books Supplement (Oxford: 
               Clarendon Press, 1995), plus materials from Blake Books (2000) and Blake (2001, 2006).
             </p>
-            
-            <p className="mb-8">
+            <p className="mb-3">
               Edited by Jason Whittaker (2018, 2021, 2023) and produced by the 
               William Blake Archive with assistance from the Bibliography Team.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-              <Link to="/bibliography">
-                <Button className="w-full h-24 text-lg flex flex-col items-center justify-center gap-2 bg-biblio-navy hover:bg-biblio-navy/90">
-                  <BookOpen size={24} />
-                  <span>Browse Bibliography</span>
-                </Button>
-              </Link>
-              
-              <Link to="/about">
-                <Button variant="outline" className="w-full h-24 text-lg flex flex-col items-center justify-center gap-2 border-biblio-navy text-biblio-navy hover:bg-biblio-lightBlue/50">
-                  <Info size={24} />
-                  <span>About this Bibliography</span>
-                </Button>
-              </Link>
+            <Alert className="my-6">
+              <AlertTitle>The William Blake Bibliography</AlertTitle>
+              <AlertDescription>
+                This bibliography contains thousands of entries organized by categories to facilitate research on Blake's art, poetry, and influence.
+              </AlertDescription>
+            </Alert>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold text-biblio-navy mb-4">Table of Contents</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <ul className="space-y-2">
+                  <li>• User Note</li>
+                  <li>• Abbreviations</li>
+                  <li>• PART I. TEACHING WILLIAM BLAKE</li>
+                  <li>• PART II. GENERAL INTRODUCTIONS</li>
+                  <li>• PART III. EDITIONS OF BLAKE'S WRITING</li>
+                </ul>
+              </div>
+              <div>
+                <ul className="space-y-2">
+                  <li>• PART IV. BIOGRAPHIES</li>
+                  <li>• PART V. BIBLIOGRAPHIES</li>
+                  <li>• PART VI-X. ADDITIONAL SECTIONS</li>
+                </ul>
+              </div>
             </div>
-            
-            <div className="mt-12 pt-6 border-t border-gray-200">
-              <h3 className="text-xl font-semibold text-biblio-navy mb-4">Contents Overview</h3>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART I. Teaching William Blake
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART II. Introductions & Handbooks
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART III. Editions of Blake's Writing
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART IV. Biographies
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART V. Bibliographies
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART VI. Catalogues
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART VII. Studies by Subject
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART VIII. Specific Works by Blake
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART IX. Collections of Essays
-                </li>
-                <li className="flex items-center gap-2">
-                  <List size={16} className="text-biblio-navy" />
-                  PART X. Appendices
-                </li>
-              </ul>
-            </div>
-          </div>
+          </section>
+
+          <section className="flex flex-col md:flex-row gap-6 justify-center">
+            <Link to="/bibliography">
+              <Button size="lg" className="w-full md:w-auto flex items-center gap-2">
+                <BookOpen size={18} />
+                Browse Bibliography
+              </Button>
+            </Link>
+            <Link to="/about">
+              <Button variant="outline" size="lg" className="w-full md:w-auto flex items-center gap-2">
+                <Info size={18} />
+                About the Project
+              </Button>
+            </Link>
+          </section>
         </div>
       </main>
-      
-      <footer className="bg-biblio-navy text-white py-4">
-        <div className="max-w-4xl mx-auto px-6 text-center text-sm">
-          <p>William Blake Bibliography Navigator © {new Date().getFullYear()}</p>
+
+      <footer className="bg-biblio-navy text-white py-6 mt-auto">
+        <div className="container mx-auto px-4 text-center">
+          <p>© 2023 William Blake Archive. All rights reserved.</p>
+          <p className="text-sm mt-2">Based on G. E. Bentley, Jr.'s bibliographic works</p>
         </div>
       </footer>
     </div>
