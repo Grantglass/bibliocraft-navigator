@@ -11,15 +11,19 @@ import {
 } from '@/data/bibliographyData';
 import { Menu, ArrowLeft } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Bibliography = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const chapterFromUrl = queryParams.get('chapter') || '';
+
   // Initialize with the pre-built data immediately
   const [entries, setEntries] = useState<BibliographyEntry[]>(bibliographyEntries);
   const [allEntries, setAllEntries] = useState<BibliographyEntry[]>(bibliographyEntries);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(chapterFromUrl);
   const [selectedSubheading, setSelectedSubheading] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chapters, setChapters] = useState<string[]>([]);
@@ -43,11 +47,19 @@ const Bibliography = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Process URL parameters when they change
+  useEffect(() => {
+    if (chapterFromUrl && allEntries.length > 0) {
+      handleSelectCategory(chapterFromUrl);
+    }
+  }, [chapterFromUrl, allEntries]);
+
   // Extract unique chapters from entries - now using pre-loaded data
   useEffect(() => {
     if (allEntries.length > 0) {
       // Extract all PART chapters (I-X)
       const partChapters = [
+        "INTRODUCTION",
         "PART I. TEACHING WILLIAM BLAKE",
         "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
         "PART III. EDITIONS OF BLAKE'S WRITING",
@@ -102,6 +114,10 @@ const Bibliography = () => {
       });
       
       const sortedChapters = filteredChapters.sort((a, b) => {
+        // Special case for INTRODUCTION - always first
+        if (a === "INTRODUCTION") return -1;
+        if (b === "INTRODUCTION") return 1;
+        
         // Extract Roman numerals or numbers for sorting
         const getPartNumber = (str: string) => {
           const match = str.match(/PART\s+([IVXLCDM]+|[0-9]+)/i);

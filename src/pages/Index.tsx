@@ -51,19 +51,19 @@ const Index = () => {
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART I. TEACHING WILLIAM BLAKE</Link>
+                    <Link to="/bibliography?chapter=PART I. TEACHING WILLIAM BLAKE" className="hover:text-biblio-navy hover:underline">PART I. TEACHING WILLIAM BLAKE</Link>
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART II. GENERAL INTRODUCTIONS</Link>
+                    <Link to="/bibliography?chapter=PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES" className="hover:text-biblio-navy hover:underline">PART II. GENERAL INTRODUCTIONS</Link>
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART III. EDITIONS OF BLAKE'S WRITING</Link>
+                    <Link to="/bibliography?chapter=PART III. EDITIONS OF BLAKE'S WRITING" className="hover:text-biblio-navy hover:underline">PART III. EDITIONS OF BLAKE'S WRITING</Link>
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART IV. BIOGRAPHIES</Link>
+                    <Link to="/bibliography?chapter=PART IV. BIOGRAPHIES" className="hover:text-biblio-navy hover:underline">PART IV. BIOGRAPHIES</Link>
                   </li>
                 </ul>
               </div>
@@ -71,27 +71,27 @@ const Index = () => {
                 <ul className="space-y-2">
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART V. BIBLIOGRAPHIES</Link>
+                    <Link to="/bibliography?chapter=PART V. BIBLIOGRAPHIES" className="hover:text-biblio-navy hover:underline">PART V. BIBLIOGRAPHIES</Link>
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART VI. CATALOGUES</Link>
+                    <Link to="/bibliography?chapter=PART VI. CATALOGUES" className="hover:text-biblio-navy hover:underline">PART VI. CATALOGUES</Link>
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART VII. STUDIES OF BLAKE</Link>
+                    <Link to="/bibliography?chapter=PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT" className="hover:text-biblio-navy hover:underline">PART VII. STUDIES OF BLAKE</Link>
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART VIII. SPECIFIC WORKS BY BLAKE</Link>
+                    <Link to="/bibliography?chapter=PART VIII. SPECIFIC WORKS BY BLAKE" className="hover:text-biblio-navy hover:underline">PART VIII. SPECIFIC WORKS BY BLAKE</Link>
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART IX. COLLECTIONS OF ESSAYS</Link>
+                    <Link to="/bibliography?chapter=PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED" className="hover:text-biblio-navy hover:underline">PART IX. COLLECTIONS OF ESSAYS</Link>
                   </li>
                   <li className="flex items-center">
                     <span className="text-biblio-navy mr-2">•</span> 
-                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART X. APPENDICES</Link>
+                    <Link to="/bibliography?chapter=PART X. APPENDICES" className="hover:text-biblio-navy hover:underline">PART X. APPENDICES</Link>
                   </li>
                 </ul>
               </div>

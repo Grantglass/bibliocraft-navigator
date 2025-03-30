@@ -2,6 +2,7 @@
 import React from 'react';
 import { BibliographyEntry } from '../data/bibliographyData';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 
 interface BibliographyContentProps {
   entries: BibliographyEntry[];
@@ -20,7 +21,39 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   selectedSubheading,
   onEntriesExtracted
 }) => {
-  // No need to load entries on mount - they're already available from props
+  // Group entries by subheading for better organization
+  const entriesBySubheading = React.useMemo(() => {
+    if (!selectedCategory || searchQuery) return null;
+
+    const grouped: Record<string, BibliographyEntry[]> = {};
+    
+    // First sort entries
+    const sortedEntries = [...entries].sort((a, b) => {
+      // Sort by subheading first
+      if (a.subheading && b.subheading) {
+        if (a.subheading < b.subheading) return -1;
+        if (a.subheading > b.subheading) return 1;
+      } else if (a.subheading) {
+        return -1;
+      } else if (b.subheading) {
+        return 1;
+      }
+      
+      // Then by author name
+      return a.authors.localeCompare(b.authors);
+    });
+    
+    // Group by subheading
+    sortedEntries.forEach(entry => {
+      const subheading = entry.subheading || 'General';
+      if (!grouped[subheading]) {
+        grouped[subheading] = [];
+      }
+      grouped[subheading].push(entry);
+    });
+    
+    return grouped;
+  }, [entries, selectedCategory, searchQuery]);
 
   if (isLoading) {
     return (
@@ -65,34 +98,65 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
         {searchQuery && entries.length === 0 && (
           <p className="text-biblio-gray mt-2">No entries found for your search.</p>
         )}
+        {selectedCategory && !searchQuery && (
+          <p className="text-biblio-gray mt-2">{entries.length} entries found</p>
+        )}
       </div>
 
       {entries.length > 0 ? (
-        <div className="space-y-6">
-          {entries.map((entry) => (
-            <div key={entry.id} className={`bibliography-entry p-4 border rounded-md hover:shadow-md transition-shadow ${
-              isIntroduction || entry.chapter === "INTRODUCTION" 
-                ? 'border-biblio-navy bg-biblio-lightBlue/10' 
-                : 'border-biblio-lightGray'
-            }`}>
-              <h2 className="text-xl font-semibold text-biblio-navy">{entry.title}</h2>
-              <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
-              <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
-              {entry.subheading && (
-                <div className="mt-2 text-sm">
-                  <span className={`px-2 py-1 rounded ${
-                    isIntroduction || entry.chapter === "INTRODUCTION"
-                      ? 'bg-biblio-navy text-white' 
-                      : 'bg-biblio-lightBlue text-biblio-navy'
-                  }`}>
-                    {entry.subheading}
-                  </span>
+        entriesBySubheading && !searchQuery ? (
+          // Grouped display by subheading for better organization
+          <div className="space-y-8">
+            {Object.entries(entriesBySubheading).map(([subheading, subEntries]) => (
+              <div key={subheading} className="space-y-4">
+                <div className="sticky top-0 bg-white py-2 z-10">
+                  <h2 className="text-xl font-semibold text-biblio-navy">{subheading}</h2>
+                  <Separator className="mt-2 mb-4" />
                 </div>
-              )}
-              <p className="mt-3 text-gray-700">{entry.content}</p>
-            </div>
-          ))}
-        </div>
+                
+                {subEntries.map((entry) => (
+                  <div key={entry.id} className={`bibliography-entry p-4 border rounded-md hover:shadow-md transition-shadow ${
+                    isIntroduction || entry.chapter === "INTRODUCTION" 
+                      ? 'border-biblio-navy bg-biblio-lightBlue/10' 
+                      : 'border-biblio-lightGray'
+                  }`}>
+                    <h3 className="text-lg font-semibold text-biblio-navy">{entry.title}</h3>
+                    <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
+                    <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
+                    <p className="mt-3 text-gray-700">{entry.content}</p>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : (
+          // Regular flat list for search results
+          <div className="space-y-6">
+            {entries.map((entry) => (
+              <div key={entry.id} className={`bibliography-entry p-4 border rounded-md hover:shadow-md transition-shadow ${
+                isIntroduction || entry.chapter === "INTRODUCTION" 
+                  ? 'border-biblio-navy bg-biblio-lightBlue/10' 
+                  : 'border-biblio-lightGray'
+              }`}>
+                <h2 className="text-xl font-semibold text-biblio-navy">{entry.title}</h2>
+                <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
+                <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
+                {entry.subheading && (
+                  <div className="mt-2 text-sm">
+                    <span className={`px-2 py-1 rounded ${
+                      isIntroduction || entry.chapter === "INTRODUCTION"
+                        ? 'bg-biblio-navy text-white' 
+                        : 'bg-biblio-lightBlue text-biblio-navy'
+                    }`}>
+                      {entry.subheading}
+                    </span>
+                  </div>
+                )}
+                <p className="mt-3 text-gray-700">{entry.content}</p>
+              </div>
+            ))}
+          </div>
+        )
       ) : (
         !searchQuery && (
           <div className="text-center p-8">
