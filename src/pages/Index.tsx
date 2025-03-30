@@ -89,6 +89,7 @@ const Index = () => {
                 About the Project
               </Button>
             </Link>
+            {/* Direct download link bypassing PDF.js */}
             <a href="/blake_bibliography.pdf" download className="inline-block">
               <Button variant="outline" size="lg" className="w-full md:w-auto flex items-center gap-2 border-biblio-navy text-biblio-navy hover:bg-biblio-navy/10">
                 <Download size={18} />
