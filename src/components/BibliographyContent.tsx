@@ -93,6 +93,9 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   // Determine if we're displaying introduction entries
   const isIntroduction = selectedCategory === "INTRODUCTION";
 
+  // Check if we have actual entries to display
+  const hasEntries = entries && entries.length > 0;
+
   return (
     <div className="bibliography-content">
       <div className="border-b border-biblio-lightGray pb-4 mb-6">
@@ -105,7 +108,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
         )}
       </div>
 
-      {entries.length > 0 ? (
+      {hasEntries ? (
         entriesBySubheading && !searchQuery ? (
           // Grouped display by subheading for better organization
           <div className="space-y-8">
