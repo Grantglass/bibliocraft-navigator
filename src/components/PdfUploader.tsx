@@ -203,17 +203,34 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
     const referencesSectionRegex = /(?:references|bibliography|works cited|sources|citations)(?:\s|:|\n)/i;
     const referencesMatch = text.match(referencesSectionRegex);
     
+    // Define the 10 parts for William Blake bibliography
+    const predefinedParts = [
+      "PART I. TEACHING WILLIAM BLAKE",
+      "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "PART III. EDITIONS OF BLAKE'S WRITING",
+      "PART IV. BIOGRAPHIES",
+      "PART V. BIBLIOGRAPHIES",
+      "PART VI. CATALOGUES",
+      "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+      "PART VIII. SPECIFIC WORKS BY BLAKE",
+      "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
+      "PART X. APPENDICES"
+    ];
+    
     // Try to extract chapters/sections from the document
-    const chapterRegex = /\b(?:chapter|section)\s+\d+(?:[.:]\s*|\s+)([A-Z][^.]+)\.?/gi;
+    const chapterRegex = /\bPART\s+[IVX]+\.\s+[A-Z][A-Z\s]+(?:\s+\d+)?/g;
     const headingRegex = /\b([A-Z][A-Z\s]{2,}[A-Z])\b/g; // All caps headings
     
     const potentialChapters = new Set<string>();
     
-    // Extract potential chapters from chapter headings
+    // Add predefined parts
+    predefinedParts.forEach(part => potentialChapters.add(part));
+    
+    // Extract potential chapters from PART headings
     let chapterMatch;
     while ((chapterMatch = chapterRegex.exec(text)) !== null) {
-      if (chapterMatch[1] && chapterMatch[1].length > 3) {
-        potentialChapters.add(chapterMatch[1].trim());
+      if (chapterMatch[0] && chapterMatch[0].length > 3) {
+        potentialChapters.add(chapterMatch[0].trim());
       }
     }
     
@@ -226,7 +243,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
     }
     
     // Convert to array and limit to prevent too many false positives
-    const chapters = Array.from(potentialChapters).slice(0, 15);
+    const chapters = Array.from(potentialChapters);
     setDebugInfo(prev => [...prev, `Detected ${chapters.length} potential chapters/sections`]);
     if (chapters.length > 0) {
       setDebugInfo(prev => [...prev, `Example chapters: ${chapters.slice(0, 3).join(', ')}...`]);
@@ -311,24 +328,56 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         }
       }
       
-      // Try to assign a chapter to this entry based on context
+      // Try to assign a chapter to this entry based on content matching
       if (chapters.length > 0) {
-        // Assign the entry to the most appropriate chapter based on content matching
-        for (const chapter of chapters) {
-          if (trimmedEntry.includes(chapter) || 
-              title.includes(chapter) || 
-              publication.includes(chapter)) {
-            entryChapter = chapter;
+        // Check if any part number is mentioned in the text
+        for (const part of predefinedParts) {
+          if (trimmedEntry.includes(part.split('.')[0]) || 
+              title.includes(part.split('.')[0])) {
+            entryChapter = part;
             break;
           }
         }
         
-        // If we couldn't match a chapter, assign to a default chapter based on entry ID
-        if (!entryChapter && chapters.length > 0) {
-          // Simple distribution of entries across chapters by their ID
-          const chapterIndex = (entryId - 1) % chapters.length;
-          entryChapter = chapters[chapterIndex];
+        // If we couldn't match a part directly, try to deduce from content
+        if (!entryChapter) {
+          // Assign based on content hints
+          if (trimmedEntry.toLowerCase().includes('teach') || 
+              trimmedEntry.toLowerCase().includes('education') ||
+              trimmedEntry.toLowerCase().includes('student')) {
+            entryChapter = predefinedParts[0]; // Part I - Teaching
+          } else if (trimmedEntry.toLowerCase().includes('introduction') || 
+                    trimmedEntry.toLowerCase().includes('handbook') ||
+                    trimmedEntry.toLowerCase().includes('glossary')) {
+            entryChapter = predefinedParts[1]; // Part II - Introductions
+          } else if (trimmedEntry.toLowerCase().includes('edition') || 
+                    trimmedEntry.toLowerCase().includes('writing')) {
+            entryChapter = predefinedParts[2]; // Part III - Editions
+          } else if (trimmedEntry.toLowerCase().includes('biography') || 
+                    trimmedEntry.toLowerCase().includes('life of')) {
+            entryChapter = predefinedParts[3]; // Part IV - Biographies
+          } else if (trimmedEntry.toLowerCase().includes('bibliography')) {
+            entryChapter = predefinedParts[4]; // Part V - Bibliographies
+          } else if (trimmedEntry.toLowerCase().includes('catalogue')) {
+            entryChapter = predefinedParts[5]; // Part VI - Catalogues
+          } else if (trimmedEntry.toLowerCase().includes('study') || 
+                    trimmedEntry.toLowerCase().includes('subject')) {
+            entryChapter = predefinedParts[6]; // Part VII - Studies
+          } else if (publication.toLowerCase().includes('blake')) {
+            entryChapter = predefinedParts[7]; // Part VIII - Works by Blake
+          } else if (trimmedEntry.toLowerCase().includes('essay') || 
+                    trimmedEntry.toLowerCase().includes('collection')) {
+            entryChapter = predefinedParts[8]; // Part IX - Collections
+          } else {
+            entryChapter = predefinedParts[9]; // Part X - Appendices (default)
+          }
         }
+      }
+      
+      // If we still don't have a chapter, distribute among parts evenly
+      if (!entryChapter && predefinedParts.length > 0) {
+        const partIndex = entryId % predefinedParts.length;
+        entryChapter = predefinedParts[partIndex];
       }
       
       entries.push({
@@ -344,20 +393,6 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
     }
     
     setDebugInfo(prev => [...prev, `Parsed ${entries.length} bibliography entries`]);
-    
-    // If we have entries but no chapters were found, create artificial chapters
-    if (entries.length > 0 && chapters.length === 0) {
-      // Create artificial chapters based on groups of entries
-      const chapterSize = Math.ceil(entries.length / 5); // Aim for about 5 chapters
-      const artificialChapters = ['Section A', 'Section B', 'Section C', 'Section D', 'Section E'];
-      
-      entries.forEach((entry, index) => {
-        const chapterIndex = Math.min(Math.floor(index / chapterSize), artificialChapters.length - 1);
-        entry.chapter = artificialChapters[chapterIndex];
-      });
-      
-      setDebugInfo(prev => [...prev, `Created artificial chapters for entries`]);
-    }
     
     return entries;
   };

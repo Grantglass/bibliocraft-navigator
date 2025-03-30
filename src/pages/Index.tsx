@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import BibliographySidebar from '@/components/BibliographySidebar';
 import BibliographyContent from '@/components/BibliographyContent';
@@ -41,19 +40,90 @@ const Index = () => {
   // Extract unique chapters from entries
   useEffect(() => {
     if (allEntries.length > 0) {
-      // Only extract main chapter headings (PART I, PART II, etc.)
-      const mainChapters = allEntries
-        .filter(entry => entry.chapter && entry.chapter.startsWith('PART '))
-        .map(entry => entry.chapter as string)
-        // Remove duplicates
-        .filter((chapter, index, self) => self.indexOf(chapter) === index)
-        .sort();
+      // Extract all PART chapters (I-X)
+      const partChapters = [
+        "PART I. TEACHING WILLIAM BLAKE",
+        "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+        "PART III. EDITIONS OF BLAKE'S WRITING",
+        "PART IV. BIOGRAPHIES",
+        "PART V. BIBLIOGRAPHIES",
+        "PART VI. CATALOGUES",
+        "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+        "PART VIII. SPECIFIC WORKS BY BLAKE",
+        "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
+        "PART X. APPENDICES"
+      ];
       
-      setChapters(mainChapters);
+      // Get chapters that exist in the entries
+      const availableChapters = allEntries
+        .filter(entry => entry.chapter)
+        .map(entry => entry.chapter as string);
+      
+      // Create a set of unique chapters
+      const uniqueChapters = new Set<string>();
+      
+      // First add all the predefined part chapters that exist in availableChapters
+      partChapters.forEach(chapter => {
+        // Check if this chapter or any chapter starting with this prefix exists
+        const exists = availableChapters.some(availableChapter => 
+          availableChapter === chapter || 
+          availableChapter.startsWith(chapter + ' ') ||
+          availableChapter.startsWith(chapter + '.')
+        );
+        
+        if (exists) {
+          uniqueChapters.add(chapter);
+        }
+      });
+      
+      // Then add any additional chapters that might not be in our predefined list
+      availableChapters.forEach(chapter => {
+        if (chapter.startsWith('PART ')) {
+          // Extract the main part
+          const mainPart = chapter.split('.')[0].trim();
+          uniqueChapters.add(mainPart);
+        }
+      });
+      
+      const sortedChapters = Array.from(uniqueChapters).sort((a, b) => {
+        // Extract Roman numerals or numbers for sorting
+        const getPartNumber = (str: string) => {
+          const match = str.match(/PART\s+([IVXLCDM]+|[0-9]+)/i);
+          return match ? match[1] : '';
+        };
+        
+        const aNum = getPartNumber(a);
+        const bNum = getPartNumber(b);
+        
+        // Convert Roman numerals to numbers for comparison
+        const romanToNum = (roman: string) => {
+          if (/^[0-9]+$/.test(roman)) return parseInt(roman, 10);
+          
+          const romanValues: Record<string, number> = {
+            I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000
+          };
+          
+          let result = 0;
+          for (let i = 0; i < roman.length; i++) {
+            const current = romanValues[roman[i] as keyof typeof romanValues] || 0;
+            const next = romanValues[roman[i + 1] as keyof typeof romanValues] || 0;
+            if (current < next) {
+              result -= current;
+            } else {
+              result += current;
+            }
+          }
+          return result;
+        };
+        
+        return romanToNum(aNum) - romanToNum(bNum);
+      });
+      
+      setChapters(sortedChapters);
       
       // If chapters are available and no category is selected, select the first chapter
-      if (mainChapters.length > 0 && !selectedCategory) {
-        handleSelectCategory(mainChapters[0]);
+      if (sortedChapters.length > 0 && !selectedCategory) {
+        handleSelectCategory(sortedChapters[0]);
       }
     }
   }, [allEntries, selectedCategory]);
