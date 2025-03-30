@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { bibliographyCategories } from '../data/bibliographyData';
-import { ChevronDown, ChevronRight, Search, Menu } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, Menu, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { BibliographyEntry } from '@/data/bibliographyData';
@@ -13,6 +13,7 @@ interface BibliographySidebarProps {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
   entries?: BibliographyEntry[];
+  chapters?: string[];
 }
 
 const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
@@ -21,25 +22,45 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
   onSearch,
   isSidebarOpen,
   toggleSidebar,
-  entries = []
+  entries = [],
+  chapters = []
 }) => {
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(
-    Object.fromEntries(bibliographyCategories.map(cat => [cat.id, true]))
-  );
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Group entries by category
-  const entriesByCategory = React.useMemo(() => {
+  // Initialize expanded state for chapters when they change
+  useEffect(() => {
+    if (chapters.length > 0) {
+      setExpandedCategories(
+        Object.fromEntries(chapters.map(chapter => [chapter, true]))
+      );
+    }
+  }, [chapters]);
+  
+  // Group entries by chapter
+  const entriesByChapter = React.useMemo(() => {
     const result: Record<string, string[]> = {};
     
-    bibliographyCategories.forEach(category => {
-      result[category.id] = entries
-        .filter(entry => entry.category === category.id)
+    // Use chapters if available, otherwise use default categories
+    const categories = chapters.length > 0 ? chapters : bibliographyCategories.map(cat => cat.id);
+    
+    categories.forEach(chapter => {
+      // For each chapter, find entries that belong to it
+      result[chapter] = entries
+        .filter(entry => {
+          // If the entry has a chapter property, use that
+          if (entry.chapter === chapter) return true;
+          
+          // If we're using the original categories, filter by category
+          if (chapters.length === 0 && entry.category === chapter) return true;
+          
+          return false;
+        })
         .map(entry => entry.id);
     });
     
     return result;
-  }, [entries]);
+  }, [entries, chapters]);
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => ({
@@ -100,46 +121,91 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
 
         <div className="overflow-y-auto flex-grow">
           <div className="p-2">
-            {bibliographyCategories.map((category) => {
-              const categoryEntries = entriesByCategory[category.id] || [];
-              const hasEntries = categoryEntries.length > 0;
-              
-              return (
-                <div key={category.id} className="mb-2">
-                  <div 
-                    className={`flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent ${!hasEntries ? 'opacity-50' : ''}`}
-                    onClick={() => {
-                      if (!hasEntries) return;
-                      toggleCategory(category.id);
-                      onSelectCategory(category.id);
-                    }}
-                  >
-                    <span className="mr-2">
-                      {expandedCategories[category.id] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                    </span>
-                    <span className="font-medium">{category.name}</span>
-                    {hasEntries && <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">{categoryEntries.length}</span>}
-                  </div>
-                  
-                  {expandedCategories[category.id] && hasEntries && (
-                    <div className="ml-6 pl-2 border-l border-sidebar-border">
-                      {categoryEntries.map((entryId) => {
-                        const entry = entries.find(e => e.id === entryId);
-                        return (
-                          <div 
-                            key={entryId}
-                            className="p-2 text-sm cursor-pointer hover:bg-sidebar-accent rounded-md my-1"
-                            onClick={() => onSelectEntry(entryId)}
-                          >
-                            {entry ? entry.title.substring(0, 28) + (entry.title.length > 28 ? '...' : '') : entryId}
-                          </div>
-                        );
-                      })}
+            {chapters.length > 0 ? (
+              // Display PDF chapters
+              chapters.map((chapter) => {
+                const chapterEntries = entriesByChapter[chapter] || [];
+                const hasEntries = chapterEntries.length > 0;
+                
+                return (
+                  <div key={chapter} className="mb-2">
+                    <div 
+                      className={`flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent ${!hasEntries ? 'opacity-75' : ''}`}
+                      onClick={() => {
+                        toggleCategory(chapter);
+                        onSelectCategory(chapter);
+                      }}
+                    >
+                      <span className="mr-2">
+                        {expandedCategories[chapter] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                      </span>
+                      <BookOpen size={16} className="mr-2" />
+                      <span className="font-medium text-sm">{chapter}</span>
+                      {hasEntries && <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">{chapterEntries.length}</span>}
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                    
+                    {expandedCategories[chapter] && hasEntries && (
+                      <div className="ml-6 pl-2 border-l border-sidebar-border">
+                        {chapterEntries.map((entryId) => {
+                          const entry = entries.find(e => e.id === entryId);
+                          return (
+                            <div 
+                              key={entryId}
+                              className="p-2 text-sm cursor-pointer hover:bg-sidebar-accent rounded-md my-1"
+                              onClick={() => onSelectEntry(entryId)}
+                            >
+                              {entry ? entry.title.substring(0, 28) + (entry.title.length > 28 ? '...' : '') : entryId}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              // Fallback to default categories if no chapters are available
+              bibliographyCategories.map((category) => {
+                const categoryEntries = entriesByChapter[category.id] || [];
+                const hasEntries = categoryEntries.length > 0;
+                
+                return (
+                  <div key={category.id} className="mb-2">
+                    <div 
+                      className={`flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent ${!hasEntries ? 'opacity-50' : ''}`}
+                      onClick={() => {
+                        if (!hasEntries) return;
+                        toggleCategory(category.id);
+                        onSelectCategory(category.id);
+                      }}
+                    >
+                      <span className="mr-2">
+                        {expandedCategories[category.id] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                      </span>
+                      <span className="font-medium">{category.name}</span>
+                      {hasEntries && <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">{categoryEntries.length}</span>}
+                    </div>
+                    
+                    {expandedCategories[category.id] && hasEntries && (
+                      <div className="ml-6 pl-2 border-l border-sidebar-border">
+                        {categoryEntries.map((entryId) => {
+                          const entry = entries.find(e => e.id === entryId);
+                          return (
+                            <div 
+                              key={entryId}
+                              className="p-2 text-sm cursor-pointer hover:bg-sidebar-accent rounded-md my-1"
+                              onClick={() => onSelectEntry(entryId)}
+                            >
+                              {entry ? entry.title.substring(0, 28) + (entry.title.length > 28 ? '...' : '') : entryId}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 

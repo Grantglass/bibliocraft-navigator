@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import BibliographySidebar from '@/components/BibliographySidebar';
 import BibliographyContent from '@/components/BibliographyContent';
@@ -21,6 +20,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [chapters, setChapters] = useState<string[]>([]);
   const { toast } = useToast();
   
   // For responsiveness
@@ -40,6 +40,27 @@ const Index = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Extract unique chapters from entries
+  useEffect(() => {
+    if (allEntries.length > 0) {
+      // Extract chapter information from entries
+      const uniqueChapters = Array.from(
+        new Set(
+          allEntries
+            .filter(entry => entry.chapter)
+            .map(entry => entry.chapter as string)
+        )
+      ).sort();
+      
+      setChapters(uniqueChapters);
+      
+      // If chapters are available and no category is selected, select the first chapter
+      if (uniqueChapters.length > 0 && !selectedCategory) {
+        handleSelectCategory(uniqueChapters[0]);
+      }
+    }
+  }, [allEntries, selectedCategory]);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -50,7 +71,14 @@ const Index = () => {
     setSelectedCategory(categoryId);
     
     setTimeout(() => {
-      const categoryEntries = getEntriesByCategory(categoryId, allEntries);
+      let categoryEntries;
+      if (chapters.includes(categoryId)) {
+        // If it's a chapter, filter by chapter
+        categoryEntries = allEntries.filter(entry => entry.chapter === categoryId);
+      } else {
+        // Otherwise use the original category filtering
+        categoryEntries = getEntriesByCategory(categoryId, allEntries);
+      }
       setEntries(categoryEntries);
       setIsLoading(false);
       // On mobile, close sidebar after selection
@@ -63,7 +91,6 @@ const Index = () => {
   const handleSelectEntry = (entryId: string) => {
     setIsLoading(true);
     setSearchQuery('');
-    setSelectedCategory('');
     
     setTimeout(() => {
       const entry = getEntryById(entryId, allEntries);
@@ -107,6 +134,12 @@ const Index = () => {
   };
 
   const getCategoryName = (categoryId: string) => {
+    // If it's a chapter, return the chapter name directly
+    if (chapters.includes(categoryId)) {
+      return categoryId;
+    }
+    
+    // Otherwise look up the category name
     const category = bibliographyCategories.find(cat => cat.id === categoryId);
     return category ? category.name : '';
   };
@@ -132,6 +165,7 @@ const Index = () => {
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
           entries={allEntries}
+          chapters={chapters}
         />
         
         <div className="flex-1 overflow-auto transition-all duration-300 ease-in-out">
