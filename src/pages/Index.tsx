@@ -35,7 +35,7 @@ const Index = () => {
               <AlertTitle className="text-biblio-navy">About This Bibliography</AlertTitle>
               <AlertDescription>
                 This bibliography contains {bibliographyEntries.length} entries documenting scholarship on William Blake's art, 
-                poetry, and influence. It represents one of the most comprehensive resources for Blake studies.
+                poetry, and influence. It represents one of the most comprehensive resources for Blake studies available today.
               </AlertDescription>
             </Alert>
           </section>
@@ -45,19 +45,54 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <ul className="space-y-2">
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> User Note</li>
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> Abbreviations</li>
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART I. TEACHING WILLIAM BLAKE</li>
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART II. GENERAL INTRODUCTIONS</li>
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART III. EDITIONS OF BLAKE'S WRITING</li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">INTRODUCTION</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART I. TEACHING WILLIAM BLAKE</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART II. GENERAL INTRODUCTIONS</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART III. EDITIONS OF BLAKE'S WRITING</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART IV. BIOGRAPHIES</Link>
+                  </li>
                 </ul>
               </div>
               <div>
                 <ul className="space-y-2">
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART IV. BIOGRAPHIES</li>
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART V. BIBLIOGRAPHIES</li>
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART VI. CATALOGUES</li>
-                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART VII-X. ADDITIONAL SECTIONS</li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART V. BIBLIOGRAPHIES</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART VI. CATALOGUES</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART VII. STUDIES OF BLAKE</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART VIII. SPECIFIC WORKS BY BLAKE</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART IX. COLLECTIONS OF ESSAYS</Link>
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-biblio-navy mr-2">•</span> 
+                    <Link to="/bibliography" className="hover:text-biblio-navy hover:underline">PART X. APPENDICES</Link>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -81,7 +116,7 @@ const Index = () => {
             <Link to="/bibliography">
               <Button size="lg" className="w-full md:w-auto flex items-center gap-2 bg-biblio-navy hover:bg-biblio-navy/90">
                 <BookOpen size={18} />
-                Browse Bibliography
+                Browse Complete Bibliography
               </Button>
             </Link>
             <Link to="/about">
