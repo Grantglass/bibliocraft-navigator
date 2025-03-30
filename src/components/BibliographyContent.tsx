@@ -3,6 +3,7 @@ import React from 'react';
 import { BibliographyEntry } from '../data/bibliographyData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 interface BibliographyContentProps {
   entries: BibliographyEntry[];
@@ -55,6 +56,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
     return grouped;
   }, [entries, selectedCategory, searchQuery]);
 
+  // Render loading state
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -123,6 +125,11 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
                     <h3 className="text-lg font-semibold text-biblio-navy">{entry.title}</h3>
                     <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
                     <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
+                    <div className="mt-2">
+                      <Badge variant="outline" className="bg-biblio-lightBlue/20 text-biblio-navy border-biblio-navy">
+                        {entry.chapter} - {entry.subheading}
+                      </Badge>
+                    </div>
                     <p className="mt-3 text-gray-700">{entry.content}</p>
                   </div>
                 ))}
@@ -141,17 +148,20 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
                 <h2 className="text-xl font-semibold text-biblio-navy">{entry.title}</h2>
                 <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
                 <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
-                {entry.subheading && (
-                  <div className="mt-2 text-sm">
-                    <span className={`px-2 py-1 rounded ${
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Badge variant="outline" className="bg-biblio-navy/10 text-biblio-navy">
+                    {entry.chapter}
+                  </Badge>
+                  {entry.subheading && (
+                    <Badge variant="outline" className={`${
                       isIntroduction || entry.chapter === "INTRODUCTION"
                         ? 'bg-biblio-navy text-white' 
                         : 'bg-biblio-lightBlue text-biblio-navy'
                     }`}>
                       {entry.subheading}
-                    </span>
-                  </div>
-                )}
+                    </Badge>
+                  )}
+                </div>
                 <p className="mt-3 text-gray-700">{entry.content}</p>
               </div>
             ))}

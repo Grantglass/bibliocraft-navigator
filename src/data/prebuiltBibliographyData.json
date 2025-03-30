@@ -35,6 +35,39 @@
       "subheading": "Table of Contents"
     },
     {
+      "id": "intro_digital1",
+      "title": "Digital Blake Resources Overview",
+      "authors": "Blake Archive Team",
+      "year": "2023",
+      "publication": "Introduction",
+      "content": "This section provides an overview of the digital resources available for Blake studies, including the William Blake Archive, digital editions, and other online repositories.",
+      "category": "introduction",
+      "chapter": "INTRODUCTION",
+      "subheading": "Digital Resources"
+    },
+    {
+      "id": "intro_cite1",
+      "title": "Citation Guidelines for Blake Studies",
+      "authors": "Editorial Team",
+      "year": "2023",
+      "publication": "Introduction",
+      "content": "This guide outlines the recommended citation formats for Blake's works, including his illuminated books, manuscript writings, and letters. It also offers guidance on citing digital resources and archival materials.",
+      "category": "introduction",
+      "chapter": "INTRODUCTION",
+      "subheading": "Citations, Annotations, and Links"
+    },
+    {
+      "id": "intro_journals1",
+      "title": "Blake Journals and Academic Publications",
+      "authors": "Blake Quarterly Editorial Board",
+      "year": "2023",
+      "publication": "Introduction",
+      "content": "An overview of the major academic journals dedicated to Blake studies, including Blake/An Illustrated Quarterly, Blake Studies, and other publications where Blake scholarship frequently appears.",
+      "category": "introduction",
+      "chapter": "INTRODUCTION",
+      "subheading": "Different Blake Journals"
+    },
+    {
       "id": "part1_1",
       "title": "Teaching Blake: Digital Resources and Archives",
       "authors": "Blake Archive Team",
@@ -66,6 +99,28 @@
       "category": "humanities",
       "chapter": "PART I. TEACHING WILLIAM BLAKE",
       "subheading": "Different Blake Journals"
+    },
+    {
+      "id": "part1_4",
+      "title": "Teaching Blake's Visual Art in the Classroom",
+      "authors": "Richards, Emily",
+      "year": "2020",
+      "publication": "Art Education Today",
+      "content": "Strategies for incorporating Blake's visual art into classroom teaching, including techniques for visual analysis and interpretation.",
+      "category": "humanities",
+      "chapter": "PART I. TEACHING WILLIAM BLAKE",
+      "subheading": "Visual Art Resources"
+    },
+    {
+      "id": "part1_5",
+      "title": "Blake's Poetry in Secondary Education",
+      "authors": "Thompson, William",
+      "year": "2018",
+      "publication": "Teaching Literature",
+      "content": "Methods for introducing Blake's poetry to secondary school students, with lesson plans and discussion guides.",
+      "category": "humanities",
+      "chapter": "PART I. TEACHING WILLIAM BLAKE",
+      "subheading": "Teaching Materials"
     },
     {
       "id": "part2_1",
@@ -112,6 +167,17 @@
       "subheading": "Classic Studies"
     },
     {
+      "id": "part2_5",
+      "title": "Blake's Jerusalem: Structure and Meaning",
+      "authors": "Damon, S. Foster",
+      "year": "1948",
+      "publication": "Blake Studies Journal",
+      "content": "An early analysis of the structure and symbolic significance of Blake's epic poem Jerusalem, which remains influential in Blake scholarship.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies"
+    },
+    {
       "id": "part3_1",
       "title": "The Complete Poetry and Prose of William Blake",
       "authors": "Erdman, David V. (ed.)",
@@ -132,6 +198,28 @@
       "category": "academic_papers",
       "chapter": "PART III. EDITIONS OF BLAKE'S WRITING",
       "subheading": "Annotated Editions"
+    },
+    {
+      "id": "part3_3",
+      "title": "Blake's 'Songs of Innocence and of Experience': A Critical Edition",
+      "authors": "Lincoln, Andrew (ed.)",
+      "year": "1991",
+      "publication": "Princeton University Press",
+      "content": "A scholarly edition of Blake's most accessible work, with detailed commentary and high-quality reproductions.",
+      "category": "academic_papers",
+      "chapter": "PART III. EDITIONS OF BLAKE'S WRITING",
+      "subheading": "Critical Editions"
+    },
+    {
+      "id": "part3_4",
+      "title": "The William Blake Archive",
+      "authors": "Eaves, Morris; Essick, Robert N.; Viscomi, Joseph (eds.)",
+      "year": "1996-present",
+      "publication": "Online Resource",
+      "content": "A comprehensive online repository of Blake's visual and literary works, featuring high-resolution digital reproductions and scholarly apparatus.",
+      "category": "digital",
+      "chapter": "PART III. EDITIONS OF BLAKE'S WRITING",
+      "subheading": "Digital Editions"
     },
     {
       "id": "entry1",
@@ -189,6 +277,28 @@
       "subheading": "Standard Biographies"
     },
     {
+      "id": "entry6",
+      "title": "Blake and Tradition",
+      "authors": "Kathleen Raine",
+      "year": "1968",
+      "publication": "Princeton University Press",
+      "content": "A two-volume study of Blake's relationship to esoteric traditions and mystical thought, influencing interpretations of his symbolic language.",
+      "category": "academic_papers",
+      "chapter": "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+      "subheading": "Religion and Spirituality"
+    },
+    {
+      "id": "entry7",
+      "title": "Blake, Politics, and History",
+      "authors": "Mee, Jon",
+      "year": "1992",
+      "publication": "Cambridge University Press",
+      "content": "An examination of Blake's political thought in relation to the radical movements of his time, with emphasis on his response to the French Revolution.",
+      "category": "academic_papers",
+      "chapter": "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+      "subheading": "Politics and Society"
+    },
+    {
       "id": "part6_1",
       "title": "Catalogue of William Blake's Drawings and Paintings in the Huntington Library",
       "authors": "Bennett, Shelley M.",
@@ -209,6 +319,17 @@
       "category": "academic_papers",
       "chapter": "PART VI. CATALOGUES",
       "subheading": "Historic Standard Catalogues"
+    },
+    {
+      "id": "part6_3",
+      "title": "Digital Blake Collections Worldwide",
+      "authors": "Digital Humanities Consortium",
+      "year": "2022",
+      "publication": "Online Resource",
+      "content": "A catalogue of digital collections of Blake's works around the world, with descriptions of their holdings and access information.",
+      "category": "digital",
+      "chapter": "PART VI. CATALOGUES",
+      "subheading": "Digital Collections"
     },
     {
       "id": "part7_1",
@@ -233,6 +354,28 @@
       "subheading": "Politics and Society"
     },
     {
+      "id": "part7_3",
+      "title": "Blake's Visual Poetics",
+      "authors": "Mitchell, W.J.T.",
+      "year": "1982",
+      "publication": "Princeton University Press",
+      "content": "A study of Blake's integration of text and image, introducing the concept of 'composite art' that has been influential in Blake scholarship.",
+      "category": "academic_papers",
+      "chapter": "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+      "subheading": "Aesthetics and Poetics"
+    },
+    {
+      "id": "part7_4",
+      "title": "Blake and Romanticism",
+      "authors": "Bloom, Harold",
+      "year": "1970",
+      "publication": "Cornell University Press",
+      "content": "An examination of Blake's place in the Romantic movement, with emphasis on his influence on later poets and his uniqueness among his contemporaries.",
+      "category": "academic_papers",
+      "chapter": "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+      "subheading": "Influences and Reception"
+    },
+    {
       "id": "part8_1",
       "title": "William Blake's Songs of Innocence and of Experience: A Critical Edition",
       "authors": "Lincoln, Andrew (ed.)",
@@ -255,6 +398,28 @@
       "subheading": "The Marriage of Heaven and Hell"
     },
     {
+      "id": "part8_3",
+      "title": "Jerusalem: Blake's Prophetic Vision",
+      "authors": "Paley, Morton D.",
+      "year": "1983",
+      "publication": "Princeton University Press",
+      "content": "A comprehensive study of Blake's longest and most complex prophetic book, exploring its themes, structure, and historical context.",
+      "category": "academic_papers",
+      "chapter": "PART VIII. SPECIFIC WORKS BY BLAKE",
+      "subheading": "Jerusalem"
+    },
+    {
+      "id": "part8_4",
+      "title": "The Four Zoas: A Study of Blake's Epic",
+      "authors": "Kilgore, John",
+      "year": "1978",
+      "publication": "Blake Studies",
+      "content": "An analysis of Blake's unfinished manuscript epic, examining its narrative structure, symbolic system, and relation to his other prophetic works.",
+      "category": "academic_papers",
+      "chapter": "PART VIII. SPECIFIC WORKS BY BLAKE",
+      "subheading": "The Four Zoas"
+    },
+    {
       "id": "part9_1",
       "title": "William Blake: Essays for S. Foster Damon",
       "authors": "Alvin H. Rosenfeld (ed.)",
@@ -272,6 +437,17 @@
       "year": "2007",
       "publication": "Palgrave Macmillan",
       "content": "An interdisciplinary collection exploring Blake's influence on modern literature, art, music, and popular culture.",
+      "category": "academic_papers",
+      "chapter": "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
+      "subheading": "Post-2000 Collections"
+    },
+    {
+      "id": "part9_3",
+      "title": "Queer Blake",
+      "authors": "Bruder, Helen P. & Connolly, Tristanne (eds.)",
+      "year": "2010",
+      "publication": "Palgrave Macmillan",
+      "content": "A collection of essays examining Blake's work through the lens of queer theory, exploring gender, sexuality, and non-normative identities in his writings and art.",
       "category": "academic_papers",
       "chapter": "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
       "subheading": "Post-2000 Collections"
@@ -297,13 +473,24 @@
       "category": "academic_papers",
       "chapter": "PART X. APPENDICES",
       "subheading": "Collection and Market Information"
+    },
+    {
+      "id": "part10_3",
+      "title": "Teaching Blake: Resources for Educators",
+      "authors": "Blake Education Consortium",
+      "year": "2018",
+      "publication": "Online Resource",
+      "content": "A compilation of teaching materials, lesson plans, and classroom resources for teaching Blake at various educational levels.",
+      "category": "academic_papers",
+      "chapter": "PART X. APPENDICES",
+      "subheading": "Teaching Resources"
     }
   ],
   "subheadings": {
-    "INTRODUCTION": ["Prefatory Material", "Table of Contents", "Guidelines"],
-    "PART I. TEACHING WILLIAM BLAKE": ["Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"],
+    "INTRODUCTION": ["Prefatory Material", "Table of Contents", "Guidelines", "Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"],
+    "PART I. TEACHING WILLIAM BLAKE": ["Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals", "Visual Art Resources", "Teaching Materials"],
     "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES": ["General Introductions", "Handbooks", "Glossaries", "Classic Studies"],
-    "PART III. EDITIONS OF BLAKE'S WRITING": ["Standard Editions", "Annotated Editions"],
+    "PART III. EDITIONS OF BLAKE'S WRITING": ["Standard Editions", "Annotated Editions", "Critical Editions", "Digital Editions"],
     "PART IV. BIOGRAPHIES": ["Standard Biographies", "Historic Biographies", "Portraits", "Catherine Blake"],
     "PART V. BIBLIOGRAPHIES": ["Standard Bibliographies", "Annotated Bibliographies", "Historic Bibliographies"],
     "PART VI. CATALOGUES": ["Standard Catalogues", "Historic Standard Catalogues", "Digital Collections"],
