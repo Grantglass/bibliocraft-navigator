@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Info, Search, Download } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { bibliographyEntries } from '@/data/bibliographyData';
+import { getAllEntries } from '@/data/bibliographyData';
 
 const Index = () => {
+  const allEntries = getAllEntries();
+  
   return (
     <div className="min-h-screen bg-biblio-lightBlue">
       <header className="bg-biblio-navy text-white py-6">
@@ -34,7 +36,7 @@ const Index = () => {
             <Alert className="my-6 border-biblio-navy">
               <AlertTitle className="text-biblio-navy">About This Bibliography</AlertTitle>
               <AlertDescription>
-                This bibliography contains {bibliographyEntries.length} entries documenting scholarship on William Blake's art, 
+                This bibliography contains {allEntries.length} entries documenting scholarship on William Blake's art, 
                 poetry, and influence. It represents one of the most comprehensive resources for Blake studies available today.
               </AlertDescription>
             </Alert>

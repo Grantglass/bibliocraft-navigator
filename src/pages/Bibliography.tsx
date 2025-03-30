@@ -8,7 +8,6 @@ import {
   searchEntries,
   BibliographyEntry,
   categorizeEntries,
-  bibliographyEntries,
   bibliographySubheadings
 } from '@/data/bibliographyData';
 import { Menu, ArrowLeft, BookOpen, Filter } from 'lucide-react';
@@ -22,9 +21,10 @@ const Bibliography = () => {
   const queryParams = new URLSearchParams(location.search);
   const chapterFromUrl = queryParams.get('chapter') || '';
 
-  // Initialize with the pre-built data immediately
-  const [entries, setEntries] = useState<BibliographyEntry[]>(bibliographyEntries);
-  const [allEntries, setAllEntries] = useState<BibliographyEntry[]>(bibliographyEntries);
+  // Initialize with all entries from the data function
+  const initialEntries = getAllEntries();
+  const [entries, setEntries] = useState<BibliographyEntry[]>(initialEntries);
+  const [allEntries, setAllEntries] = useState<BibliographyEntry[]>(initialEntries);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(chapterFromUrl);
@@ -263,10 +263,10 @@ const Bibliography = () => {
       const categorizedEntries = categorizeEntries(extractedEntries);
       
       // Combine with existing entries, avoiding duplicates
-      const combinedEntries = [...bibliographyEntries];
+      const combinedEntries = [...allEntries];
       
       // Add only new entries that don't have matching IDs
-      const existingIds = new Set(bibliographyEntries.map(entry => entry.id));
+      const existingIds = new Set(allEntries.map(entry => entry.id));
       
       categorizedEntries.forEach(entry => {
         if (!existingIds.has(entry.id)) {
