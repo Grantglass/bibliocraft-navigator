@@ -1,11 +1,43 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Info, Search, Download } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { BibliographyEntry } from '@/data/bibliographyData';
+import { useToast } from '@/hooks/use-toast';
+import PdfUploader from '@/components/PdfUploader';
 
 const Index = () => {
+  const [bibliographyLoaded, setBibliographyLoaded] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const preloadBibliography = async () => {
+      try {
+        const uploader = new PdfUploader({
+          onBibliographyExtracted: (entries) => {
+            setBibliographyLoaded(true);
+            toast({
+              title: "Bibliography Loaded",
+              description: `Successfully loaded ${entries.length} entries`,
+            });
+          }
+        });
+        
+        await uploader.loadPdfFromPublicFolder();
+      } catch (error) {
+        console.error("Error preloading bibliography:", error);
+        toast({
+          title: "Bibliography Loading Error",
+          description: "There was an issue loading the bibliography data. Please try again later.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    preloadBibliography();
+  }, [toast]);
+
   return (
     <div className="min-h-screen bg-biblio-lightBlue">
       <header className="bg-biblio-navy text-white py-6">
@@ -38,6 +70,15 @@ const Index = () => {
               </AlertDescription>
             </Alert>
           </section>
+
+          {!bibliographyLoaded && (
+            <Alert className="my-6 bg-biblio-lightBlue border-biblio-navy">
+              <AlertTitle className="text-biblio-navy">Loading Bibliography Data</AlertTitle>
+              <AlertDescription>
+                The bibliography data is being loaded. This may take a moment...
+              </AlertDescription>
+            </Alert>
+          )}
 
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-biblio-navy mb-4">Table of Contents</h2>
@@ -89,7 +130,6 @@ const Index = () => {
                 About the Project
               </Button>
             </Link>
-            {/* Direct download link bypassing PDF.js */}
             <a href="/blake_bibliography.pdf" download className="inline-block">
               <Button variant="outline" size="lg" className="w-full md:w-auto flex items-center gap-2 border-biblio-navy text-biblio-navy hover:bg-biblio-navy/10">
                 <Download size={18} />

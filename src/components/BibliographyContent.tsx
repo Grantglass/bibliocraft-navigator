@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BibliographyEntry } from '../data/bibliographyData';
 import PdfUploader from './PdfUploader';
 
