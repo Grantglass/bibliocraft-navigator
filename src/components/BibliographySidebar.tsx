@@ -124,31 +124,25 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
                   <Collapsible 
                     key={chapter} 
                     open={isExpanded} 
-                    onOpenChange={(open) => {
-                      setExpandedCategories(prev => ({
-                        ...prev,
-                        [chapter]: open
-                      }));
-                    }}
+                    onOpenChange={() => toggleCategory(chapter)}
                     className="mb-2"
                   >
-                    <CollapsibleTrigger className="w-full">
-                      <div 
-                        className="flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent w-full text-left"
-                        onClick={(e) => {
-                          // Prevent collapsible from toggling when clicking the category
-                          e.stopPropagation();
-                          onSelectCategory(chapter);
-                        }}
-                      >
-                        <span className="mr-2">
+                    <div className="flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent w-full text-left">
+                      <CollapsibleTrigger asChild>
+                        <button className="mr-2 flex items-center justify-center">
                           {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                        </span>
+                        </button>
+                      </CollapsibleTrigger>
+                      
+                      <div 
+                        className="flex items-center flex-1"
+                        onClick={() => onSelectCategory(chapter)}
+                      >
                         <BookOpen size={16} className="mr-2" />
                         <span className="font-medium text-sm">{chapter}</span>
                         {hasEntries && <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">{chapterEntries.length}</span>}
                       </div>
-                    </CollapsibleTrigger>
+                    </div>
                     
                     <CollapsibleContent>
                       {hasEntries && (
