@@ -30,9 +30,8 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
     if (searchQuery) {
       return `Search Results for "${searchQuery}" (${entries.length} entries)`;
     } else if (selectedCategory) {
-      return selectedCategory.replace(/_/g, ' ').split(' ').map(
-        word => word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
+      // Show the full category title
+      return selectedCategory;
     } else {
       return 'All Bibliography Entries';
     }

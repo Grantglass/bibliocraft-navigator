@@ -41,20 +41,19 @@ const Index = () => {
   // Extract unique chapters from entries
   useEffect(() => {
     if (allEntries.length > 0) {
-      // Extract chapter information from entries
-      const uniqueChapters = Array.from(
-        new Set(
-          allEntries
-            .filter(entry => entry.chapter)
-            .map(entry => entry.chapter as string)
-        )
-      ).sort();
+      // Only extract main chapter headings (PART I, PART II, etc.)
+      const mainChapters = allEntries
+        .filter(entry => entry.chapter && entry.chapter.startsWith('PART '))
+        .map(entry => entry.chapter as string)
+        // Remove duplicates
+        .filter((chapter, index, self) => self.indexOf(chapter) === index)
+        .sort();
       
-      setChapters(uniqueChapters);
+      setChapters(mainChapters);
       
       // If chapters are available and no category is selected, select the first chapter
-      if (uniqueChapters.length > 0 && !selectedCategory) {
-        handleSelectCategory(uniqueChapters[0]);
+      if (mainChapters.length > 0 && !selectedCategory) {
+        handleSelectCategory(mainChapters[0]);
       }
     }
   }, [allEntries, selectedCategory]);
@@ -70,7 +69,12 @@ const Index = () => {
     
     setTimeout(() => {
       // Filter entries by the selected chapter
-      const chapterEntries = allEntries.filter(entry => entry.chapter === categoryId);
+      const chapterEntries = allEntries.filter(entry => {
+        // Match entries that have this exact chapter or are part of this chapter
+        return entry.chapter === categoryId || 
+               (entry.chapter && entry.chapter.startsWith(categoryId + '.'));
+      });
+      
       setEntries(chapterEntries);
       setIsLoading(false);
       
