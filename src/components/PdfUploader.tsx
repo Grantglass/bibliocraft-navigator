@@ -330,16 +330,31 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       
       // Try to assign a chapter to this entry based on content matching
       if (chapters.length > 0) {
-        // Check if any part number is mentioned in the text
+        // Always prefer full chapter names over abbreviated ones
+        // First, check if any predefined part is directly mentioned in the text
         for (const part of predefinedParts) {
-          if (trimmedEntry.includes(part.split('.')[0]) || 
-              title.includes(part.split('.')[0])) {
+          if (trimmedEntry.includes(part) || 
+              title.includes(part)) {
             entryChapter = part;
             break;
           }
         }
         
-        // If we couldn't match a part directly, try to deduce from content
+        // If we couldn't match a part directly, try the abbreviated version
+        if (!entryChapter) {
+          for (const part of predefinedParts) {
+            // Extract the "PART X" portion
+            const shortPart = part.split('.')[0].trim();
+            if (trimmedEntry.includes(shortPart) || 
+                title.includes(shortPart)) {
+              // Use the full part name instead of the abbreviated version
+              entryChapter = part;
+              break;
+            }
+          }
+        }
+        
+        // If we still couldn't match a part, try to deduce from content
         if (!entryChapter) {
           // Assign based on content hints
           if (trimmedEntry.toLowerCase().includes('teach') || 

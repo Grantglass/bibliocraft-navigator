@@ -59,7 +59,7 @@ const Index = () => {
         .filter(entry => entry.chapter)
         .map(entry => entry.chapter as string);
       
-      // Create a set of unique chapters
+      // Create a set of unique chapters focusing only on full chapter names
       const uniqueChapters = new Set<string>();
       
       // First add all the predefined part chapters that exist in availableChapters
@@ -76,16 +76,26 @@ const Index = () => {
         }
       });
       
-      // Then add any additional chapters that might not be in our predefined list
-      availableChapters.forEach(chapter => {
-        if (chapter.startsWith('PART ')) {
-          // Extract the main part
-          const mainPart = chapter.split('.')[0].trim();
-          uniqueChapters.add(mainPart);
+      // Filter out abbreviated chapter versions (e.g., "PART V") 
+      // when the full version (e.g., "PART V. BIBLIOGRAPHIES") exists
+      const chaptersList = Array.from(uniqueChapters);
+      const filteredChapters = chaptersList.filter(chapter => {
+        // If this is a full chapter name (contains a dot), keep it
+        if (chapter.includes('.')) {
+          return true;
         }
+        
+        // If this is an abbreviated chapter name, check if a full version exists
+        const prefix = chapter.trim();
+        const fullVersionExists = chaptersList.some(fullChapter => 
+          fullChapter !== chapter && fullChapter.startsWith(prefix + '.')
+        );
+        
+        // Only keep if no full version exists
+        return !fullVersionExists;
       });
       
-      const sortedChapters = Array.from(uniqueChapters).sort((a, b) => {
+      const sortedChapters = filteredChapters.sort((a, b) => {
         // Extract Roman numerals or numbers for sorting
         const getPartNumber = (str: string) => {
           const match = str.match(/PART\s+([IVXLCDM]+|[0-9]+)/i);
