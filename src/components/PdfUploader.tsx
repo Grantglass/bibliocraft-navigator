@@ -1,9 +1,12 @@
+
 import React, { useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Button } from '@/components/ui/button';
 import { Upload, FileText, AlertCircle } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { BibliographyEntry } from '@/data/bibliographyData';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 // Set worker source path
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -15,62 +18,151 @@ interface PdfUploaderProps {
 const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [processingInfo, setProcessingInfo] = useState('');
   const { toast } = useToast();
   
   const processPdf = async (file: File) => {
     setIsUploading(true);
-    setUploadProgress(10);
+    setUploadProgress(5);
+    setProcessingInfo('Initializing PDF processing...');
     
     try {
-      // Read the file
-      const arrayBuffer = await file.arrayBuffer();
-      setUploadProgress(30);
+      // Create a file reader for streaming
+      const fileReader = new FileReader();
       
-      // Load the PDF document
-      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-      const pdf = await loadingTask.promise;
-      setUploadProgress(50);
-      
-      // Extract text from all pages
-      const totalPages = pdf.numPages;
-      let extractedText = '';
-      
-      for (let i = 1; i <= totalPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const textItems = textContent.items.map((item: any) => item.str);
-        extractedText += textItems.join(' ') + '\n';
+      fileReader.onload = async (event) => {
+        if (!event.target?.result) {
+          throw new Error('Failed to read file');
+        }
         
-        setUploadProgress(50 + (i / totalPages) * 40);
-      }
+        setProcessingInfo('Preparing PDF document...');
+        setUploadProgress(10);
+        
+        // Use arrayBuffer for more efficient memory handling
+        const data = event.target.result as ArrayBuffer;
+        
+        // Configure PDF.js with better memory options
+        const loadingTask = pdfjsLib.getDocument({
+          data,
+          // Improve memory usage with these options
+          cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+          cMapPacked: true,
+          disableFontFace: true, // Reduces memory usage
+          nativeImageDecoderSupport: 'none', // Reduces memory usage
+        });
+        
+        // Add event listener for progress
+        loadingTask.onProgress = (progressData) => {
+          if (progressData.total > 0) {
+            const percentage = Math.round((progressData.loaded / progressData.total) * 20) + 10;
+            setUploadProgress(Math.min(percentage, 30));
+          }
+        };
+        
+        const pdf = await loadingTask.promise;
+        setProcessingInfo(`Processing ${pdf.numPages} pages...`);
+        setUploadProgress(30);
+        
+        // Process pages in smaller batches to avoid memory issues
+        const BATCH_SIZE = 10; // Process 10 pages at a time
+        const totalPages = pdf.numPages;
+        let extractedText = '';
+        
+        for (let i = 0; i < totalPages; i += BATCH_SIZE) {
+          // Calculate batch end page
+          const endPage = Math.min(i + BATCH_SIZE, totalPages);
+          setProcessingInfo(`Processing pages ${i + 1}-${endPage} of ${totalPages}...`);
+          
+          // Process each page in the current batch
+          const batchPromises = [];
+          for (let j = i + 1; j <= endPage; j++) {
+            batchPromises.push(processPage(pdf, j));
+          }
+          
+          const batchResults = await Promise.all(batchPromises);
+          extractedText += batchResults.join(' ');
+          
+          // Update progress
+          const progressPercentage = 30 + ((endPage / totalPages) * 50);
+          setUploadProgress(Math.round(progressPercentage));
+          
+          // Allow garbage collection between batches
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+        
+        setProcessingInfo('Analyzing and categorizing entries...');
+        setUploadProgress(85);
+        
+        // Process the text into bibliography entries
+        const entries = parseBibliographyEntries(extractedText);
+        setUploadProgress(95);
+        
+        // Give UI time to update before finalizing
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Pass the entries to the parent component
+        onBibliographyExtracted(entries);
+        setUploadProgress(100);
+        
+        toast({
+          title: "PDF Processed Successfully",
+          description: `Extracted ${entries.length} bibliography entries from ${totalPages} pages`,
+        });
+      };
       
-      // Process the text into bibliography entries
-      const entries = parseBibliographyEntries(extractedText);
-      setUploadProgress(100);
+      fileReader.onerror = () => {
+        throw new Error('Error reading file');
+      };
       
-      // Pass the entries to the parent component
-      onBibliographyExtracted(entries);
+      // Read the file as an array buffer for better memory efficiency
+      fileReader.readAsArrayBuffer(file);
       
-      toast({
-        title: "PDF Processed Successfully",
-        description: `Extracted ${entries.length} bibliography entries`,
-      });
     } catch (error) {
       console.error('Error processing PDF:', error);
       toast({
         title: "Error Processing PDF",
-        description: "There was a problem extracting data from your PDF. Please try a different file.",
+        description: "There was a problem extracting data from your PDF. Please try again or use a different file.",
         variant: "destructive",
       });
     } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
+      setTimeout(() => {
+        setIsUploading(false);
+        setUploadProgress(0);
+        setProcessingInfo('');
+      }, 500);
+    }
+  };
+  
+  // Helper function to process a single page
+  const processPage = async (pdf: pdfjsLib.PDFDocumentProxy, pageNum: number): Promise<string> => {
+    try {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const textItems = textContent.items.map((item: any) => item.str);
+      const pageText = textItems.join(' ');
+      
+      // Cleanup to prevent memory leaks
+      page.cleanup();
+      
+      return pageText;
+    } catch (error) {
+      console.error(`Error processing page ${pageNum}:`, error);
+      return '';
     }
   };
   
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'application/pdf') {
+      // Check file size - allow up to 50MB (instead of 10MB)
+      if (file.size > 50 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "The maximum file size is 50MB. Please upload a smaller file.",
+          variant: "destructive",
+        });
+        return;
+      }
       processPdf(file);
     } else if (file) {
       toast({
@@ -161,7 +253,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
           <div className="flex flex-col items-center justify-center pt-5 pb-6">
             <Upload className="w-10 h-10 mb-3 text-biblio-navy" />
             <p className="mb-2 text-sm text-biblio-navy"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-            <p className="text-xs text-biblio-gray">PDF (MAX. 10MB)</p>
+            <p className="text-xs text-biblio-gray">PDF (MAX. 50MB)</p>
           </div>
           <input
             type="file"
@@ -174,28 +266,22 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       </div>
       
       {isUploading && (
-        <div className="mt-4">
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div 
-              className="bg-biblio-navy h-2.5 rounded-full" 
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
-          </div>
-          <p className="text-sm text-center mt-2 text-biblio-gray">
-            Processing PDF... {uploadProgress}%
+        <div className="mt-4 space-y-3">
+          <Progress value={uploadProgress} className="h-2" />
+          <p className="text-sm text-center text-biblio-gray">
+            {processingInfo || `Processing PDF... ${uploadProgress}%`}
           </p>
         </div>
       )}
       
-      <div className="mt-4 text-center">
-        <p className="text-sm text-biblio-gray mb-2">
-          <AlertCircle className="inline-block mr-1" size={16} />
-          The PDF parser works best with well-structured bibliography PDFs.
-        </p>
-        <p className="text-xs text-biblio-gray">
-          You may need to manually adjust the extracted data for optimal results.
-        </p>
-      </div>
+      <Alert className="mt-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Processing large PDFs</AlertTitle>
+        <AlertDescription>
+          Large PDFs (20MB+) may take several minutes to process. 
+          Please be patient and don't refresh the page.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };
