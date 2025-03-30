@@ -237,20 +237,21 @@ const Bibliography = () => {
   };
 
   const handleBibliographyExtracted = (extractedEntries: BibliographyEntry[], extractedSubheadings?: Record<string, string[]>) => {
-    // Categorize the entries
-    const categorizedEntries = categorizeEntries(extractedEntries);
-    setAllEntries(categorizedEntries);
-    setEntries(categorizedEntries);
-    
-    // Set subheadings if provided
-    if (extractedSubheadings) {
-      setSubheadings(extractedSubheadings);
+    // Only use if we don't already have entries
+    if (allEntries.length === 0) {
+      const categorizedEntries = categorizeEntries(extractedEntries);
+      setAllEntries(categorizedEntries);
+      setEntries(categorizedEntries);
+      
+      if (extractedSubheadings) {
+        setSubheadings(extractedSubheadings);
+      }
+      
+      toast({
+        title: "Bibliography Imported",
+        description: `Successfully imported ${categorizedEntries.length} entries.`,
+      });
     }
-    
-    toast({
-      title: "Bibliography Imported",
-      description: `Successfully imported ${categorizedEntries.length} entries.`,
-    });
   };
 
   return (

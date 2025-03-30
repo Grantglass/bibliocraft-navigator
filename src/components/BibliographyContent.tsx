@@ -1,6 +1,6 @@
 
-import React, { useEffect } from 'react';
-import { BibliographyEntry, bibliographyEntries, bibliographySubheadings } from '../data/bibliographyData';
+import React from 'react';
+import { BibliographyEntry } from '../data/bibliographyData';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface BibliographyContentProps {
@@ -20,13 +20,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   selectedSubheading,
   onEntriesExtracted
 }) => {
-  // Auto-load entries when the component mounts
-  useEffect(() => {
-    if (onEntriesExtracted) {
-      // Use the pre-built data directly, no PDF loading needed
-      onEntriesExtracted(bibliographyEntries, bibliographySubheadings);
-    }
-  }, [onEntriesExtracted]);
+  // No need to load entries on mount - they're already available from props
 
   if (isLoading) {
     return (
