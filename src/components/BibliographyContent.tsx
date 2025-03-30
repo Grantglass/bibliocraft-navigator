@@ -31,6 +31,8 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   const getPageTitle = () => {
     if (searchQuery) {
       return `Search Results for "${searchQuery}" (${entries.length} entries)`;
+    } else if (selectedCategory === "INTRODUCTION") {
+      return selectedSubheading ? `Introduction - ${selectedSubheading}` : 'Introduction';
     } else if (selectedCategory && selectedSubheading) {
       return `${selectedCategory} - ${selectedSubheading}`;
     } else if (selectedCategory) {
@@ -43,6 +45,9 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
 
   // Show the PDF loader when there are no entries and not searching
   const showPdfLoader = entries.length === 0 && !searchQuery;
+
+  // Determine if we're displaying introduction entries
+  const isIntroduction = selectedCategory === "INTRODUCTION";
 
   return (
     <div className="bibliography-content">
@@ -63,13 +68,21 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
       {entries.length > 0 ? (
         <div className="space-y-6">
           {entries.map((entry) => (
-            <div key={entry.id} className="bibliography-entry p-4 border border-biblio-lightGray rounded-md hover:shadow-md transition-shadow">
+            <div key={entry.id} className={`bibliography-entry p-4 border rounded-md hover:shadow-md transition-shadow ${
+              isIntroduction || entry.chapter === "INTRODUCTION" 
+                ? 'border-biblio-navy bg-biblio-lightBlue/10' 
+                : 'border-biblio-lightGray'
+            }`}>
               <h2 className="text-xl font-semibold text-biblio-navy">{entry.title}</h2>
               <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
               <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
               {entry.subheading && (
                 <div className="mt-2 text-sm">
-                  <span className="bg-biblio-lightBlue text-biblio-navy px-2 py-1 rounded">
+                  <span className={`px-2 py-1 rounded ${
+                    isIntroduction || entry.chapter === "INTRODUCTION"
+                      ? 'bg-biblio-navy text-white' 
+                      : 'bg-biblio-lightBlue text-biblio-navy'
+                  }`}>
                     {entry.subheading}
                   </span>
                 </div>

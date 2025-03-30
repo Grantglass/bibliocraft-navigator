@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Button } from '@/components/ui/button';
@@ -111,8 +110,32 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
       const BATCH_SIZE = 5;
       const totalPages = pdf.numPages;
       let extractedText = '';
+      let introductionText = '';
       
-      for (let i = 0; i < totalPages; i += BATCH_SIZE) {
+      // First pass: Process introduction pages (first 23 pages)
+      const introductionPages = Math.min(23, totalPages);
+      this.setState({
+        processingInfo: `Processing introduction pages 1-${introductionPages}...`,
+      });
+      
+      for (let i = 1; i <= introductionPages; i++) {
+        this.setState(prevState => ({
+          debugInfo: [...prevState.debugInfo, `Processing introduction page ${i}`]
+        }));
+        
+        const pageText = await this.processPage(pdf, i);
+        introductionText += pageText + ' ';
+        
+        const progressPercentage = 30 + ((i / totalPages) * 25);
+        this.setState({
+          progress: Math.round(progressPercentage),
+        });
+        
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      
+      // Second pass: Process remaining pages
+      for (let i = introductionPages; i < totalPages; i += BATCH_SIZE) {
         const endPage = Math.min(i + BATCH_SIZE, totalPages);
         this.setState({
           processingInfo: `Processing pages ${i + 1}-${endPage} of ${totalPages}...`,
@@ -134,7 +157,7 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
           debugInfo: [...prevState.debugInfo, `Batch ${i + 1}-${endPage} extracted ${batchText.length} chars`]
         }));
         
-        const progressPercentage = 30 + ((endPage / totalPages) * 50);
+        const progressPercentage = 55 + ((endPage / totalPages) * 30);
         this.setState({
           progress: Math.round(progressPercentage),
         });
@@ -147,13 +170,25 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
         progress: 85,
       });
       this.setState(prevState => ({
-        debugInfo: [...prevState.debugInfo, `Total extracted text: ${extractedText.length} characters`]
+        debugInfo: [...prevState.debugInfo, `Introduction text: ${introductionText.length} characters`]
+      }));
+      this.setState(prevState => ({
+        debugInfo: [...prevState.debugInfo, `Bibliography text: ${extractedText.length} characters`]
       }));
       
-      // Initialize default empty objects to prevent undefined errors
+      // Create introduction entries
+      const introductionEntries = this.createIntroductionEntries(introductionText);
+      
+      // Parse bibliography entries from the remaining text
       const result = this.parseBibliographyEntries(extractedText);
-      const entries = result.entries || [];
-      const subheadings = result.subheadings || {};
+      let entries = result.entries || [];
+      let subheadings = result.subheadings || {};
+      
+      // Add "INTRODUCTION" to the subheadings
+      subheadings["INTRODUCTION"] = ["Prefatory Material", "Table of Contents", "Guidelines"];
+      
+      // Combine introduction entries with bibliography entries
+      entries = [...introductionEntries, ...entries];
       
       this.setState({
         progress: 95,
@@ -165,7 +200,7 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
           sum + (subheadings[chapter]?.length || 0), 0) : 0;
       
       this.setState(prevState => ({
-        debugInfo: [...prevState.debugInfo, `Parsed ${entries.length} bibliography entries and ${subheadingCount} subheadings`]
+        debugInfo: [...prevState.debugInfo, `Parsed ${entries.length} bibliography entries (including introduction) and ${subheadingCount} subheadings`]
       }));
       
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -253,8 +288,90 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
     }
   };
   
+  createIntroductionEntries = (introText: string): BibliographyEntry[] => {
+    const introductionEntries: BibliographyEntry[] = [];
+    
+    // Extract some meaningful sections from the introduction
+    const sections = introText.split(/\n\n|\r\n\r\n/).filter(section => 
+      section.trim().length > 50 && 
+      !section.includes("Page") && 
+      !section.includes("Table of") &&
+      !section.trim().match(/^\d+$/)
+    );
+    
+    // Add introduction entries
+    introductionEntries.push({
+      id: `intro1`,
+      title: "William Blake: An Annotated Bibliography",
+      authors: "Editorial Team",
+      year: new Date().getFullYear().toString(),
+      publication: "Introduction",
+      content: "This bibliography serves as a comprehensive resource for scholars, students, and enthusiasts of William Blake. The following pages contain a carefully curated collection of bibliographic entries spanning Blake's works, critical responses, and scholarly analyses.",
+      category: 'introduction',
+      chapter: "INTRODUCTION",
+      subheading: "Prefatory Material"
+    });
+    
+    // Extract and add sections from the introduction text
+    let count = 2;
+    for (let i = 0; i < Math.min(sections.length, 5); i++) {
+      const section = sections[i];
+      if (section.length < 50) continue;
+      
+      let title = "";
+      let content = section;
+      
+      // Try to extract a title from the first line
+      const lines = section.split(/\n|\r\n/);
+      if (lines[0] && lines[0].length < 100 && lines[0].length > 10) {
+        title = lines[0].trim();
+        content = section.substring(title.length).trim();
+      } else {
+        title = `Introduction Section ${count}`;
+      }
+      
+      let subheading = "Prefatory Material";
+      if (section.toLowerCase().includes("contents") || 
+          section.toLowerCase().includes("chapter") || 
+          section.toLowerCase().includes("section")) {
+        subheading = "Table of Contents";
+      } else if (section.toLowerCase().includes("guideline") || 
+                section.toLowerCase().includes("instruction") || 
+                section.toLowerCase().includes("how to")) {
+        subheading = "Guidelines";
+      }
+      
+      introductionEntries.push({
+        id: `intro${count++}`,
+        title: title,
+        authors: "Editorial Team",
+        year: new Date().getFullYear().toString(),
+        publication: "Introduction",
+        content: content.substring(0, 500) + (content.length > 500 ? "..." : ""),
+        category: 'introduction',
+        chapter: "INTRODUCTION",
+        subheading: subheading
+      });
+    }
+    
+    return introductionEntries;
+  };
+  
   createFallbackEntries = (): BibliographyEntry[] => {
     const fallbackEntries: BibliographyEntry[] = [];
+    
+    // Add an introduction entry
+    fallbackEntries.push({
+      id: `intro_fallback`,
+      title: "William Blake: An Annotated Bibliography",
+      authors: "Editorial Team",
+      year: new Date().getFullYear().toString(),
+      publication: "Introduction",
+      content: "This bibliography serves as a comprehensive resource for scholars, students, and enthusiasts of William Blake. The following pages contain a carefully curated collection of bibliographic entries spanning Blake's works, critical responses, and scholarly analyses.",
+      category: 'introduction',
+      chapter: "INTRODUCTION",
+      subheading: "Prefatory Material"
+    });
     
     // Add some fallback entries to ensure we have at least some data to display
     fallbackEntries.push({
@@ -327,6 +444,7 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
     const subheadings: Record<string, string[]> = {};
     
     const predefinedParts = [
+      "INTRODUCTION",
       "PART I. TEACHING WILLIAM BLAKE",
       "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
       "PART III. EDITIONS OF BLAKE'S WRITING",
@@ -343,6 +461,9 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
     predefinedParts.forEach(part => {
       subheadings[part] = [];
     });
+    
+    // Add Introduction subheadings
+    subheadings["INTRODUCTION"] = ["Prefatory Material", "Table of Contents", "Guidelines"];
     
     const subheadingRegex = /(?:^|\n)([A-Z][A-Za-z\s,]+)(?:\s+\d+)?(?:\n|\r)/g;
     const contentSections = text.split(/PART [IVX]+\./);
