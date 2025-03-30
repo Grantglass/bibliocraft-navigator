@@ -35,9 +35,8 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
   // Initialize expanded state for chapters when they change
   useEffect(() => {
     if (chapters.length > 0) {
-      setExpandedCategories(
-        Object.fromEntries(chapters.map(chapter => [chapter, true]))
-      );
+      const initialState = Object.fromEntries(chapters.map(chapter => [chapter, true]));
+      setExpandedCategories(initialState);
     }
   }, [chapters]);
   
@@ -119,21 +118,31 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
               chapters.map((chapter) => {
                 const chapterEntries = entriesByChapter[chapter] || [];
                 const hasEntries = chapterEntries.length > 0;
+                const isExpanded = expandedCategories[chapter] || false;
                 
                 return (
                   <Collapsible 
                     key={chapter} 
-                    open={expandedCategories[chapter]} 
-                    onOpenChange={(open) => setExpandedCategories(prev => ({ ...prev, [chapter]: open }))}
+                    open={isExpanded} 
+                    onOpenChange={(open) => {
+                      setExpandedCategories(prev => ({
+                        ...prev,
+                        [chapter]: open
+                      }));
+                    }}
                     className="mb-2"
                   >
                     <CollapsibleTrigger className="w-full">
                       <div 
                         className="flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent w-full text-left"
-                        onClick={() => onSelectCategory(chapter)}
+                        onClick={(e) => {
+                          // Prevent collapsible from toggling when clicking the category
+                          e.stopPropagation();
+                          onSelectCategory(chapter);
+                        }}
                       >
                         <span className="mr-2">
-                          {expandedCategories[chapter] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                          {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                         </span>
                         <BookOpen size={16} className="mr-2" />
                         <span className="font-medium text-sm">{chapter}</span>
