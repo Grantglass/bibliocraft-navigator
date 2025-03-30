@@ -75,8 +75,7 @@
       "publication": "Journal of Digital Humanities",
       "content": "An overview of digital resources available for teaching Blake's works in undergraduate and graduate courses, with special emphasis on the William Blake Archive and other online repositories.",
       "category": "digital",
-      "chapter": "PART I. TEACHING WILLIAM BLAKE",
-      "subheading": "Digital Resources"
+      "chapter": "PART I. TEACHING WILLIAM BLAKE"
     },
     {
       "id": "part1_2",
@@ -86,8 +85,7 @@
       "publication": "Teaching Romanticism Series",
       "content": "A practical guide for instructors teaching students how to annotate Blake's illuminated works, with strategies for addressing the interplay between text and image.",
       "category": "humanities",
-      "chapter": "PART I. TEACHING WILLIAM BLAKE",
-      "subheading": "Citations, Annotations, and Links"
+      "chapter": "PART I. TEACHING WILLIAM BLAKE"
     },
     {
       "id": "part1_3",
@@ -97,8 +95,7 @@
       "publication": "Romanticism Studies",
       "content": "An examination of the various academic journals dedicated to Blake studies, including their focus areas, submission guidelines, and impact in the field.",
       "category": "humanities",
-      "chapter": "PART I. TEACHING WILLIAM BLAKE",
-      "subheading": "Different Blake Journals"
+      "chapter": "PART I. TEACHING WILLIAM BLAKE"
     },
     {
       "id": "part1_4",
@@ -108,8 +105,7 @@
       "publication": "Art Education Today",
       "content": "Strategies for incorporating Blake's visual art into classroom teaching, including techniques for visual analysis and interpretation.",
       "category": "humanities",
-      "chapter": "PART I. TEACHING WILLIAM BLAKE",
-      "subheading": "Visual Art Resources"
+      "chapter": "PART I. TEACHING WILLIAM BLAKE"
     },
     {
       "id": "part1_5",
@@ -119,63 +115,414 @@
       "publication": "Teaching Literature",
       "content": "Methods for introducing Blake's poetry to secondary school students, with lesson plans and discussion guides.",
       "category": "humanities",
-      "chapter": "PART I. TEACHING WILLIAM BLAKE",
-      "subheading": "Teaching Materials"
+      "chapter": "PART I. TEACHING WILLIAM BLAKE"
     },
     {
-      "id": "part2_1",
-      "title": "William Blake: A Comprehensive Introduction",
-      "authors": "Thompson, Karen",
-      "year": "2018",
-      "publication": "Oxford University Press",
-      "content": "A thorough introduction to Blake's life, works, and cultural context, suitable for students and scholars new to Blake studies.",
+      "id": "part2_behrendt",
+      "title": "Reading William Blake",
+      "authors": "Behrendt, Stephen C.",
+      "year": "1992",
+      "publication": "London: Macmillan Press",
+      "content": "An overview of the issues confronting readers of Blake, with a survey of his works in illuminated printing.",
       "category": "academic_papers",
       "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
-      "subheading": "General Introductions"
+      "subheading": "General Introductions, Handbooks, and Glossaries"
     },
     {
-      "id": "part2_2",
-      "title": "The Blake Handbook: Symbols, Techniques, and Themes",
-      "authors": "Davis, Robert & Miller, Sarah",
+      "id": "part2_damon",
+      "title": "A Blake Dictionary: The Ideas and Symbols of William Blake",
+      "authors": "Damon, S. Foster",
+      "year": "2013",
+      "publication": "Hanover, NH: Dartmouth College Press",
+      "content": "Despite its age, remedied somewhat by Eaves's foreword, bibliography, and index, an indispensable reference for a basic understanding of Blake's obscure myth and symbolism.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_eaves",
+      "title": "The Cambridge Companion to William Blake",
+      "authors": "Eaves, Morris (ed.)",
+      "year": "2003",
+      "publication": "Cambridge: Cambridge University Press",
+      "content": "A very readable collection aimed at introducing new researchers to Blake. Some of its chapters were developed into content for the William Blake Archive.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_ferber",
+      "title": "The Poetry of William Blake",
+      "authors": "Ferber, Michael",
+      "year": "1991",
+      "publication": "New York: Penguin",
+      "content": "A well-received introduction to Blake's poetry aimed at an undergraduate audience, highlighting mostly the early illuminated books.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_freeman",
+      "title": "A Guide to the Cosmology of William Blake",
+      "authors": "Freeman, Kathryn S.",
       "year": "2017",
-      "publication": "Cambridge University Press",
-      "content": "A reference handbook covering Blake's symbolic system, artistic techniques, and recurring themes across his corpus of work.",
+      "publication": "New York: Routledge",
+      "content": "A reference book on Blake's mythic system more recent than Damon's Blake Dictionary, which also includes useful information about Blake's circle and more contemporary bibliographical resources.",
       "category": "academic_papers",
       "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
-      "subheading": "Handbooks"
+      "subheading": "General Introductions, Handbooks, and Glossaries"
     },
     {
-      "id": "part2_3",
-      "title": "Blake's Mythological Dictionary",
-      "authors": "Wilson, Elizabeth",
+      "id": "part2_gourlay",
+      "title": "Glossary",
+      "authors": "Gourlay, Alexander S.",
+      "year": "2023",
+      "publication": "The William Blake Archive",
+      "content": "A concise list defining key words in Blake's mythology and symbolism. Adapted from Gourlay's 'A Glossary of Terms, Names, and Concepts in Blake,' published in Eaves's Cambridge Companion to William Blake.",
+      "category": "digital",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_haggerty",
+      "title": "William Blake in Context",
+      "authors": "Haggerty, Sarah (ed.)",
       "year": "2019",
-      "publication": "Blake Studies Press",
-      "content": "A glossary of Blake's personal mythology, providing definitions and contexts for the characters, places, and concepts that appear throughout his prophetic works.",
+      "publication": "Cambridge: Cambridge University Press",
+      "content": "A very useful collection of nearly forty short essays on Blake's relationship to various contexts and topics. Each chapter includes a list of further readings. A great starting point.",
       "category": "academic_papers",
       "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
-      "subheading": "Glossaries"
+      "subheading": "General Introductions, Handbooks, and Glossaries"
     },
     {
-      "id": "part2_4",
-      "title": "William Blake: Poet and Painter",
+      "id": "part2_johnson",
+      "title": "Mapping Blake's London",
+      "authors": "Johnson, Mary Lynn",
+      "year": "1977",
+      "publication": "Blake: An Illustrated Quarterly 10.4",
+      "content": "The maps of Britain, the Holy Land, and London in the article, which were published in Blake's Poetry and Designs (1979, 2008), are very useful for visualizing Blake's syncretic fusion of biblical and British geography.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_makdisi",
+      "title": "Reading William Blake",
+      "authors": "Makdisi, Saree",
+      "year": "2015",
+      "publication": "Cambridge: Cambridge University Press",
+      "content": "A short, but compelling, analysis of some of the different dimensions at play in reading Blake.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_natarajan",
+      "title": "William Blake (1757-1827)",
+      "authors": "Natarajan, Uttara",
+      "year": "2007",
+      "publication": "The Romantic Poets: A Guide to Criticism",
+      "content": "A survey of criticism with excerpts from three previously published books and an annotated list of further reading.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_pinheiro",
+      "title": "Urizen Now: Reading Anew William Blake's Response to his Times",
+      "authors": "Pinheiro de Sousa, Alcinda & Whittaker, Jason",
+      "year": "2023",
+      "publication": "Weaving Tales: Anglo-Iberian Encounters on Literatures in English",
+      "content": "On how to read Blake's works: 'Blake himself seems very strongly as an author to invite engaged and dialectical readings of his works' (13).",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_roberts",
+      "title": "William Blake's Poetry: A Reader's Guide",
+      "authors": "Roberts, Jonathan",
+      "year": "2007",
+      "publication": "London: Continuum",
+      "content": "Aimed at advanced undergraduates. Includes an overview of Blake's context, expression, thought, and reception history, with study questions and a guide to further reading.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_summerfield",
+      "title": "A Guide to the Books of William Blake for Innocent and Experienced Readers",
+      "authors": "Summerfield, Henry",
+      "year": "1998",
+      "publication": "Gerrards Cross: Colin Smythe",
+      "content": "An extensive overview of Blake's poetic works, with comprehensive annotations that synthesize important critical commentaries.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_williams",
+      "title": "Palgrave Advances in William Blake Studies",
+      "authors": "Williams, Nicholas M. (ed.)",
+      "year": "2006",
+      "publication": "Basingstoke: Palgrave Macmillan",
+      "content": "A collection of introductory essays that consider Blake from critical, historical, and cultural perspectives as might be presented in a critical theory course. Complements Eaves's Cambridge Companion well.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "General Introductions, Handbooks, and Glossaries"
+    },
+    {
+      "id": "part2_ault",
+      "title": "Visionary Physics: Blake's Response to Newton",
+      "authors": "Ault, Donald D.",
+      "year": "1974",
+      "publication": "Chicago: University of Chicago Press",
+      "content": "A very important study of how Blake incorporated the language of Newtonian science into his own symbolism.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_bindman",
+      "title": "Blake as an Artist",
+      "authors": "Bindman, David",
+      "year": "1977",
+      "publication": "Oxford: Phaidon",
+      "content": "A substantial introduction to Blake's work as an artist.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_bloom",
+      "title": "Blake's Apocalypse: A Study in Poetic Argument",
+      "authors": "Bloom, Harold",
+      "year": "1970",
+      "publication": "Ithaca: Cornell University Press",
+      "content": "A one-time influential study of Blake's poetic career. The book's argument shaped Bloom's commentary to David V. Erdman's The Complete Poetry and Prose of William (1965, 1982, 1988).",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_blunt",
+      "title": "The Art of William Blake",
+      "authors": "Blunt, Anthony",
+      "year": "1969",
+      "publication": "New York: Columbia University Press",
+      "content": "Although dated in its understanding of Blake's artistic techniques and technologies, a still useful study of Blake as an artist and his relationship to the world of eighteenth-century art.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_bronowski",
+      "title": "William Blake and the Age of Revolution",
+      "authors": "Bronowski, Jacob",
+      "year": "1965",
+      "publication": "New York: Harper & Row",
+      "content": "First published as William Blake, 1757-1827: A Man without a Mask in 1943. Along with David V. Erdman's Blake: Prophet Against Empire, an early and important examination of Blake within his historical and political context.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_bruder",
+      "title": "William Blake and the Daughters of Albion",
+      "authors": "Bruder, Helen P.",
+      "year": "1997",
+      "publication": "New York: St. Martin's Press",
+      "content": "An important feminist critique of both Blake and Blake criticism, focused primarily on the early illuminated books. Bruder's work continued in her collection, Women Reading Blake (2007), and a series of collected essays.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_damon_2",
+      "title": "William Blake, His Philosophy and Symbols",
+      "authors": "Damon, S. Foster",
+      "year": "1924",
+      "publication": "Boston and New York: Houghton Mifflin Company",
+      "content": "William Blake, His Philosophy and Symbols is the first thoroughly scholarly book about Blake, and as such it is of great importance. It is particularly valuable for the parallels it draws between Blake's works and an immense variety of recondite mythologies.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_davies",
+      "title": "The Theology of William Blake",
+      "authors": "Davies, J. G.",
+      "year": "1948",
+      "publication": "Oxford: Clarendon Press",
+      "content": "Davies attempts to assert Blake's religious orthodoxy, but he is illuminating on Blake's relations with the Swedenborgians, particularly in demonstrating the impossibility of the legend that Blake's father and family belonged to the New Church.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_deluca",
+      "title": "Words of Eternity: Blake and the Poetics of the Sublime",
+      "authors": "De Luca, Vincent Arthur",
+      "year": "1991",
+      "publication": "Princeton: Princeton University Press",
+      "content": "An important study of how Blake's poetics invoked the sublime, both in terms of content and materially. De Luca coins the phrase, \"wall of words,\" to describe pages of the illuminated books full of text.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_eaves1",
+      "title": "The Counter-Arts Conspiracy: Art and Industry in the Age of Blake",
+      "authors": "Eaves, Morris",
+      "year": "1992",
+      "publication": "Ithaca: Cornell University Press",
+      "content": "An illuminating study that positions Blake within several artistic traditions and controversies, including the development of the English School of Art between the seventeenth and nineteenth centuries and the aesthetic issues created by new technologies of mechanical reproduction.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_eaves2",
+      "title": "William Blake's Theory of Art",
+      "authors": "Eaves, Morris",
+      "year": "1982",
+      "publication": "Princeton: Princeton University Press",
+      "content": "An influential articulation of Blake's theory of art in relationship to Neoclassicism and Romanticism, with a consideration of Blake's notion of audience.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_erdman",
+      "title": "Blake: Prophet Against Empire",
+      "authors": "Erdman, David V.",
+      "year": "1977",
+      "publication": "Princeton: Princeton University Press",
+      "content": "A key study that examines Blake within his historical context. Erdman's approach was so influential that historicist readings of Blake are sometimes categorized as \"The School of Erdman.\"",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_essick1",
+      "title": "William Blake and the Language of Adam",
+      "authors": "Essick, Robert N.",
+      "year": "1989",
+      "publication": "Oxford: Clarendon Press",
+      "content": "A study of Blake's conception of language with an analysis of the paintings, Adam Naming the Beasts and Eve Naming the Birds, and most of the poetry. Includes a discussion of the Kabbalah and Hebrew, Blake's notion of the linguistic sign, his notion of the Fall, and Blake and other Romantic-era writers on language.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_essick2",
+      "title": "William Blake Printmaker",
+      "authors": "Essick, Robert N.",
+      "year": "1980",
+      "publication": "Princeton: Princeton University Press",
+      "content": "A very important study of Blake's career as a printmaker, which traces his training and his work in various forms of printing (intaglio, relief, etc.).",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_ferber2",
+      "title": "The Social Vision of William Blake",
+      "authors": "Ferber, Michael",
+      "year": "1985",
+      "publication": "Princeton: Princeton University Press",
+      "content": "Focusing on the illuminated books, an examination of Blake's thought about the individual and society, influenced by Marxism (the first two chapters are concerned with ideology), but the study also engages deeply with Christian and especially antinomian thought. Ferber builds to Blake's notion of \"apocatastasis, or the restoration of all things\" (xi).",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_frye",
+      "title": "Fearful Symmetry: A Study of William Blake",
       "authors": "Frye, Northrop",
       "year": "1947",
-      "publication": "Princeton University Press",
-      "content": "A seminal study of Blake's integration of poetry and visual art, presenting an influential framework for understanding Blake's symbolic system.",
+      "publication": "Princeton, NJ: Princeton University Press",
+      "content": "A profoundly influential study, which dominated twentieth-century Blake scholarship. Frye considered Blake primarily as a poet and artist (rather than a mystic), and his work led to Blake's canonization as a Romantic poet as well as shaping Frye's own Archetypal Criticism.",
       "category": "academic_papers",
       "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
-      "subheading": "Classic Studies"
+      "subheading": "Classic Studies Published Before 2000"
     },
     {
-      "id": "part2_5",
-      "title": "Blake's Jerusalem: Structure and Meaning",
-      "authors": "Damon, S. Foster",
-      "year": "1948",
-      "publication": "Blake Studies Journal",
-      "content": "An early analysis of the structure and symbolic significance of Blake's epic poem Jerusalem, which remains influential in Blake scholarship.",
+      "id": "part2_hagstrum",
+      "title": "William Blake, Poet and Painter: An Introduction to the Illuminated Verse",
+      "authors": "Hagstrum, Jean H.",
+      "year": "1964",
+      "publication": "Chicago: University of Chicago Press",
+      "content": "A classic study of the poetry and the designs of the illuminated books. See Hagstrum's defense of associating Blake with the Sister-Arts Tradition in his \"Blake and the Sister-Arts Tradition.\"",
       "category": "academic_papers",
       "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
-      "subheading": "Classic Studies"
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_hilton",
+      "title": "Literal Imagination: Blake's Vision of Words",
+      "authors": "Hilton, Nelson",
+      "year": "1983",
+      "publication": "Berkeley: University of California Press",
+      "content": "A major study of how Blake used and envisioned words, with many ingenious readings of Blake's word play.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_keynes",
+      "title": "Blake Studies: Essays on his Life and Work",
+      "authors": "Keynes, Geoffrey",
+      "year": "1971",
+      "publication": "Oxford: Clarendon Press",
+      "content": "A collection of some of Keynes's most important essays on Blake, all of which were published elsewhere but which were revised for both editions of the collection. The first edition (1949) had 17 essays, and the second edition (1971) had 29.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_mee",
+      "title": "Dangerous Enthusiasm: William Blake and the Culture of Radicalism in the 1790s",
+      "authors": "Mee, Jon",
+      "year": "1992",
+      "publication": "Oxford: Clarendon Press",
+      "content": "Focused on Blake's early illuminated books, a key study of Blake's relationship to religious enthusiasts of the era who shared his suspicion of Enlightenment-grounded radicalism. The study recasts Blake's relationship to millenarianism and to the polite circle of Joseph Johnson.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_mitchell",
+      "title": "Blake's Composite Art",
+      "authors": "Mitchell, W.J.T.",
+      "year": "1978",
+      "publication": "Princeton: Princeton University Press",
+      "content": "A key study on the interplay of the visual and verbal in Blake's works. The phrase, \"composite art,\" while popularized by Mitchell, was coined by Jean Hagstrum.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_ostriker",
+      "title": "Vision and Verse in William Blake",
+      "authors": "Ostriker, Alicia S.",
+      "year": "1965",
+      "publication": "Madison and Milwaukee: University of Wisconsin Press",
+      "content": "\"A sensitive and responsible commentary on Blake's prosody\" (BB #2335). Remains the best study of Blake's versification.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
+    },
+    {
+      "id": "part2_paley",
+      "title": "Energy and the Imagination: A Study in the Development of Blake's Thought",
+      "authors": "Paley, Morton D.",
+      "year": "1970",
+      "publication": "Oxford: Clarendon Press",
+      "content": "A pioneering study of Blake's intellectual development that examines the complexities of his relationship to the ideas of his time.",
+      "category": "academic_papers",
+      "chapter": "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
+      "subheading": "Classic Studies Published Before 2000"
     },
     {
       "id": "part3_1",
@@ -488,8 +835,7 @@
   ],
   "subheadings": {
     "INTRODUCTION": ["Prefatory Material", "Table of Contents", "Guidelines", "Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"],
-    "PART I. TEACHING WILLIAM BLAKE": ["Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals", "Visual Art Resources", "Teaching Materials"],
-    "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES": ["General Introductions", "Handbooks", "Glossaries", "Classic Studies"],
+    "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES": ["General Introductions, Handbooks, and Glossaries", "Classic Studies Published Before 2000"],
     "PART III. EDITIONS OF BLAKE'S WRITING": ["Standard Editions", "Annotated Editions", "Critical Editions", "Digital Editions"],
     "PART IV. BIOGRAPHIES": ["Standard Biographies", "Historic Biographies", "Portraits", "Catherine Blake"],
     "PART V. BIBLIOGRAPHIES": ["Standard Bibliographies", "Annotated Bibliographies", "Historic Bibliographies"],
