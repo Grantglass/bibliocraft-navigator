@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 // Set worker source path
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-// Path to the PDF file in the public directory - make sure this matches the actual filename
+// Path to the PDF file in the public directory - using absolute path to ensure proper loading
 const PDF_FILE_PATH = '/blake_bibliography.pdf';
 
 interface PdfUploaderProps {
@@ -41,14 +42,27 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       setProcessingInfo('Preparing PDF document...');
       setProgress(10);
       
-      // Load the PDF from the public folder
-      const pdfUrl = PDF_FILE_PATH;
+      // Get the absolute URL for the PDF
+      const pdfUrl = window.location.origin + PDF_FILE_PATH;
       setDebugInfo(prev => [...prev, `Attempting to load PDF from: ${pdfUrl}`]);
+      
+      // Try loading with direct fetch first to check if file exists and is accessible
+      try {
+        const response = await fetch(pdfUrl, { method: 'HEAD' });
+        if (!response.ok) {
+          throw new Error(`PDF file not accessible: ${response.status} ${response.statusText}`);
+        }
+        setDebugInfo(prev => [...prev, `PDF file is accessible via fetch: ${response.status}`]);
+      } catch (fetchError) {
+        setDebugInfo(prev => [...prev, `Fetch check failed: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`]);
+        // Continue anyway as PDFJS might still be able to load it
+      }
       
       const loadingTask = pdfjsLib.getDocument({
         url: pdfUrl,
         cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
         cMapPacked: true,
+        withCredentials: false,
       });
       
       loadingTask.onProgress = (progressData) => {
@@ -406,7 +420,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
             className="flex items-center gap-2"
           >
             <BookOpen size={16} />
-            Load Bibliography Data
+            Reload Bibliography Data
           </Button>
           <p className="text-sm text-biblio-gray mt-2">
             This will load the Blake bibliography data stored in the repository.
@@ -420,6 +434,18 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
               </AlertDescription>
             </Alert>
           )}
+          
+          {/* Display the debug info even when not loading */}
+          {debugInfo.length > 0 && (
+            <div className="mt-4 p-3 border rounded-md bg-gray-50 max-h-60 overflow-auto">
+              <h4 className="font-medium mb-2 text-sm">Processing Log:</h4>
+              <ul className="text-xs space-y-1 text-gray-600">
+                {debugInfo.map((info, i) => (
+                  <li key={i}>{info}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       ) : (
         <div className="mt-4 space-y-3">
@@ -427,17 +453,18 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
           <p className="text-sm text-center text-biblio-gray">
             {processingInfo || `Processing PDF... ${progress}%`}
           </p>
-        </div>
-      )}
-      
-      {debugInfo.length > 0 && (
-        <div className="mt-4 p-3 border rounded-md bg-gray-50 max-h-60 overflow-auto">
-          <h4 className="font-medium mb-2 text-sm">Processing Log:</h4>
-          <ul className="text-xs space-y-1 text-gray-600">
-            {debugInfo.map((info, i) => (
-              <li key={i}>{info}</li>
-            ))}
-          </ul>
+          
+          {/* Always show debug info when loading */}
+          {debugInfo.length > 0 && (
+            <div className="mt-4 p-3 border rounded-md bg-gray-50 max-h-60 overflow-auto">
+              <h4 className="font-medium mb-2 text-sm">Processing Log:</h4>
+              <ul className="text-xs space-y-1 text-gray-600">
+                {debugInfo.map((info, i) => (
+                  <li key={i}>{info}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
       

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Info, Search } from 'lucide-react';
@@ -43,18 +43,18 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <ul className="space-y-2">
-                  <li>• User Note</li>
-                  <li>• Abbreviations</li>
-                  <li>• PART I. TEACHING WILLIAM BLAKE</li>
-                  <li>• PART II. GENERAL INTRODUCTIONS</li>
-                  <li>• PART III. EDITIONS OF BLAKE'S WRITING</li>
+                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> User Note</li>
+                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> Abbreviations</li>
+                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART I. TEACHING WILLIAM BLAKE</li>
+                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART II. GENERAL INTRODUCTIONS</li>
+                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART III. EDITIONS OF BLAKE'S WRITING</li>
                 </ul>
               </div>
               <div>
                 <ul className="space-y-2">
-                  <li>• PART IV. BIOGRAPHIES</li>
-                  <li>• PART V. BIBLIOGRAPHIES</li>
-                  <li>• PART VI-X. ADDITIONAL SECTIONS</li>
+                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART IV. BIOGRAPHIES</li>
+                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART V. BIBLIOGRAPHIES</li>
+                  <li className="flex items-center"><span className="text-biblio-navy mr-2">•</span> PART VI-X. ADDITIONAL SECTIONS</li>
                 </ul>
               </div>
             </div>
@@ -62,13 +62,13 @@ const Index = () => {
 
           <section className="flex flex-col md:flex-row gap-6 justify-center">
             <Link to="/bibliography">
-              <Button size="lg" className="w-full md:w-auto flex items-center gap-2">
+              <Button size="lg" className="w-full md:w-auto flex items-center gap-2 bg-biblio-navy hover:bg-biblio-navy/90">
                 <BookOpen size={18} />
                 Browse Bibliography
               </Button>
             </Link>
             <Link to="/about">
-              <Button variant="outline" size="lg" className="w-full md:w-auto flex items-center gap-2">
+              <Button variant="outline" size="lg" className="w-full md:w-auto flex items-center gap-2 border-biblio-navy text-biblio-navy hover:bg-biblio-navy/10">
                 <Info size={18} />
                 About the Project
               </Button>
