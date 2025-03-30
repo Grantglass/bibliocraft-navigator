@@ -1,13 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import BibliographySidebar from '@/components/BibliographySidebar';
 import BibliographyContent from '@/components/BibliographyContent';
 import { 
   getAllEntries, 
-  getEntriesByCategory, 
-  getEntryById,
   searchEntries,
   BibliographyEntry,
-  bibliographyCategories,
   categorizeEntries
 } from '@/data/bibliographyData';
 import { Menu } from 'lucide-react';
@@ -71,16 +69,11 @@ const Index = () => {
     setSelectedCategory(categoryId);
     
     setTimeout(() => {
-      let categoryEntries;
-      if (chapters.includes(categoryId)) {
-        // If it's a chapter, filter by chapter
-        categoryEntries = allEntries.filter(entry => entry.chapter === categoryId);
-      } else {
-        // Otherwise use the original category filtering
-        categoryEntries = getEntriesByCategory(categoryId, allEntries);
-      }
-      setEntries(categoryEntries);
+      // Filter entries by the selected chapter
+      const chapterEntries = allEntries.filter(entry => entry.chapter === categoryId);
+      setEntries(chapterEntries);
       setIsLoading(false);
+      
       // On mobile, close sidebar after selection
       if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
@@ -93,9 +86,10 @@ const Index = () => {
     setSearchQuery('');
     
     setTimeout(() => {
-      const entry = getEntryById(entryId, allEntries);
-      setEntries(entry ? [entry] : []);
+      const selectedEntry = allEntries.find(entry => entry.id === entryId);
+      setEntries(selectedEntry ? [selectedEntry] : []);
       setIsLoading(false);
+      
       // On mobile, close sidebar after selection
       if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
@@ -114,6 +108,7 @@ const Index = () => {
       const results = searchEntries(query, allEntries);
       setEntries(results);
       setIsLoading(false);
+      
       // On mobile, close sidebar after search
       if (window.innerWidth < 768) {
         setIsSidebarOpen(false);
@@ -131,17 +126,6 @@ const Index = () => {
       title: "Bibliography Imported",
       description: `Successfully imported ${categorizedEntries.length} entries.`,
     });
-  };
-
-  const getCategoryName = (categoryId: string) => {
-    // If it's a chapter, return the chapter name directly
-    if (chapters.includes(categoryId)) {
-      return categoryId;
-    }
-    
-    // Otherwise look up the category name
-    const category = bibliographyCategories.find(cat => cat.id === categoryId);
-    return category ? category.name : '';
   };
 
   return (
@@ -174,7 +158,7 @@ const Index = () => {
               entries={entries} 
               isLoading={isLoading} 
               searchQuery={searchQuery}
-              selectedCategory={getCategoryName(selectedCategory)}
+              selectedCategory={selectedCategory}
               onEntriesExtracted={handleBibliographyExtracted}
             />
           </div>

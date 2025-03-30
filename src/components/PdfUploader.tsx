@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Button } from '@/components/ui/button';
@@ -204,6 +203,35 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
     const referencesSectionRegex = /(?:references|bibliography|works cited|sources|citations)(?:\s|:|\n)/i;
     const referencesMatch = text.match(referencesSectionRegex);
     
+    // Try to extract chapters/sections from the document
+    const chapterRegex = /\b(?:chapter|section)\s+\d+(?:[.:]\s*|\s+)([A-Z][^.]+)\.?/gi;
+    const headingRegex = /\b([A-Z][A-Z\s]{2,}[A-Z])\b/g; // All caps headings
+    
+    const potentialChapters = new Set<string>();
+    
+    // Extract potential chapters from chapter headings
+    let chapterMatch;
+    while ((chapterMatch = chapterRegex.exec(text)) !== null) {
+      if (chapterMatch[1] && chapterMatch[1].length > 3) {
+        potentialChapters.add(chapterMatch[1].trim());
+      }
+    }
+    
+    // Extract potential chapters from ALL CAPS headings
+    let headingMatch;
+    while ((headingMatch = headingRegex.exec(text)) !== null) {
+      if (headingMatch[1] && headingMatch[1].length > 3) {
+        potentialChapters.add(headingMatch[1].trim());
+      }
+    }
+    
+    // Convert to array and limit to prevent too many false positives
+    const chapters = Array.from(potentialChapters).slice(0, 15);
+    setDebugInfo(prev => [...prev, `Detected ${chapters.length} potential chapters/sections`]);
+    if (chapters.length > 0) {
+      setDebugInfo(prev => [...prev, `Example chapters: ${chapters.slice(0, 3).join(', ')}...`]);
+    }
+    
     if (!referencesMatch) {
       setDebugInfo(prev => [...prev, "No references section found"]);
       // If no dedicated section found, we'll try to parse the whole text
@@ -244,6 +272,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       let year = new Date().getFullYear().toString();
       let title = "Unknown Title";
       let publication = "Unknown Publication";
+      let entryChapter: string | undefined = undefined;
       
       // Extract year - look for 4 digits that could be a year (between 1900 and current year)
       const currentYear = new Date().getFullYear();
@@ -282,6 +311,26 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         }
       }
       
+      // Try to assign a chapter to this entry based on context
+      if (chapters.length > 0) {
+        // Assign the entry to the most appropriate chapter based on content matching
+        for (const chapter of chapters) {
+          if (trimmedEntry.includes(chapter) || 
+              title.includes(chapter) || 
+              publication.includes(chapter)) {
+            entryChapter = chapter;
+            break;
+          }
+        }
+        
+        // If we couldn't match a chapter, assign to a default chapter based on entry ID
+        if (!entryChapter && chapters.length > 0) {
+          // Simple distribution of entries across chapters by their ID
+          const chapterIndex = (entryId - 1) % chapters.length;
+          entryChapter = chapters[chapterIndex];
+        }
+      }
+      
       entries.push({
         id: `entry${entryId++}`,
         title,
@@ -289,11 +338,27 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         year,
         publication,
         content: trimmedEntry,
-        category: 'academic_papers' // Default category
+        category: 'academic_papers', // Default category
+        chapter: entryChapter
       });
     }
     
     setDebugInfo(prev => [...prev, `Parsed ${entries.length} bibliography entries`]);
+    
+    // If we have entries but no chapters were found, create artificial chapters
+    if (entries.length > 0 && chapters.length === 0) {
+      // Create artificial chapters based on groups of entries
+      const chapterSize = Math.ceil(entries.length / 5); // Aim for about 5 chapters
+      const artificialChapters = ['Section A', 'Section B', 'Section C', 'Section D', 'Section E'];
+      
+      entries.forEach((entry, index) => {
+        const chapterIndex = Math.min(Math.floor(index / chapterSize), artificialChapters.length - 1);
+        entry.chapter = artificialChapters[chapterIndex];
+      });
+      
+      setDebugInfo(prev => [...prev, `Created artificial chapters for entries`]);
+    }
+    
     return entries;
   };
   
