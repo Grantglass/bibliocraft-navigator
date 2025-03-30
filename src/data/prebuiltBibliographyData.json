@@ -1,0 +1,95 @@
+
+{
+  "entries": [
+    {
+      "id": "intro1",
+      "title": "William Blake: An Annotated Bibliography",
+      "authors": "Editorial Team",
+      "year": "2023",
+      "publication": "Introduction",
+      "content": "This bibliography serves as a comprehensive resource for scholars, students, and enthusiasts of William Blake. The following pages contain a carefully curated collection of bibliographic entries spanning Blake's works, critical responses, and scholarly analyses.",
+      "category": "introduction",
+      "chapter": "INTRODUCTION",
+      "subheading": "Prefatory Material"
+    },
+    {
+      "id": "intro2",
+      "title": "How to Use This Bibliography",
+      "authors": "Editorial Team",
+      "year": "2023",
+      "publication": "Introduction",
+      "content": "The bibliography is organized into ten main parts, each focusing on a different aspect of Blake studies. You can navigate through these sections using the sidebar menu, or search for specific entries using the search function. Each entry provides bibliographic information and a brief description of the content.",
+      "category": "introduction",
+      "chapter": "INTRODUCTION",
+      "subheading": "Guidelines"
+    },
+    {
+      "id": "entry1",
+      "title": "William Blake: The Critical Heritage",
+      "authors": "G. E. Bentley, Jr.",
+      "year": "1975",
+      "publication": "London: Routledge",
+      "content": "Comprehensive collection of contemporary responses to Blake's work from 1757 to 1863, including reviews, letters, and biographical accounts.",
+      "category": "academic_papers",
+      "chapter": "PART IV. BIOGRAPHIES",
+      "subheading": "Standard Biographies"
+    },
+    {
+      "id": "entry2",
+      "title": "Blake Books",
+      "authors": "G. E. Bentley, Jr.",
+      "year": "1977",
+      "publication": "Oxford: Clarendon Press",
+      "content": "Detailed bibliographical descriptions of Blake's writings with information about their production, printing, and contemporary reception.",
+      "category": "academic_papers",
+      "chapter": "PART V. BIBLIOGRAPHIES",
+      "subheading": "Standard Bibliographies"
+    },
+    {
+      "id": "entry3",
+      "title": "Blake Books Supplement",
+      "authors": "G. E. Bentley, Jr.",
+      "year": "1995",
+      "publication": "Oxford: Clarendon Press",
+      "content": "Supplementary volume to Blake Books with new information and corrections to the original bibliography.",
+      "category": "academic_papers",
+      "chapter": "PART V. BIBLIOGRAPHIES",
+      "subheading": "Standard Bibliographies"
+    },
+    {
+      "id": "entry4",
+      "title": "The Life of William Blake",
+      "authors": "Alexander Gilchrist",
+      "year": "1863",
+      "publication": "London: Macmillan",
+      "content": "The first full-length biography of Blake, which helped revive interest in his work. Includes accounts from Blake's friends and contemporaries.",
+      "category": "academic_papers",
+      "chapter": "PART IV. BIOGRAPHIES",
+      "subheading": "Historic Biographies"
+    },
+    {
+      "id": "entry5",
+      "title": "William Blake: His Life and Work",
+      "authors": "Jack Lindsay",
+      "year": "1978",
+      "publication": "London: Constable",
+      "content": "A biographical study that places Blake's work in the context of the revolutionary politics of his time.",
+      "category": "academic_papers",
+      "chapter": "PART IV. BIOGRAPHIES",
+      "subheading": "Standard Biographies"
+    }
+  ],
+  "subheadings": {
+    "INTRODUCTION": ["Prefatory Material", "Table of Contents", "Guidelines"],
+    "PART I. TEACHING WILLIAM BLAKE": ["Citations, Annotations, and Links", "Different Blake Journals"],
+    "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES": ["General Introductions", "Classic Studies"],
+    "PART III. EDITIONS OF BLAKE'S WRITING": ["Standard Editions", "Annotated Editions"],
+    "PART IV. BIOGRAPHIES": ["Standard Biographies", "Historic Biographies"],
+    "PART V. BIBLIOGRAPHIES": ["Standard Bibliographies"],
+    "PART VI. CATALOGUES": ["Standard Catalogues"],
+    "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT": [],
+    "PART VIII. SPECIFIC WORKS BY BLAKE": [],
+    "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED": [],
+    "PART X. APPENDICES": []
+  }
+}

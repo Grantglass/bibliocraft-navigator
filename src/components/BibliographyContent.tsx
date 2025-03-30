@@ -1,7 +1,6 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BibliographyEntry } from '../data/bibliographyData';
-import PdfUploader from './PdfUploader';
 
 interface BibliographyContentProps {
   entries: BibliographyEntry[];
@@ -17,8 +16,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   isLoading, 
   searchQuery,
   selectedCategory,
-  selectedSubheading,
-  onEntriesExtracted
+  selectedSubheading
 }) => {
   if (isLoading) {
     return (
@@ -43,9 +41,6 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
     }
   };
 
-  // Show the PDF loader when there are no entries and not searching
-  const showPdfLoader = entries.length === 0 && !searchQuery;
-
   // Determine if we're displaying introduction entries
   const isIntroduction = selectedCategory === "INTRODUCTION";
 
@@ -57,13 +52,6 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
           <p className="text-biblio-gray mt-2">No entries found for your search.</p>
         )}
       </div>
-
-      {showPdfLoader && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-biblio-navy mb-4">Load Bibliography Data</h2>
-          <PdfUploader onBibliographyExtracted={onEntriesExtracted || (() => {})} />
-        </div>
-      )}
 
       {entries.length > 0 ? (
         <div className="space-y-6">
@@ -92,7 +80,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
           ))}
         </div>
       ) : (
-        !searchQuery && !showPdfLoader && (
+        !searchQuery && (
           <div className="text-center p-8">
             <p className="text-biblio-gray">Select a category or search for entries to begin.</p>
           </div>

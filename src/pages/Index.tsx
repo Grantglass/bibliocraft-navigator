@@ -1,43 +1,12 @@
-import React, { useEffect, useState } from 'react';
+
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Info, Search, Download } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { BibliographyEntry } from '@/data/bibliographyData';
-import { useToast } from '@/hooks/use-toast';
-import PdfUploader from '@/components/PdfUploader';
+import { bibliographyEntries } from '@/data/bibliographyData';
 
 const Index = () => {
-  const [bibliographyLoaded, setBibliographyLoaded] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const preloadBibliography = async () => {
-      try {
-        const uploader = new PdfUploader({
-          onBibliographyExtracted: (entries) => {
-            setBibliographyLoaded(true);
-            toast({
-              title: "Bibliography Loaded",
-              description: `Successfully loaded ${entries.length} entries`,
-            });
-          }
-        });
-        
-        await uploader.loadPdfFromPublicFolder();
-      } catch (error) {
-        console.error("Error preloading bibliography:", error);
-        toast({
-          title: "Bibliography Loading Error",
-          description: "There was an issue loading the bibliography data. Please try again later.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    preloadBibliography();
-  }, [toast]);
-
   return (
     <div className="min-h-screen bg-biblio-lightBlue">
       <header className="bg-biblio-navy text-white py-6">
@@ -65,20 +34,11 @@ const Index = () => {
             <Alert className="my-6 border-biblio-navy">
               <AlertTitle className="text-biblio-navy">About This Bibliography</AlertTitle>
               <AlertDescription>
-                This bibliography contains thousands of entries documenting scholarship on William Blake's art, 
+                This bibliography contains {bibliographyEntries.length} entries documenting scholarship on William Blake's art, 
                 poetry, and influence. It represents one of the most comprehensive resources for Blake studies.
               </AlertDescription>
             </Alert>
           </section>
-
-          {!bibliographyLoaded && (
-            <Alert className="my-6 bg-biblio-lightBlue border-biblio-navy">
-              <AlertTitle className="text-biblio-navy">Loading Bibliography Data</AlertTitle>
-              <AlertDescription>
-                The bibliography data is being loaded. This may take a moment...
-              </AlertDescription>
-            </Alert>
-          )}
 
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-biblio-navy mb-4">Table of Contents</h2>
