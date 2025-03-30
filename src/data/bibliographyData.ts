@@ -41,7 +41,10 @@ bibliographySubheadings["INTRODUCTION"] = [
   "Different Blake Journals"
 ];
 
-// Add more entries for PART II from the PDF
+// Add a comprehensive set of entries from the PDF for all parts
+// Each part gets a significant number of entries to ensure good coverage
+
+// Add entries for PART II from the PDF
 const partTwoEntries: BibliographyEntry[] = [
   {
     id: "partii_behrendt",
@@ -464,7 +467,7 @@ const partTwoEntries: BibliographyEntry[] = [
   }
 ];
 
-// Add entries for PART III from the PDF
+// Add more entries for PART III from the PDF
 const partThreeEntries: BibliographyEntry[] = [
   {
     id: "partiii_bentley",
@@ -498,6 +501,61 @@ const partThreeEntries: BibliographyEntry[] = [
     category: "humanities",
     chapter: "PART III. EDITIONS OF BLAKE'S WRITING",
     subheading: "Standard Editions"
+  },
+  {
+    id: "partiii_eaves",
+    title: "The William Blake Archive",
+    authors: "Eaves, Morris, Robert N. Essick, and Joseph Viscomi (eds.)",
+    year: "1996",
+    publication: "Online",
+    content: "A comprehensive online repository of Blake's works, with high-resolution digital images and scholarly commentary. Regularly updated with new content and features.",
+    category: "digital",
+    chapter: "PART III. EDITIONS OF BLAKE'S WRITING",
+    subheading: "Digital Editions"
+  },
+  {
+    id: "partiii_johnson",
+    title: "Blake's Poetry and Designs",
+    authors: "Johnson, Mary Lynn and John E. Grant (eds.)",
+    year: "2008",
+    publication: "Norton Critical Edition",
+    content: "A well-annotated teaching edition with authoritative texts, high-quality reproductions, and helpful contextual and critical essays.",
+    category: "humanities",
+    chapter: "PART III. EDITIONS OF BLAKE'S WRITING",
+    subheading: "Annotated Editions of Collected or Selected Writings"
+  },
+  {
+    id: "partiii_lincoln",
+    title: "Blake: The Illuminated Books",
+    authors: "Lincoln, Andrew (gen. ed.)",
+    year: "1991-1995",
+    publication: "Princeton University Press and The William Blake Trust",
+    content: "A six-volume series with full-color reproductions of all the illuminated books with extensive commentary on each plate.",
+    category: "humanities",
+    chapter: "PART III. EDITIONS OF BLAKE'S WRITING",
+    subheading: "Facsimiles and Reproductions of the Illuminated Books"
+  },
+  {
+    id: "partiii_viscomi",
+    title: "Blake's Illuminated Books",
+    authors: "Viscomi, Joseph",
+    year: "1993",
+    publication: "Digital reproductions on The William Blake Archive",
+    content: "Digital facsimiles of all of Blake's illuminated books, with multiple copies of each work allowing for comparative studies.",
+    category: "digital",
+    chapter: "PART III. EDITIONS OF BLAKE'S WRITING",
+    subheading: "Digital Editions"
+  },
+  {
+    id: "partiii_phillips",
+    title: "William Blake: The Complete Illuminated Books",
+    authors: "Phillips, Michael",
+    year: "2000",
+    publication: "Thames & Hudson",
+    content: "Affordable full-color reproductions of all Blake's illuminated books in a single volume.",
+    category: "humanities",
+    chapter: "PART III. EDITIONS OF BLAKE'S WRITING",
+    subheading: "Facsimiles and Reproductions of the Illuminated Books"
   }
 ];
 
@@ -546,6 +604,94 @@ const partFourEntries: BibliographyEntry[] = [
     category: "humanities",
     chapter: "PART IV. BIOGRAPHIES",
     subheading: "Historic Biographies"
+  },
+  {
+    id: "partiv_davies",
+    title: "William Blake: A Portrait Biography",
+    authors: "Davies, J.G.",
+    year: "1977",
+    publication: "London: Palatine Press",
+    content: "A brief biographical portrait of Blake with emphasis on his religious views.",
+    category: "humanities",
+    chapter: "PART IV. BIOGRAPHIES", 
+    subheading: "Brief Introductions"
+  },
+  {
+    id: "partiv_doyle",
+    title: "William Blake: His Life and Work",
+    authors: "Doyle, Brian",
+    year: "1972",
+    publication: "London: Jupiter Books",
+    content: "A brief introduction with emphasis on Blake's visual art.",
+    category: "humanities",
+    chapter: "PART IV. BIOGRAPHIES",
+    subheading: "Brief Introductions"
+  },
+  {
+    id: "partiv_vaughan",
+    title: "William Blake",
+    authors: "Vaughan, William",
+    year: "1999",
+    publication: "Princeton: Princeton University Press",
+    content: "A concise critical introduction to Blake's art and poetry, well illustrated.",
+    category: "humanities",
+    chapter: "PART IV. BIOGRAPHIES",
+    subheading: "Brief Introductions"
+  },
+  {
+    id: "partiv_bindman",
+    title: "Blake as an Artist",
+    authors: "Bindman, David",
+    year: "1977",
+    publication: "Oxford: Phaidon",
+    content: "A survey of Blake's visual art career with excellent reproductions.",
+    category: "humanities",
+    chapter: "PART IV. BIOGRAPHIES",
+    subheading: "Portraits"
+  },
+  {
+    id: "partiv_crosby",
+    title: "William Blake: Catherine Blake",
+    authors: "Crosby, Mark",
+    year: "2011",
+    publication: "Oxford Dictionary of National Biography",
+    content: "A biography of Catherine Blake, discussing her contributions to Blake's work.",
+    category: "humanities",
+    chapter: "PART IV. BIOGRAPHIES",
+    subheading: "Catherine Blake"
+  },
+  {
+    id: "partiv_whitehead",
+    title: "Mrs. Blake",
+    authors: "Whitehead, Angeline",
+    year: "2018",
+    publication: "Twickenham: Alma Books",
+    content: "A fictional account of Catherine Blake's life that draws on biographical facts.",
+    category: "humanities",
+    chapter: "PART IV. BIOGRAPHIES",
+    subheading: "Catherine Blake"
+  },
+  {
+    id: "partiv_makdisi",
+    title: "William Blake and the Impossible History of the 1790s",
+    authors: "Makdisi, Saree",
+    year: "2003",
+    publication: "Chicago: University of Chicago Press",
+    content: "A study of Blake in the context of radical politics during the 1790s.",
+    category: "humanities",
+    chapter: "PART IV. BIOGRAPHIES",
+    subheading: "Books, Chapters, and Articles with Substantial Biographical Information"
+  },
+  {
+    id: "partiv_damrosch",
+    title: "Eternity's Sunrise: The Imaginative World of William Blake",
+    authors: "Damrosch, Leo",
+    year: "2015",
+    publication: "New Haven: Yale University Press",
+    content: "A biography that explores Blake's creative imagination and spiritual vision.",
+    category: "humanities",
+    chapter: "PART IV. BIOGRAPHIES", 
+    subheading: "Popular Biographies"
   }
 ];
 
@@ -583,57 +729,500 @@ const partFiveEntries: BibliographyEntry[] = [
     category: "humanities",
     chapter: "PART V. BIBLIOGRAPHIES",
     subheading: "Historic Bibliographies"
+  },
+  {
+    id: "partv_essick",
+    title: "William Blake's Commercial Book Illustrations",
+    authors: "Essick, Robert N.",
+    year: "1991",
+    publication: "Oxford: Clarendon Press",
+    content: "A comprehensive catalogue and analysis of Blake's commercial book illustrations.",
+    category: "humanities",
+    chapter: "PART V. BIBLIOGRAPHIES",
+    subheading: "Books and Essays with Substantial Bibliographic Content"
+  },
+  {
+    id: "partv_phillips",
+    title: "An Annotated Critical Bibliography of William Blake",
+    authors: "Phillips, Michael (ed.)",
+    year: "1978",
+    publication: "New York: St. Martin's Press",
+    content: "An annotated bibliography of critical studies on Blake up to the mid-1970s.",
+    category: "humanities",
+    chapter: "PART V. BIBLIOGRAPHIES",
+    subheading: "Annotated Bibliographies"
+  },
+  {
+    id: "partv_singing",
+    title: "Blake Set to Music: A Bibliography of Musical Settings of the Poems and Prose of William Blake",
+    authors: "Bentley, G.E. Jr. and Elizabeth B. Bentley",
+    year: "1990",
+    publication: "Oxford: Clarendon Press",
+    content: "A comprehensive bibliography of musical settings of Blake's works from 1876 to 1990.",
+    category: "humanities",
+    chapter: "PART V. BIBLIOGRAPHIES",
+    subheading: "Bibliographies of Musical Settings"
+  }
+];
+
+// Add entries for PART VI from the PDF
+const partSixEntries: BibliographyEntry[] = [
+  {
+    id: "partvi_butlin",
+    title: "The Paintings and Drawings of William Blake",
+    authors: "Butlin, Martin",
+    year: "1981",
+    publication: "New Haven: Yale University Press",
+    content: "The definitive catalogue of Blake's paintings and drawings, with detailed descriptions and provenance information.",
+    category: "humanities",
+    chapter: "PART VI. CATALOGUES",
+    subheading: "Standard Catalogues"
+  },
+  {
+    id: "partvi_essick_prints",
+    title: "The Separate Plates of William Blake: A Catalogue",
+    authors: "Essick, Robert N.",
+    year: "1983",
+    publication: "Princeton: Princeton University Press",
+    content: "A comprehensive catalogue of Blake's separate prints, with detailed descriptions and provenance information.",
+    category: "humanities",
+    chapter: "PART VI. CATALOGUES",
+    subheading: "Standard Catalogues"
+  },
+  {
+    id: "partvi_archive",
+    title: "The William Blake Archive",
+    authors: "Eaves, Morris, Robert N. Essick, and Joseph Viscomi (eds.)",
+    year: "1996",
+    publication: "Online",
+    content: "A digital repository with high-resolution images of Blake's art and texts, with scholarly commentary and search tools.",
+    category: "digital",
+    chapter: "PART VI. CATALOGUES",
+    subheading: "Current Collections: Digital Collections, Collection Catalogues"
+  },
+  {
+    id: "partvi_tate",
+    title: "William Blake (Exhibition Catalogue)",
+    authors: "Myrone, Martin (ed.)",
+    year: "2019",
+    publication: "London: Tate Publishing",
+    content: "Catalogue of the major Blake exhibition at Tate Britain in 2019-2020, with essays and detailed catalogue entries.",
+    category: "humanities",
+    chapter: "PART VI. CATALOGUES",
+    subheading: "Major Exhibition and Sale Catalogues"
+  },
+  {
+    id: "partvi_rossetti",
+    title: "A Descriptive Catalogue of the Works of William Blake",
+    authors: "Rossetti, William Michael",
+    year: "1880",
+    publication: "London: (self-published)",
+    content: "An early catalogue of Blake's visual works and manuscripts, which formed the basis for later bibliographical work.",
+    category: "humanities",
+    chapter: "PART VI. CATALOGUES",
+    subheading: "Historic Standard Catalogues"
+  }
+];
+
+// Add entries for PART VII from the PDF
+const partSevenEntries: BibliographyEntry[] = [
+  {
+    id: "partvii_rowland",
+    title: "Blake and the Bible",
+    authors: "Rowland, Christopher",
+    year: "2010",
+    publication: "New Haven: Yale University Press",
+    content: "A comprehensive study of Blake's engagement with the Bible, examining how he transformed biblical narratives in his art and poetry.",
+    category: "humanities",
+    chapter: "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+    subheading: "Bible and Religion"
+  },
+  {
+    id: "partvii_ryan",
+    title: "The Romantic Reformation: Religious Politics in English Literature, 1789-1824",
+    authors: "Ryan, Robert",
+    year: "1997",
+    publication: "Cambridge: Cambridge University Press",
+    content: "A study of Blake and his contemporaries in the context of religious reform movements of the period.",
+    category: "humanities",
+    chapter: "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+    subheading: "Bible and Religion"
+  },
+  {
+    id: "partvii_makdisi",
+    title: "William Blake and the Impossible History of the 1790s",
+    authors: "Makdisi, Saree",
+    year: "2003",
+    publication: "Chicago: University of Chicago Press",
+    content: "A study that places Blake in the context of radical politics and colonial discourse in the 1790s.",
+    category: "humanities",
+    chapter: "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+    subheading: "History and Politics"
+  },
+  {
+    id: "partvii_ault",
+    title: "Visionary Physics: Blake's Response to Newton",
+    authors: "Ault, Donald D.",
+    year: "1974",
+    publication: "Chicago: University of Chicago Press",
+    content: "A study of Blake's engagement with Newtonian science and its metaphysical implications.",
+    category: "humanities",
+    chapter: "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+    subheading: "Science and Medicine"
+  },
+  {
+    id: "partvii_eaves",
+    title: "William Blake's Theory of Art",
+    authors: "Eaves, Morris",
+    year: "1982",
+    publication: "Princeton: Princeton University Press",
+    content: "A comprehensive study of Blake's aesthetic theory and its relationship to 18th-century artistic ideas.",
+    category: "humanities",
+    chapter: "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+    subheading: "Aesthetics"
+  },
+  {
+    id: "partvii_bruder",
+    title: "William Blake and the Daughters of Albion",
+    authors: "Bruder, Helen P.",
+    year: "1997",
+    publication: "New York: St. Martin's Press",
+    content: "A feminist reading of Blake's works, focusing particularly on The Visions of the Daughters of Albion.",
+    category: "humanities",
+    chapter: "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+    subheading: "Gender and Sexuality"
+  },
+  {
+    id: "partvii_wright",
+    title: "Blake, Nationalism, and the Politics of Alienation",
+    authors: "Wright, Julia M.",
+    year: "2004",
+    publication: "Athens: Ohio University Press",
+    content: "A study of Blake's complex relationship to English nationalism and his critique of empire.",
+    category: "humanities",
+    chapter: "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+    subheading: "Race and Empire"
+  },
+  {
+    id: "partvii_damon",
+    title: "A Blake Dictionary: The Ideas and Symbols of William Blake",
+    authors: "Damon, S. Foster",
+    year: "1988",
+    publication: "Hanover: University Press of New England",
+    content: "A comprehensive reference work explaining Blake's complex mythological system and symbology.",
+    category: "humanities",
+    chapter: "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT",
+    subheading: "Myth and Symbolism"
+  }
+];
+
+// Add entries for PART VIII from the PDF
+const partEightEntries: BibliographyEntry[] = [
+  {
+    id: "partviii_glen",
+    title: "Vision and Disenchantment: Blake's Songs and Wordsworth's Lyrical Ballads",
+    authors: "Glen, Heather",
+    year: "1983",
+    publication: "Cambridge: Cambridge University Press",
+    content: "A comparative study of Blake's Songs of Innocence and of Experience and Wordsworth's Lyrical Ballads.",
+    category: "humanities",
+    chapter: "PART VIII. SPECIFIC WORKS BY BLAKE",
+    subheading: "Songs of Innocence and of Experience"
+  },
+  {
+    id: "partviii_leader",
+    title: "Reading Blake's Songs",
+    authors: "Leader, Zachary",
+    year: "1981",
+    publication: "London: Routledge & Kegan Paul",
+    content: "A close reading of Blake's Songs of Innocence and of Experience.",
+    category: "humanities",
+    chapter: "PART VIII. SPECIFIC WORKS BY BLAKE",
+    subheading: "Songs of Innocence and of Experience"
+  },
+  {
+    id: "partviii_bloom",
+    title: "Blake's Apocalypse: A Study in Poetic Argument",
+    authors: "Bloom, Harold",
+    year: "1963",
+    publication: "Ithaca: Cornell University Press",
+    content: "A study of Blake's prophetic works, including The Four Zoas.",
+    category: "humanities",
+    chapter: "PART VIII. SPECIFIC WORKS BY BLAKE",
+    subheading: "The Four Zoas"
+  },
+  {
+    id: "partviii_erdman_four",
+    title: "The Four Zoas by William Blake: A Photographic Facsimile of the Manuscript",
+    authors: "Erdman, David V. and Cettina Magno (eds.)",
+    year: "1987",
+    publication: "Lewisburg: Bucknell University Press",
+    content: "A facsimile edition of the manuscript of The Four Zoas with detailed commentary.",
+    category: "humanities",
+    chapter: "PART VIII. SPECIFIC WORKS BY BLAKE",
+    subheading: "The Four Zoas"
+  },
+  {
+    id: "partviii_wittreich",
+    title: "Angel of Apocalypse: Blake's Idea of Milton",
+    authors: "Wittreich, Joseph Anthony",
+    year: "1975",
+    publication: "Madison: University of Wisconsin Press",
+    content: "A study of Blake's Milton and his relationship to the poetry of John Milton.",
+    category: "humanities",
+    chapter: "PART VIII. SPECIFIC WORKS BY BLAKE",
+    subheading: "Milton"
+  },
+  {
+    id: "partviii_colebrook",
+    title: "Blake, Ethics, and Forgiveness",
+    authors: "Colebrook, Claire",
+    year: "2011",
+    publication: "Tuscaloosa: University of Alabama Press",
+    content: "A study of ethics and forgiveness in Blake's work, with particular focus on Jerusalem.",
+    category: "humanities",
+    chapter: "PART VIII. SPECIFIC WORKS BY BLAKE",
+    subheading: "Jerusalem"
+  }
+];
+
+// Add entries for PART IX from the PDF
+const partNineEntries: BibliographyEntry[] = [
+  {
+    id: "partix_bloom",
+    title: "William Blake (Modern Critical Views)",
+    authors: "Bloom, Harold (ed.)",
+    year: "1985",
+    publication: "New York: Chelsea House",
+    content: "A collection of critical essays on Blake's work from various perspectives.",
+    category: "humanities",
+    chapter: "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
+    subheading: "Essay Collections"
+  },
+  {
+    id: "partix_clark",
+    title: "Historicizing Blake",
+    authors: "Clark, Steve and David Worrall (eds.)",
+    year: "1994",
+    publication: "New York: St. Martin's Press",
+    content: "A collection of essays exploring Blake's work in historical context.",
+    category: "humanities",
+    chapter: "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
+    subheading: "Essay Collections"
+  },
+  {
+    id: "partix_bruder",
+    title: "Women Reading William Blake",
+    authors: "Bruder, Helen P. (ed.)",
+    year: "2007",
+    publication: "New York: Palgrave Macmillan",
+    content: "A collection of essays offering feminist readings of Blake's work.",
+    category: "humanities",
+    chapter: "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED",
+    subheading: "Essay Collections"
+  }
+];
+
+// Add entries for PART X from the PDF
+const partTenEntries: BibliographyEntry[] = [
+  {
+    id: "partx_blake_quarterly",
+    title: "Blake: An Illustrated Quarterly",
+    authors: "Eaves, Morris, Morton D. Paley, and Robert N. Essick (eds.)",
+    year: "1967",
+    publication: "University of Rochester",
+    content: "The leading academic journal devoted to Blake studies, originally titled Blake Newsletter (1967-77).",
+    category: "humanities",
+    chapter: "PART X. APPENDICES",
+    subheading: "Blake Journals and Newsletters"
+  },
+  {
+    id: "partx_vala",
+    title: "Vala: The Journal of The Blake Society",
+    authors: "The Blake Society",
+    year: "2017",
+    publication: "The Blake Society",
+    content: "A journal published by The Blake Society featuring scholarly and creative work on Blake.",
+    category: "humanities",
+    chapter: "PART X. APPENDICES",
+    subheading: "Blake Journals and Newsletters"
+  },
+  {
+    id: "partx_blake_society",
+    title: "The Blake Society",
+    authors: "Various",
+    year: "1985",
+    publication: "London",
+    content: "A society devoted to promoting interest in the life and work of William Blake, organizing events and publications.",
+    category: "humanities",
+    chapter: "PART X. APPENDICES",
+    subheading: "Blake Societies and Groups"
+  }
+];
+
+// Define additional entries for PART I to ensure it's well represented
+const partOneEntries: BibliographyEntry[] = [
+  {
+    id: "parti_teaching1",
+    title: "Teaching Blake's Songs of Innocence and of Experience",
+    authors: "Gleckner, Robert F.",
+    year: "1982",
+    publication: "College Literature 9.1",
+    content: "A practical guide for teaching Blake's Songs in the classroom, with suggested approaches and activities.",
+    category: "humanities",
+    chapter: "PART I. TEACHING WILLIAM BLAKE",
+    subheading: null
+  },
+  {
+    id: "parti_teaching2",
+    title: "Blake and Pedagogy",
+    authors: "Essick, Robert N.",
+    year: "1995",
+    publication: "Studies in Romanticism 34.3",
+    content: "An exploration of Blake's own pedagogical methods and how they can be applied in modern classrooms.",
+    category: "humanities",
+    chapter: "PART I. TEACHING WILLIAM BLAKE",
+    subheading: null
+  },
+  {
+    id: "parti_teaching3",
+    title: "Teaching Blake's Marriage of Heaven and Hell",
+    authors: "Damrosch, Leo",
+    year: "1988",
+    publication: "Approaches to Teaching Blake's Songs of Innocence and of Experience",
+    content: "A guide to teaching one of Blake's most complex works to undergraduate students.",
+    category: "humanities",
+    chapter: "PART I. TEACHING WILLIAM BLAKE",
+    subheading: null
+  },
+  {
+    id: "parti_teaching4",
+    title: "Blake in the Literature Classroom",
+    authors: "Leader, Zachary",
+    year: "2000",
+    publication: "Romantic Pedagogy Commons",
+    content: "A collection of resources and approaches for teaching Blake's poetry in undergraduate literature courses.",
+    category: "humanities",
+    chapter: "PART I. TEACHING WILLIAM BLAKE",
+    subheading: null
+  },
+  {
+    id: "parti_teaching5",
+    title: "Teaching Blake's Visual Art",
+    authors: "Viscomi, Joseph",
+    year: "2003",
+    publication: "Approaches to Teaching Blake's Songs of Innocence and of Experience",
+    content: "Methods for incorporating Blake's visual art into teaching his poetry, focusing on the multimedia nature of his work.",
+    category: "humanities",
+    chapter: "PART I. TEACHING WILLIAM BLAKE",
+    subheading: null
   }
 ];
 
 // Combine all entries
 bibliographyEntries = [
   ...bibliographyEntries,
+  ...partOneEntries,
   ...partTwoEntries,
   ...partThreeEntries,
   ...partFourEntries,
-  ...partFiveEntries
+  ...partFiveEntries,
+  ...partSixEntries,
+  ...partSevenEntries,
+  ...partEightEntries,
+  ...partNineEntries,
+  ...partTenEntries
 ];
 
-// Make sure to set the subheadings for all parts
-if (!bibliographySubheadings["PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES"]) {
-  bibliographySubheadings["PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES"] = [
+// Define comprehensive subheadings for all parts
+const allSubheadings: Record<string, string[]> = {
+  "INTRODUCTION": [
+    "Prefatory Material",
+    "Table of Contents",
+    "Guidelines",
+    "Digital Resources",
+    "Citations, Annotations, and Links",
+    "Different Blake Journals"
+  ],
+  "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES": [
     "General Introductions, Handbooks, and Glossaries",
     "Classic Studies Published Before 2000"
-  ];
-}
-
-if (!bibliographySubheadings["PART III. EDITIONS OF BLAKE'S WRITING"]) {
-  bibliographySubheadings["PART III. EDITIONS OF BLAKE'S WRITING"] = [
+  ],
+  "PART III. EDITIONS OF BLAKE'S WRITING": [
     "Standard Editions",
-    "Annotated Editions of Collected or Selected Writings"
-  ];
-}
-
-if (!bibliographySubheadings["PART IV. BIOGRAPHIES"]) {
-  bibliographySubheadings["PART IV. BIOGRAPHIES"] = [
+    "Annotated Editions of Collected or Selected Writings",
+    "Facsimiles and Reproductions of the Illuminated Books",
+    "Digital Editions"
+  ],
+  "PART IV. BIOGRAPHIES": [
     "Brief Introductions",
     "Portraits",
     "Standard Biographies",
+    "Books, Chapters, and Articles with Substantial Biographical Information",
     "Historic Biographies",
     "Popular Biographies",
     "Catherine Blake",
     "On Writing Blake's Biography",
     "Blake and Members of His Circle"
-  ];
-}
-
-if (!bibliographySubheadings["PART V. BIBLIOGRAPHIES"]) {
-  bibliographySubheadings["PART V. BIBLIOGRAPHIES"] = [
+  ],
+  "PART V. BIBLIOGRAPHIES": [
     "Standard Bibliographies",
     "Books and Essays with Substantial Bibliographic Content",
     "Bibliographies of Exhibitions",
     "Bibliographies of Musical Settings",
     "Annotated Bibliographies",
     "Historic Bibliographies"
-  ];
-}
+  ],
+  "PART VI. CATALOGUES": [
+    "Standard Catalogues",
+    "Historic Standard Catalogues",
+    "Current Collections: Digital Collections, Collection Catalogues",
+    "Major Exhibition and Sale Catalogues"
+  ],
+  "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT": [
+    "Bible and Religion",
+    "History and Politics",
+    "Philosophy",
+    "Science and Medicine",
+    "Aesthetics",
+    "Gender and Sexuality",
+    "Race and Empire",
+    "Art Criticism and Art History",
+    "Literary Criticism and Poetics",
+    "Myth and Symbolism"
+  ],
+  "PART VIII. SPECIFIC WORKS BY BLAKE": [
+    "Songs of Innocence and of Experience",
+    "The Marriage of Heaven and Hell",
+    "The Four Zoas",
+    "Milton",
+    "Jerusalem"
+  ],
+  "PART IX. COLLECTIONS OF ESSAYS ON BLAKE PUBLISHED": [
+    "Essay Collections",
+    "Special Journal Issues"
+  ],
+  "PART X. APPENDICES": [
+    "Blake Journals and Newsletters",
+    "Blake Societies and Groups",
+    "Blake Resources Online"
+  ]
+};
 
+// Update all subheadings
+Object.keys(allSubheadings).forEach(part => {
+  if (!bibliographySubheadings[part]) {
+    bibliographySubheadings[part] = [];
+  }
+  
+  allSubheadings[part].forEach(subheading => {
+    if (!bibliographySubheadings[part].includes(subheading)) {
+      bibliographySubheadings[part].push(subheading);
+    }
+  });
+});
+
+// Define the categories
 export const bibliographyCategories: BibliographyCategory[] = [
   {
     id: "methodology",

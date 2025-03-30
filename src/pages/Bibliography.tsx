@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import BibliographySidebar from '@/components/BibliographySidebar';
 import BibliographyContent from '@/components/BibliographyContent';
+import PdfUploader from '@/components/PdfUploader';
 import { 
   getAllEntries, 
   searchEntries,
@@ -9,9 +11,11 @@ import {
   bibliographyEntries,
   bibliographySubheadings
 } from '@/data/bibliographyData';
-import { Menu, ArrowLeft } from 'lucide-react';
+import { Menu, ArrowLeft, BookOpen, Filter } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const Bibliography = () => {
   const location = useLocation();
@@ -28,6 +32,7 @@ const Bibliography = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chapters, setChapters] = useState<string[]>([]);
   const [subheadings, setSubheadings] = useState<Record<string, string[]>>(bibliographySubheadings);
+  const [showPdfUploader, setShowPdfUploader] = useState(false);
   const { toast } = useToast();
   
   // For responsiveness
@@ -253,20 +258,56 @@ const Bibliography = () => {
   };
 
   const handleBibliographyExtracted = (extractedEntries: BibliographyEntry[], extractedSubheadings?: Record<string, string[]>) => {
-    // Only use if we don't already have entries
-    if (allEntries.length === 0) {
+    if (extractedEntries.length > 0) {
+      // Categorize the new entries
       const categorizedEntries = categorizeEntries(extractedEntries);
-      setAllEntries(categorizedEntries);
-      setEntries(categorizedEntries);
       
+      // Combine with existing entries, avoiding duplicates
+      const combinedEntries = [...bibliographyEntries];
+      
+      // Add only new entries that don't have matching IDs
+      const existingIds = new Set(bibliographyEntries.map(entry => entry.id));
+      
+      categorizedEntries.forEach(entry => {
+        if (!existingIds.has(entry.id)) {
+          combinedEntries.push(entry);
+          existingIds.add(entry.id);
+        }
+      });
+      
+      setAllEntries(combinedEntries);
+      
+      // Update current view if no category is selected
+      if (!selectedCategory) {
+        setEntries(combinedEntries);
+      }
+      
+      // Merge subheadings
       if (extractedSubheadings) {
-        setSubheadings(extractedSubheadings);
+        const mergedSubheadings = { ...subheadings };
+        
+        Object.keys(extractedSubheadings).forEach(chapter => {
+          if (!mergedSubheadings[chapter]) {
+            mergedSubheadings[chapter] = [];
+          }
+          
+          extractedSubheadings[chapter].forEach(subheading => {
+            if (!mergedSubheadings[chapter].includes(subheading)) {
+              mergedSubheadings[chapter].push(subheading);
+            }
+          });
+        });
+        
+        setSubheadings(mergedSubheadings);
       }
       
       toast({
-        title: "Bibliography Imported",
-        description: `Successfully imported ${categorizedEntries.length} entries.`,
+        title: "Bibliography Processed",
+        description: `Successfully processed ${categorizedEntries.length} entries from the PDF.`,
       });
+      
+      // Hide the uploader after processing
+      setShowPdfUploader(false);
     }
   };
 
@@ -278,14 +319,24 @@ const Bibliography = () => {
           <Link to="/" className="text-white hover:text-biblio-lightBlue">
             <ArrowLeft size={20} />
           </Link>
-          <h1 className="text-lg font-bold">Bibliography Navigator</h1>
+          <h1 className="text-lg font-bold">Blake Bibliography Navigator</h1>
         </div>
-        <button 
-          className="p-2 rounded-md hover:bg-sidebar-accent md:hidden"
-          onClick={toggleSidebar}
-        >
-          <Menu size={24} />
-        </button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-white hover:text-biblio-lightBlue p-2"
+            onClick={() => setShowPdfUploader(!showPdfUploader)}
+          >
+            <BookOpen size={20} />
+          </Button>
+          <button 
+            className="p-2 rounded-md hover:bg-sidebar-accent md:hidden"
+            onClick={toggleSidebar}
+          >
+            <Menu size={24} />
+          </button>
+        </div>
       </div>
       
       <div className="flex flex-1 overflow-hidden">
@@ -301,6 +352,13 @@ const Bibliography = () => {
         />
         
         <div className="flex-1 overflow-auto transition-all duration-300 ease-in-out">
+          {showPdfUploader && (
+            <Card className="max-w-4xl mx-auto p-6 bg-white shadow-sm rounded-md mt-6 mx-4 md:mx-auto">
+              <h2 className="text-xl font-bold mb-4">Extract More Entries from PDF</h2>
+              <PdfUploader onBibliographyExtracted={handleBibliographyExtracted} />
+            </Card>
+          )}
+          
           <div className="max-w-4xl mx-auto p-6 bg-white shadow-sm rounded-md my-6 mx-4 md:mx-auto">
             <BibliographyContent 
               entries={entries} 
@@ -310,6 +368,21 @@ const Bibliography = () => {
               selectedSubheading={selectedSubheading}
               onEntriesExtracted={handleBibliographyExtracted}
             />
+            
+            {entries.length === 0 && !isLoading && !searchQuery && (
+              <div className="mt-8 text-center">
+                <Button 
+                  onClick={() => setShowPdfUploader(true)}
+                  className="flex items-center gap-2"
+                >
+                  <BookOpen size={16} />
+                  Process Bibliography PDF
+                </Button>
+                <p className="text-sm text-gray-500 mt-2">
+                  Click to extract more entries from the Blake bibliography PDF.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

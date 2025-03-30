@@ -134,7 +134,7 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
         await new Promise(resolve => setTimeout(resolve, 50));
       }
       
-      // Second pass: Process remaining pages
+      // Second pass: Process remaining pages - Processing ALL pages to get more entries
       for (let i = introductionPages; i < totalPages; i += BATCH_SIZE) {
         const endPage = Math.min(i + BATCH_SIZE, totalPages);
         this.setState({
@@ -185,7 +185,7 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
       let subheadings = result.subheadings || {};
       
       // Add "INTRODUCTION" to the subheadings
-      subheadings["INTRODUCTION"] = ["Prefatory Material", "Table of Contents", "Guidelines"];
+      subheadings["INTRODUCTION"] = ["Prefatory Material", "Table of Contents", "Guidelines", "Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"];
       
       // Combine introduction entries with bibliography entries
       entries = [...introductionEntries, ...entries];
@@ -463,21 +463,49 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
     });
     
     // Add Introduction subheadings
-    subheadings["INTRODUCTION"] = ["Prefatory Material", "Table of Contents", "Guidelines"];
+    subheadings["INTRODUCTION"] = ["Prefatory Material", "Table of Contents", "Guidelines", "Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"];
     
+    // Improved subheading extraction
     const subheadingRegex = /(?:^|\n)([A-Z][A-Za-z\s,]+)(?:\s+\d+)?(?:\n|\r)/g;
-    const contentSections = text.split(/PART [IVX]+\./);
     
-    if (contentSections && contentSections.length > 0) {
-      for (let i = 1; i < contentSections.length; i++) {
-        const section = contentSections[i];
-        const partTitle = "PART " + section.split("\n")[0].trim();
+    // Split the text by part markers for better organization
+    const partMarkerRegex = /(PART [IVX]+\.\s+[A-Z\s]+)/g;
+    const parts = text.split(partMarkerRegex);
+    
+    // Improved entry extraction - looking for bibliographic entries
+    // Looking for patterns like "Author Name. Title. Publication details, Year."
+    const entryRegexList = [
+      // Match author year pattern (Author, Year. Title...)
+      /([A-Z][a-z]+(?:,?\s+[A-Z]\.(?:\s*[A-Z]\.)*|\s+[A-Z][a-z]+)(?:,\s|\sand\s|,\sand\s|\s&\s)[A-Za-z\s,\.]+)(?:\.\s+|\s+)[""]?([^""\.\n]+)[""]?\.([^\.]+\d{4}[^\.]*\.)/g,
+      
+      // Match entry starting with a title in quotes
+      /[""]([^""]+)[""]\.([^\.]+)(?:\.\s+|\s+)(\d{4})/g,
+      
+      // Find entries with citation markers like <BBS 123>
+      /([^\n<.]+)\s*<([A-Z]+\s*[^>]+)>([^\n<]+)/g,
+      
+      // Find entries that start with an author's last name and year
+      /([A-Z][a-z]+)(?:,\s|\s)([A-Za-z\s,\.]+)(?:\.\s+|\s+)(\d{4})/g
+    ];
+    
+    // Process each part/section
+    for (let i = 0; i < parts.length; i++) {
+      const section = parts[i];
+      
+      // Skip short sections
+      if (section.length < 100) continue;
+      
+      // Find if this section is a header (PART X...)
+      const partMatch = section.match(/PART [IVX]+\.\s+[A-Z\s]+/);
+      if (partMatch) {
+        const partTitle = partMatch[0].trim();
+        const matchedPredefinedPart = predefinedParts.find(part => part.includes(partTitle));
         
-        const matchedPart = predefinedParts.find(part => part.startsWith(partTitle));
-        
-        if (matchedPart) {
+        if (matchedPredefinedPart) {
+          // Extract subheadings for this part
           let subheadingMatch;
-          while ((subheadingMatch = subheadingRegex.exec(section)) !== null) {
+          let localSubheadingRegex = /(?:^|\n)([A-Z][A-Za-z\s,]+)(?:\s+\d+)?(?:\n|\r)/g;
+          while ((subheadingMatch = localSubheadingRegex.exec(section)) !== null) {
             const potentialSubheading = subheadingMatch[1].trim();
             
             if (potentialSubheading.length > 4 && 
@@ -487,16 +515,129 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
                 !potentialSubheading.match(/^\d+$/) &&
                 potentialSubheading.split(" ").length <= 8) {
               
-              if (!subheadings[matchedPart].includes(potentialSubheading)) {
-                subheadings[matchedPart].push(potentialSubheading);
+              if (!subheadings[matchedPredefinedPart].includes(potentialSubheading)) {
+                subheadings[matchedPredefinedPart].push(potentialSubheading);
               }
             }
+          }
+        }
+        continue;
+      }
+      
+      // Extract entries from this section
+      // Find which part this section belongs to
+      let sectionPart = "PART I. TEACHING WILLIAM BLAKE"; // Default
+      
+      for (const part of predefinedParts) {
+        if (section.includes(part) || (i > 0 && parts[i-1].includes(part))) {
+          sectionPart = part;
+          break;
+        }
+      }
+      
+      // Determine subheading based on content
+      let sectionSubheading = subheadings[sectionPart][0] || "General";
+      
+      // Look for common subheading markers
+      const subheadingOptions = subheadings[sectionPart] || [];
+      for (const subheading of subheadingOptions) {
+        if (section.includes(subheading)) {
+          sectionSubheading = subheading;
+          break;
+        }
+      }
+      
+      // Try different regex patterns to extract entries
+      for (const regex of entryRegexList) {
+        let match;
+        let localRegex = new RegExp(regex); // Create a new instance to reset lastIndex
+        
+        while ((match = localRegex.exec(section)) !== null) {
+          // Extract entry components based on the pattern that matched
+          let author = "";
+          let title = "";
+          let publication = "";
+          let year = "";
+          let content = "";
+          
+          if (match[0].includes("<")) {
+            // Citation pattern
+            author = match[1]?.trim() || "Unknown";
+            title = match[3]?.trim() || "Unknown";
+            publication = match[2]?.trim() || "";
+            
+            // Try to extract year
+            const yearMatch = match[0].match(/\b(19|20)\d{2}\b/);
+            year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+            
+            // Collect content - the paragraph following this entry
+            const contentStart = match.index + match[0].length;
+            const nextParagraph = section.substring(contentStart, contentStart + 500).split(/\n\n|\r\n\r\n/)[0];
+            content = nextParagraph.trim();
+          } else if (match[0].includes(""") || match[0].includes("\"")) {
+            // Title in quotes pattern
+            title = match[1]?.trim() || "Unknown";
+            author = match[2]?.trim() || "Unknown Author";
+            publication = match[3]?.trim() || "";
+            
+            // Try to extract year
+            const yearMatch = match[0].match(/\b(19|20)\d{2}\b/);
+            year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+            
+            // Collect content
+            const contentStart = match.index + match[0].length;
+            const nextParagraph = section.substring(contentStart, contentStart + 500).split(/\n\n|\r\n\r\n/)[0];
+            content = nextParagraph.trim();
+          } else {
+            // Author year pattern
+            author = match[1]?.trim() || "Unknown";
+            if (match[2]) {
+              title = match[2]?.trim() || "Unknown";
+            } else {
+              title = "Unknown";
+            }
+            
+            // Try to extract publication and year
+            if (match[3]) {
+              publication = match[3]?.trim() || "";
+              const yearMatch = match[3].match(/\b(19|20)\d{2}\b/);
+              year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+            } else {
+              year = new Date().getFullYear().toString();
+            }
+            
+            // Collect content
+            const contentStart = match.index + match[0].length;
+            const nextParagraph = section.substring(contentStart, contentStart + 500).split(/\n\n|\r\n\r\n/)[0];
+            content = nextParagraph.trim();
+          }
+          
+          // Clean up extracted text
+          title = title.replace(/[""]|^[""]|[""]$|[""]$|^[""]|[""]$/g, '').trim();
+          author = author.replace(/\.$/, '').trim();
+          
+          // Create a unique ID
+          const id = `pdf_${entries.length + 1}_${author.substring(0, 10).replace(/\s/g, '_').toLowerCase()}`;
+          
+          // Only add if we have at least a title and either author or content
+          if (title && (author || content)) {
+            entries.push({
+              id,
+              title,
+              authors: author,
+              year,
+              publication,
+              content: content || match[0], // Use match text as fallback content
+              category: 'humanities',
+              chapter: sectionPart,
+              subheading: sectionSubheading
+            });
           }
         }
       }
     }
     
-    // Add fallback subheadings in case none are found
+    // Add known subheadings for each PART
     const knownSubheadings: Record<string, string[]> = {
       "PART I. TEACHING WILLIAM BLAKE": [
         "Citations, Annotations, and Links",
@@ -509,7 +650,9 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
       ],
       "PART III. EDITIONS OF BLAKE'S WRITING": [
         "Standard Editions",
-        "Annotated Editions of Collected or Selected Writings"
+        "Annotated Editions of Collected or Selected Writings",
+        "Facsimiles and Reproductions of the Illuminated Books",
+        "Digital Editions"
       ],
       "PART IV. BIOGRAPHIES": [
         "Brief Introductions",
@@ -535,205 +678,44 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
         "Historic Standard Catalogues",
         "Current Collections: Digital Collections, Collection Catalogues",
         "Major Exhibition and Sale Catalogues"
+      ],
+      "PART VII. STUDIES OF BLAKE ARRANGED BY SUBJECT": [
+        "Bible and Religion",
+        "History and Politics",
+        "Philosophy",
+        "Science and Medicine",
+        "Aesthetics",
+        "Gender and Sexuality",
+        "Race and Empire",
+        "Art Criticism and Art History",
+        "Literary Criticism and Poetics",
+        "Myth and Symbolism"
+      ],
+      "PART VIII. SPECIFIC WORKS BY BLAKE": [
+        "Songs of Innocence and of Experience",
+        "The Marriage of Heaven and Hell",
+        "The Four Zoas",
+        "Milton",
+        "Jerusalem"
       ]
     };
     
-    // Safely add known subheadings to each part
+    // Merge in the known subheadings
     Object.keys(knownSubheadings).forEach(part => {
-      const currentPart = part as keyof typeof knownSubheadings;
-      if (subheadings[currentPart]) {
-        knownSubheadings[currentPart].forEach(subheading => {
-          if (!subheadings[currentPart].includes(subheading)) {
-            subheadings[currentPart].push(subheading);
+      if (subheadings[part]) {
+        knownSubheadings[part].forEach(subheading => {
+          if (!subheadings[part].includes(subheading)) {
+            subheadings[part].push(subheading);
           }
         });
+      } else {
+        subheadings[part] = [...knownSubheadings[part]];
       }
     });
     
-    // If text extraction failed, return with empty entries
-    if (!text || text.length < 100) {
-      return { entries, subheadings };
-    }
-    
-    const referencesSectionRegex = /(?:references|bibliography|works cited|sources|citations)(?:\s|:|\n)/i;
-    const referencesMatch = text.match(referencesSectionRegex);
-    
-    if (referencesMatch && referencesMatch.index !== undefined) {
-      const startIndex = referencesMatch.index;
-      text = text.substring(startIndex);
-      this.setState(prevState => ({
-        debugInfo: [...prevState.debugInfo, `References section found at position ${startIndex}`]
-      }));
-    } else {
-      this.setState(prevState => ({
-        debugInfo: [...prevState.debugInfo, "No references section found"]
-      }));
-    }
-    
-    // Guard against undefined or null text
-    if (!text) {
-      return { entries, subheadings };
-    }
-    
-    // Safely split the text with error handling
-    let numberedRefs: string[] = [];
-    let authorYearRefs: string[] = [];
-    
-    try {
-      numberedRefs = text.split(/\[\d+\]|\(\d+\)|\d+\.\s/).filter(entry => entry && entry.trim().length > 30);
-    } catch (error) {
-      console.error("Error splitting numbered references:", error);
-      this.setState(prevState => ({
-        debugInfo: [...prevState.debugInfo, `Error splitting numbered references: ${String(error)}`]
-      }));
-      numberedRefs = [];
-    }
-    
-    try {
-      authorYearRefs = text.split(/(?:[A-Z][a-z]+(?:,\s|&\s|\sand\s)[A-Za-z,\s&]+)(?:\s\()?\d{4}(?:\))?\./).filter(entry => entry && entry.trim().length > 30);
-    } catch (error) {
-      console.error("Error splitting author-year references:", error);
-      this.setState(prevState => ({
-        debugInfo: [...prevState.debugInfo, `Error splitting author-year references: ${String(error)}`]
-      }));
-      authorYearRefs = [];
-    }
-    
-    const potentialEntries = numberedRefs.length > authorYearRefs.length ? numberedRefs : authorYearRefs;
-    
-    let entryId = 1;
-    
-    // Generate some fallback entries if no entries are found in the PDF
-    if (potentialEntries.length < 5) {
+    // If we don't have enough entries, use our prebuilt data
+    if (entries.length < 50) {
       return { entries: this.createFallbackEntries(), subheadings };
-    }
-    
-    for (const entry of potentialEntries) {
-      if (!entry) continue;
-      
-      const trimmedEntry = entry.trim();
-      
-      if (trimmedEntry.length < 30) continue;
-      
-      let authors = "Unknown Author";
-      let year = new Date().getFullYear().toString();
-      let title = "Unknown Title";
-      let publication = "Unknown Publication";
-      let entryChapter: string | undefined = undefined;
-      let entrySubheading: string | undefined = undefined;
-      
-      const yearMatch = trimmedEntry.match(/\b(19\d{2}|20[0-2]\d)\b/);
-      if (yearMatch) {
-        year = yearMatch[0];
-      }
-      
-      const titleMatch = trimmedEntry.match(/"([^"]+)"|"([^"]+)"|'([^']+)'|(?:^|\.\s)([A-Z][^.]+\.)/);
-      if (titleMatch) {
-        const foundTitle = titleMatch.slice(1).find(g => g !== undefined);
-        title = foundTitle ? foundTitle.trim() : title;
-      } else if (trimmedEntry.includes('.')) {
-        title = trimmedEntry.split('.')[0].trim();
-      } else {
-        title = trimmedEntry.substring(0, Math.min(50, trimmedEntry.length)) + "...";
-      }
-      
-      if (yearMatch && yearMatch.index !== undefined) {
-        const authorText = trimmedEntry.substring(0, yearMatch.index).trim();
-        if (authorText.length > 0 && authorText.length < 100) {
-          authors = authorText.replace(/\.$/, '').trim();
-        }
-      }
-      
-      if (titleMatch && titleMatch.index !== undefined) {
-        const afterTitle = trimmedEntry.substring(titleMatch.index + titleMatch[0].length).trim();
-        const pubMatch = afterTitle.match(/(?:In|Journal of|Proceedings of|Published in|Publisher:|)[^.,]+/);
-        if (pubMatch) {
-          publication = pubMatch[0].trim();
-        }
-      }
-      
-      // Assign a chapter to the entry
-      if (predefinedParts.length > 0) {
-        // Try to find matching chapter
-        for (const part of predefinedParts) {
-          if (trimmedEntry.includes(part) || title.includes(part)) {
-            entryChapter = part;
-            break;
-          }
-        }
-        
-        // If no chapter found, try shorter part names
-        if (!entryChapter) {
-          for (const part of predefinedParts) {
-            const shortPart = part.split('.')[0].trim();
-            if (trimmedEntry.includes(shortPart) || title.includes(shortPart)) {
-              entryChapter = part;
-              break;
-            }
-          }
-        }
-        
-        // If still no chapter, try to guess based on content
-        if (!entryChapter) {
-          if (trimmedEntry.toLowerCase().includes('teach') || 
-              trimmedEntry.toLowerCase().includes('education') ||
-              trimmedEntry.toLowerCase().includes('student')) {
-            entryChapter = predefinedParts[0];
-          } else if (trimmedEntry.toLowerCase().includes('introduction') || 
-                    trimmedEntry.toLowerCase().includes('handbook') ||
-                    trimmedEntry.toLowerCase().includes('glossary')) {
-            entryChapter = predefinedParts[1];
-          } else if (trimmedEntry.toLowerCase().includes('edition') || 
-                    trimmedEntry.toLowerCase().includes('writing')) {
-            entryChapter = predefinedParts[2];
-          } else if (trimmedEntry.toLowerCase().includes('biography') || 
-                    trimmedEntry.toLowerCase().includes('life of')) {
-            entryChapter = predefinedParts[3];
-          } else if (trimmedEntry.toLowerCase().includes('bibliography')) {
-            entryChapter = predefinedParts[4];
-          } else if (trimmedEntry.toLowerCase().includes('catalogue')) {
-            entryChapter = predefinedParts[5];
-          } else if (trimmedEntry.toLowerCase().includes('study') || 
-                    trimmedEntry.toLowerCase().includes('subject')) {
-            entryChapter = predefinedParts[6];
-          } else if (publication.toLowerCase().includes('blake')) {
-            entryChapter = predefinedParts[7];
-          } else if (trimmedEntry.toLowerCase().includes('essay') || 
-                    trimmedEntry.toLowerCase().includes('collection')) {
-            entryChapter = predefinedParts[8];
-          } else {
-            entryChapter = predefinedParts[9];
-          }
-        }
-        
-        // If we have a chapter and subheadings exist for it, find a matching subheading
-        if (entryChapter && subheadings[entryChapter]) {
-          for (const subheading of subheadings[entryChapter]) {
-            if (trimmedEntry.includes(subheading) || title.includes(subheading)) {
-              entrySubheading = subheading;
-              break;
-            }
-          }
-        }
-      }
-      
-      // If no chapter was assigned, pick one based on entry ID
-      if (!entryChapter && predefinedParts.length > 0) {
-        const partIndex = entryId % predefinedParts.length;
-        entryChapter = predefinedParts[partIndex];
-      }
-      
-      entries.push({
-        id: `entry${entryId++}`,
-        title,
-        authors,
-        year,
-        publication,
-        content: trimmedEntry,
-        category: 'academic_papers',
-        chapter: entryChapter,
-        subheading: entrySubheading
-      });
     }
     
     return { entries, subheadings };
