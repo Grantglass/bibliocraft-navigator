@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Button } from '@/components/ui/button';
-import { Upload, FileText, AlertCircle } from 'lucide-react';
+import { FileText, AlertCircle, BookOpen } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { BibliographyEntry } from '@/data/bibliographyData';
 import { Progress } from '@/components/ui/progress';
@@ -10,128 +10,119 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 // Set worker source path
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
+// Path to the PDF file in the public directory
+const PDF_FILE_PATH = '/blake_bibliography.pdf';
+
 interface PdfUploaderProps {
   onBibliographyExtracted: (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => void;
 }
 
 const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [processingInfo, setProcessingInfo] = useState('');
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const { toast } = useToast();
   
-  const processPdf = async (file: File) => {
-    setIsUploading(true);
-    setUploadProgress(5);
-    setProcessingInfo('Initializing PDF processing...');
-    setDebugInfo([`Starting to process file: ${file.name} (${Math.round(file.size / 1024 / 1024)}MB)`]);
+  // Automatically load the PDF when the component mounts
+  useEffect(() => {
+    loadPdfFromPublicFolder();
+  }, []);
+  
+  const loadPdfFromPublicFolder = async () => {
+    setIsLoading(true);
+    setProgress(5);
+    setProcessingInfo('Loading bibliography from repository...');
+    setDebugInfo([`Starting to process file: ${PDF_FILE_PATH}`]);
     
     try {
-      const fileReader = new FileReader();
+      setProcessingInfo('Preparing PDF document...');
+      setProgress(10);
       
-      fileReader.onload = async (event) => {
-        if (!event.target?.result) {
-          throw new Error('Failed to read file');
+      // Load the PDF from the public folder
+      const loadingTask = pdfjsLib.getDocument({
+        url: PDF_FILE_PATH,
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+        cMapPacked: true,
+        disableFontFace: true,
+      });
+      
+      loadingTask.onProgress = (progressData) => {
+        if (progressData.total > 0) {
+          const percentage = Math.round((progressData.loaded / progressData.total) * 20) + 10;
+          setProgress(Math.min(percentage, 30));
+          setDebugInfo(prev => [...prev, `Loading progress: ${progressData.loaded}/${progressData.total}`]);
+        }
+      };
+      
+      const pdf = await loadingTask.promise;
+      setProcessingInfo(`Processing ${pdf.numPages} pages...`);
+      setProgress(30);
+      setDebugInfo(prev => [...prev, `PDF loaded with ${pdf.numPages} pages`]);
+      
+      const BATCH_SIZE = 5;
+      const totalPages = pdf.numPages;
+      let extractedText = '';
+      
+      for (let i = 0; i < totalPages; i += BATCH_SIZE) {
+        const endPage = Math.min(i + BATCH_SIZE, totalPages);
+        setProcessingInfo(`Processing pages ${i + 1}-${endPage} of ${totalPages}...`);
+        setDebugInfo(prev => [...prev, `Processing batch: pages ${i + 1}-${endPage}`]);
+        
+        const batchPromises = [];
+        for (let j = i + 1; j <= endPage; j++) {
+          batchPromises.push(processPage(pdf, j));
         }
         
-        setProcessingInfo('Preparing PDF document...');
-        setUploadProgress(10);
+        const batchResults = await Promise.all(batchPromises);
+        const batchText = batchResults.join(' ');
+        extractedText += batchText;
         
-        const data = event.target.result as ArrayBuffer;
-        setDebugInfo(prev => [...prev, `File loaded into memory, size: ${Math.round(data.byteLength / 1024 / 1024)}MB`]);
+        setDebugInfo(prev => [...prev, `Batch ${i + 1}-${endPage} extracted ${batchText.length} chars`]);
         
-        const loadingTask = pdfjsLib.getDocument({
-          data,
-          cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
-          cMapPacked: true,
-          disableFontFace: true,
+        const progressPercentage = 30 + ((endPage / totalPages) * 50);
+        setProgress(Math.round(progressPercentage));
+        
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      
+      setProcessingInfo('Analyzing and categorizing entries...');
+      setProgress(85);
+      setDebugInfo(prev => [...prev, `Total extracted text: ${extractedText.length} characters`]);
+      
+      const { entries, subheadings } = parseBibliographyEntries(extractedText);
+      setProgress(95);
+      setDebugInfo(prev => [...prev, `Parsed ${entries.length} bibliography entries and ${Object.keys(subheadings).reduce((sum, chapter) => sum + subheadings[chapter].length, 0)} subheadings`]);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (entries.length > 0) {
+        onBibliographyExtracted(entries, subheadings);
+        setProgress(100);
+        
+        toast({
+          title: "Bibliography Loaded Successfully",
+          description: `Extracted ${entries.length} bibliography entries from ${totalPages} pages`,
         });
-        
-        loadingTask.onProgress = (progressData) => {
-          if (progressData.total > 0) {
-            const percentage = Math.round((progressData.loaded / progressData.total) * 20) + 10;
-            setUploadProgress(Math.min(percentage, 30));
-            setDebugInfo(prev => [...prev, `Loading progress: ${progressData.loaded}/${progressData.total}`]);
-          }
-        };
-        
-        const pdf = await loadingTask.promise;
-        setProcessingInfo(`Processing ${pdf.numPages} pages...`);
-        setUploadProgress(30);
-        setDebugInfo(prev => [...prev, `PDF loaded with ${pdf.numPages} pages`]);
-        
-        const BATCH_SIZE = 5;
-        const totalPages = pdf.numPages;
-        let extractedText = '';
-        
-        for (let i = 0; i < totalPages; i += BATCH_SIZE) {
-          const endPage = Math.min(i + BATCH_SIZE, totalPages);
-          setProcessingInfo(`Processing pages ${i + 1}-${endPage} of ${totalPages}...`);
-          setDebugInfo(prev => [...prev, `Processing batch: pages ${i + 1}-${endPage}`]);
-          
-          const batchPromises = [];
-          for (let j = i + 1; j <= endPage; j++) {
-            batchPromises.push(processPage(pdf, j));
-          }
-          
-          const batchResults = await Promise.all(batchPromises);
-          const batchText = batchResults.join(' ');
-          extractedText += batchText;
-          
-          setDebugInfo(prev => [...prev, `Batch ${i + 1}-${endPage} extracted ${batchText.length} chars`]);
-          
-          const progressPercentage = 30 + ((endPage / totalPages) * 50);
-          setUploadProgress(Math.round(progressPercentage));
-          
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
-        
-        setProcessingInfo('Analyzing and categorizing entries...');
-        setUploadProgress(85);
-        setDebugInfo(prev => [...prev, `Total extracted text: ${extractedText.length} characters`]);
-        
-        const { entries, subheadings } = parseBibliographyEntries(extractedText);
-        setUploadProgress(95);
-        setDebugInfo(prev => [...prev, `Parsed ${entries.length} bibliography entries and ${Object.keys(subheadings).reduce((sum, chapter) => sum + subheadings[chapter].length, 0)} subheadings`]);
-        
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        if (entries.length > 0) {
-          onBibliographyExtracted(entries, subheadings);
-          setUploadProgress(100);
-          
-          toast({
-            title: "PDF Processed Successfully",
-            description: `Extracted ${entries.length} bibliography entries from ${totalPages} pages`,
-          });
-        } else {
-          toast({
-            title: "No Bibliography Entries Found",
-            description: "The PDF was processed but no bibliography entries were detected. Try adjusting the parser or use a different file.",
-            variant: "destructive",
-          });
-        }
-      };
-      
-      fileReader.onerror = () => {
-        throw new Error('Error reading file');
-      };
-      
-      fileReader.readAsArrayBuffer(file);
-      
+      } else {
+        toast({
+          title: "No Bibliography Entries Found",
+          description: "The PDF was processed but no bibliography entries were detected.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error processing PDF:', error);
       setDebugInfo(prev => [...prev, `Error: ${error instanceof Error ? error.message : String(error)}`]);
       toast({
-        title: "Error Processing PDF",
-        description: "There was a problem extracting data from your PDF. Please try again or use a different file.",
+        title: "Error Loading Bibliography",
+        description: "There was a problem extracting data from the PDF. Please try again later.",
         variant: "destructive",
       });
     } finally {
       setTimeout(() => {
-        setIsUploading(false);
-        setUploadProgress(0);
+        setIsLoading(false);
+        setProgress(0);
         setProcessingInfo('');
       }, 500);
     }
@@ -153,27 +144,6 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       console.error(`Error processing page ${pageNum}:`, error);
       setDebugInfo(prev => [...prev, `Error on page ${pageNum}: ${error instanceof Error ? error.message : String(error)}`]);
       return '';
-    }
-  };
-  
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      if (file.size > 50 * 1024 * 1024) {
-        toast({
-          title: "File Too Large",
-          description: "The maximum file size is 50MB. Please upload a smaller file.",
-          variant: "destructive",
-        });
-        return;
-      }
-      processPdf(file);
-    } else if (file) {
-      toast({
-        title: "Invalid File Type",
-        description: "Please upload a PDF file.",
-        variant: "destructive",
-      });
     }
   };
   
@@ -422,28 +392,24 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
   
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="flex items-center justify-center w-full">
-        <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-biblio-navy border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50">
-          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-            <Upload className="w-10 h-10 mb-3 text-biblio-navy" />
-            <p className="mb-2 text-sm text-biblio-navy"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-            <p className="text-xs text-biblio-gray">PDF (MAX. 50MB)</p>
-          </div>
-          <input
-            type="file"
-            className="hidden"
-            accept="application/pdf"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
-        </label>
-      </div>
-      
-      {isUploading && (
+      {!isLoading ? (
+        <div className="flex flex-col items-center justify-center">
+          <Button 
+            onClick={loadPdfFromPublicFolder}
+            className="flex items-center gap-2"
+          >
+            <BookOpen size={16} />
+            Load Bibliography Data
+          </Button>
+          <p className="text-sm text-biblio-gray mt-2">
+            This will load the Blake bibliography data stored in the repository.
+          </p>
+        </div>
+      ) : (
         <div className="mt-4 space-y-3">
-          <Progress value={uploadProgress} className="h-2" />
+          <Progress value={progress} className="h-2" />
           <p className="text-sm text-center text-biblio-gray">
-            {processingInfo || `Processing PDF... ${uploadProgress}%`}
+            {processingInfo || `Processing PDF... ${progress}%`}
           </p>
         </div>
       )}
@@ -461,10 +427,10 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       
       <Alert className="mt-4">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Processing large PDFs</AlertTitle>
+        <AlertTitle>Processing large PDF</AlertTitle>
         <AlertDescription>
-          Large PDFs (20MB+) may take several minutes to process. 
-          Please be patient and don't refresh the page.
+          The bibliography is a large document that may take several minutes to process. 
+          Please be patient while loading.
         </AlertDescription>
       </Alert>
     </div>

@@ -41,7 +41,8 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
     }
   };
 
-  const showPdfUploader = entries.length === 0 && !searchQuery;
+  // Show the PDF loader when there are no entries and not searching
+  const showPdfLoader = entries.length === 0 && !searchQuery;
 
   return (
     <div className="bibliography-content">
@@ -52,9 +53,9 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
         )}
       </div>
 
-      {showPdfUploader && (
+      {showPdfLoader && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-biblio-navy mb-4">Import Bibliography from PDF</h2>
+          <h2 className="text-xl font-semibold text-biblio-navy mb-4">Load Bibliography Data</h2>
           <PdfUploader onBibliographyExtracted={onEntriesExtracted || (() => {})} />
         </div>
       )}
@@ -78,7 +79,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
           ))}
         </div>
       ) : (
-        !searchQuery && !showPdfUploader && (
+        !searchQuery && !showPdfLoader && (
           <div className="text-center p-8">
             <p className="text-biblio-gray">Select a category or search for entries to begin.</p>
           </div>
