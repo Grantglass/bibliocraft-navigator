@@ -20,7 +20,7 @@ export interface BibliographyCategory {
 }
 
 // Base entries from the pre-built data
-let bibliographyEntries: BibliographyEntry[] = prebuiltData.entries;
+export let bibliographyEntries: BibliographyEntry[] = prebuiltData.entries;
 
 // Convert the JSON subheadings to the correct type
 export const bibliographySubheadings: Record<string, string[]> = prebuiltData.subheadings;
