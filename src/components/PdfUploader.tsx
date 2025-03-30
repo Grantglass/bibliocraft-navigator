@@ -11,7 +11,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface PdfUploaderProps {
-  onBibliographyExtracted: (entries: BibliographyEntry[]) => void;
+  onBibliographyExtracted: (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => void;
 }
 
 const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) => {
@@ -28,7 +28,6 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
     setDebugInfo([`Starting to process file: ${file.name} (${Math.round(file.size / 1024 / 1024)}MB)`]);
     
     try {
-      // Create a file reader for streaming
       const fileReader = new FileReader();
       
       fileReader.onload = async (event) => {
@@ -39,20 +38,16 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         setProcessingInfo('Preparing PDF document...');
         setUploadProgress(10);
         
-        // Use arrayBuffer for more efficient memory handling
         const data = event.target.result as ArrayBuffer;
         setDebugInfo(prev => [...prev, `File loaded into memory, size: ${Math.round(data.byteLength / 1024 / 1024)}MB`]);
         
-        // Configure PDF.js with compatible options
         const loadingTask = pdfjsLib.getDocument({
           data,
-          // Improve memory usage with these options
           cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
           cMapPacked: true,
-          disableFontFace: true, // Reduces memory usage
+          disableFontFace: true,
         });
         
-        // Add event listener for progress
         loadingTask.onProgress = (progressData) => {
           if (progressData.total > 0) {
             const percentage = Math.round((progressData.loaded / progressData.total) * 20) + 10;
@@ -66,18 +61,15 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         setUploadProgress(30);
         setDebugInfo(prev => [...prev, `PDF loaded with ${pdf.numPages} pages`]);
         
-        // Process pages in smaller batches to avoid memory issues
-        const BATCH_SIZE = 5; // Reduced batch size for larger files
+        const BATCH_SIZE = 5;
         const totalPages = pdf.numPages;
         let extractedText = '';
         
         for (let i = 0; i < totalPages; i += BATCH_SIZE) {
-          // Calculate batch end page
           const endPage = Math.min(i + BATCH_SIZE, totalPages);
           setProcessingInfo(`Processing pages ${i + 1}-${endPage} of ${totalPages}...`);
           setDebugInfo(prev => [...prev, `Processing batch: pages ${i + 1}-${endPage}`]);
           
-          // Process each page in the current batch
           const batchPromises = [];
           for (let j = i + 1; j <= endPage; j++) {
             batchPromises.push(processPage(pdf, j));
@@ -89,11 +81,9 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
           
           setDebugInfo(prev => [...prev, `Batch ${i + 1}-${endPage} extracted ${batchText.length} chars`]);
           
-          // Update progress
           const progressPercentage = 30 + ((endPage / totalPages) * 50);
           setUploadProgress(Math.round(progressPercentage));
           
-          // Allow garbage collection between batches
           await new Promise(resolve => setTimeout(resolve, 50));
         }
         
@@ -101,17 +91,14 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         setUploadProgress(85);
         setDebugInfo(prev => [...prev, `Total extracted text: ${extractedText.length} characters`]);
         
-        // Process the text into bibliography entries
-        const entries = parseBibliographyEntries(extractedText);
+        const { entries, subheadings } = parseBibliographyEntries(extractedText);
         setUploadProgress(95);
-        setDebugInfo(prev => [...prev, `Parsed ${entries.length} bibliography entries`]);
+        setDebugInfo(prev => [...prev, `Parsed ${entries.length} bibliography entries and ${Object.keys(subheadings).reduce((sum, chapter) => sum + subheadings[chapter].length, 0)} subheadings`]);
         
-        // Give UI time to update before finalizing
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Pass the entries to the parent component
         if (entries.length > 0) {
-          onBibliographyExtracted(entries);
+          onBibliographyExtracted(entries, subheadings);
           setUploadProgress(100);
           
           toast({
@@ -131,7 +118,6 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         throw new Error('Error reading file');
       };
       
-      // Read the file as an array buffer for better memory efficiency
       fileReader.readAsArrayBuffer(file);
       
     } catch (error) {
@@ -151,7 +137,6 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
     }
   };
   
-  // Helper function to process a single page
   const processPage = async (pdf: pdfjsLib.PDFDocumentProxy, pageNum: number): Promise<string> => {
     try {
       const page = await pdf.getPage(pageNum);
@@ -159,10 +144,8 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       const textItems = textContent.items.map((item: any) => item.str);
       const pageText = textItems.join(' ');
       
-      // Log first 50 chars of each page for debugging
       setDebugInfo(prev => [...prev, `Page ${pageNum}: ${pageText.substring(0, 50)}...`]);
       
-      // Cleanup to prevent memory leaks
       page.cleanup();
       
       return pageText;
@@ -176,7 +159,6 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'application/pdf') {
-      // Check file size - allow up to 50MB
       if (file.size > 50 * 1024 * 1024) {
         toast({
           title: "File Too Large",
@@ -195,15 +177,10 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
     }
   };
   
-  // Enhanced parser with improved detection for references and citations
-  const parseBibliographyEntries = (text: string): BibliographyEntry[] => {
+  const parseBibliographyEntries = (text: string): { entries: BibliographyEntry[], subheadings: Record<string, string[]> } => {
     const entries: BibliographyEntry[] = [];
+    const subheadings: Record<string, string[]> = {};
     
-    // First, try to find a references or bibliography section
-    const referencesSectionRegex = /(?:references|bibliography|works cited|sources|citations)(?:\s|:|\n)/i;
-    const referencesMatch = text.match(referencesSectionRegex);
-    
-    // Define the 10 parts for William Blake bibliography
     const predefinedParts = [
       "PART I. TEACHING WILLIAM BLAKE",
       "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES",
@@ -217,101 +194,133 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
       "PART X. APPENDICES"
     ];
     
-    // Try to extract chapters/sections from the document
-    const chapterRegex = /\bPART\s+[IVX]+\.\s+[A-Z][A-Z\s]+(?:\s+\d+)?/g;
-    const headingRegex = /\b([A-Z][A-Z\s]{2,}[A-Z])\b/g; // All caps headings
+    predefinedParts.forEach(part => {
+      subheadings[part] = [];
+    });
     
-    const potentialChapters = new Set<string>();
+    const subheadingRegex = /(?:^|\n)([A-Z][A-Za-z\s,]+)(?:\s+\d+)?(?:\n|\r)/g;
+    const contentSections = text.split(/PART [IVX]+\./);
     
-    // Add predefined parts
-    predefinedParts.forEach(part => potentialChapters.add(part));
-    
-    // Extract potential chapters from PART headings
-    let chapterMatch;
-    while ((chapterMatch = chapterRegex.exec(text)) !== null) {
-      if (chapterMatch[0] && chapterMatch[0].length > 3) {
-        potentialChapters.add(chapterMatch[0].trim());
+    for (let i = 1; i < contentSections.length; i++) {
+      const section = contentSections[i];
+      const partTitle = "PART " + section.split("\n")[0].trim();
+      
+      const matchedPart = predefinedParts.find(part => part.startsWith(partTitle));
+      
+      if (matchedPart) {
+        let subheadingMatch;
+        while ((subheadingMatch = subheadingRegex.exec(section)) !== null) {
+          const potentialSubheading = subheadingMatch[1].trim();
+          
+          if (potentialSubheading.length > 4 && 
+              !potentialSubheading.includes("PART") && 
+              !potentialSubheading.includes("APPENDIX") &&
+              !potentialSubheading.match(/^[IVX]+$/) &&
+              !potentialSubheading.match(/^\d+$/) &&
+              potentialSubheading.split(" ").length <= 8) {
+            
+            if (!subheadings[matchedPart].includes(potentialSubheading)) {
+              subheadings[matchedPart].push(potentialSubheading);
+            }
+          }
+        }
       }
     }
     
-    // Extract potential chapters from ALL CAPS headings
-    let headingMatch;
-    while ((headingMatch = headingRegex.exec(text)) !== null) {
-      if (headingMatch[1] && headingMatch[1].length > 3) {
-        potentialChapters.add(headingMatch[1].trim());
-      }
-    }
+    const knownSubheadings = {
+      "PART I. TEACHING WILLIAM BLAKE": [
+        "Citations, Annotations, and Links",
+        "A Note on Specialized Terms for Researchers New to William Blake",
+        "Different Blake Journals"
+      ],
+      "PART II. GENERAL INTRODUCTIONS, HANDBOOKS, GLOSSARIES, AND CLASSIC STUDIES": [
+        "General Introductions, Handbooks, and Glossaries",
+        "Classic Studies Published Before 2000"
+      ],
+      "PART III. EDITIONS OF BLAKE'S WRITING": [
+        "Standard Editions",
+        "Annotated Editions of Collected or Selected Writings"
+      ],
+      "PART IV. BIOGRAPHIES": [
+        "Brief Introductions",
+        "Portraits",
+        "Standard Biographies",
+        "Books, Chapters, and Articles with Substantial Biographical Information",
+        "Historic Biographies",
+        "Popular Biographies",
+        "Catherine Blake",
+        "On Writing Blake's Biography",
+        "Blake and Members of His Circle"
+      ],
+      "PART V. BIBLIOGRAPHIES": [
+        "Standard Bibliographies",
+        "Books and Essays with Substantial Bibliographic Content",
+        "Bibliographies of Exhibitions",
+        "Bibliographies of Musical Settings",
+        "Annotated Bibliographies",
+        "Historic Bibliographies"
+      ],
+      "PART VI. CATALOGUES": [
+        "Standard Catalogues",
+        "Historic Standard Catalogues",
+        "Current Collections: Digital Collections, Collection Catalogues",
+        "Major Exhibition and Sale Catalogues"
+      ]
+    };
     
-    // Convert to array and limit to prevent too many false positives
-    const chapters = Array.from(potentialChapters);
-    setDebugInfo(prev => [...prev, `Detected ${chapters.length} potential chapters/sections`]);
-    if (chapters.length > 0) {
-      setDebugInfo(prev => [...prev, `Example chapters: ${chapters.slice(0, 3).join(', ')}...`]);
-    }
+    predefinedParts.forEach(part => {
+      knownSubheadings[part as keyof typeof knownSubheadings].forEach(subheading => {
+        if (!subheadings[part]?.includes(subheading)) {
+          subheadings[part] = [...(subheadings[part] || []), subheading];
+        }
+      });
+    });
+    
+    const referencesSectionRegex = /(?:references|bibliography|works cited|sources|citations)(?:\s|:|\n)/i;
+    const referencesMatch = text.match(referencesSectionRegex);
     
     if (!referencesMatch) {
       setDebugInfo(prev => [...prev, "No references section found"]);
-      // If no dedicated section found, we'll try to parse the whole text
     } else {
-      // Extract text from the references section to the end
       const startIndex = referencesMatch.index || 0;
       text = text.substring(startIndex);
       setDebugInfo(prev => [...prev, `References section found at position ${startIndex}`]);
     }
     
-    // Split by common bibliography patterns
-    // Look for patterns like:
-    // 1. Author(s) (YEAR). Title. Publication.
-    // 2. [1] Author(s), "Title," Publication, YEAR.
-    // 3. Author(s). (YEAR). Title. Publication.
-    
-    // First, try to split by numbered references [1], [2], etc.
     const numberedRefs = text.split(/\[\d+\]|\(\d+\)|\d+\.\s/).filter(entry => entry.trim().length > 30);
-    
-    // Also try to split by author year pattern
     const authorYearRefs = text.split(/(?:[A-Z][a-z]+(?:,\s|&\s|\sand\s)[A-Za-z,\s&]+)(?:\s\()?\d{4}(?:\))?\./).filter(entry => entry.trim().length > 30);
     
-    // Use the result with more potential entries
     const potentialEntries = numberedRefs.length > authorYearRefs.length ? numberedRefs : authorYearRefs;
-    
-    setDebugInfo(prev => [...prev, `Found ${potentialEntries.length} potential entries`]);
     
     let entryId = 1;
     
     for (const entry of potentialEntries) {
       const trimmedEntry = entry.trim();
       
-      // Skip very short entries that are likely not bibliography items
       if (trimmedEntry.length < 30) continue;
       
-      // Try to extract author, year, title, and publication
       let authors = "Unknown Author";
       let year = new Date().getFullYear().toString();
       let title = "Unknown Title";
       let publication = "Unknown Publication";
       let entryChapter: string | undefined = undefined;
+      let entrySubheading: string | undefined = undefined;
       
-      // Extract year - look for 4 digits that could be a year (between 1900 and current year)
       const currentYear = new Date().getFullYear();
       const yearMatch = trimmedEntry.match(/\b(19\d{2}|20[0-2]\d)\b/);
       if (yearMatch) {
         year = yearMatch[0];
       }
       
-      // Extract title - often in quotes or followed by a period
       const titleMatch = trimmedEntry.match(/"([^"]+)"|"([^"]+)"|'([^']+)'|(?:^|\.\s)([A-Z][^.]+\.)/);
       if (titleMatch) {
-        // Find the first non-undefined group
         title = (titleMatch.slice(1).find(g => g !== undefined) || "").trim();
       } else if (trimmedEntry.includes('.')) {
-        // If no quotes, take the first sentence
         title = trimmedEntry.split('.')[0].trim();
       } else {
-        // Take the first 50 chars as a fallback
         title = trimmedEntry.substring(0, Math.min(50, trimmedEntry.length)) + "...";
       }
       
-      // Extract authors - often at the beginning before the year
       if (yearMatch && yearMatch.index) {
         const authorText = trimmedEntry.substring(0, yearMatch.index).trim();
         if (authorText.length > 0 && authorText.length < 100) {
@@ -319,7 +328,6 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         }
       }
       
-      // Extract publication - often after the title
       if (titleMatch && titleMatch.index) {
         const afterTitle = trimmedEntry.substring(titleMatch.index + titleMatch[0].length).trim();
         const pubMatch = afterTitle.match(/(?:In|Journal of|Proceedings of|Published in|Publisher:|)[^.,]+/);
@@ -328,10 +336,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         }
       }
       
-      // Try to assign a chapter to this entry based on content matching
-      if (chapters.length > 0) {
-        // Always prefer full chapter names over abbreviated ones
-        // First, check if any predefined part is directly mentioned in the text
+      if (predefinedParts.length > 0) {
         for (const part of predefinedParts) {
           if (trimmedEntry.includes(part) || 
               title.includes(part)) {
@@ -340,56 +345,60 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
           }
         }
         
-        // If we couldn't match a part directly, try the abbreviated version
         if (!entryChapter) {
           for (const part of predefinedParts) {
-            // Extract the "PART X" portion
             const shortPart = part.split('.')[0].trim();
             if (trimmedEntry.includes(shortPart) || 
                 title.includes(shortPart)) {
-              // Use the full part name instead of the abbreviated version
               entryChapter = part;
               break;
             }
           }
         }
         
-        // If we still couldn't match a part, try to deduce from content
         if (!entryChapter) {
-          // Assign based on content hints
           if (trimmedEntry.toLowerCase().includes('teach') || 
               trimmedEntry.toLowerCase().includes('education') ||
               trimmedEntry.toLowerCase().includes('student')) {
-            entryChapter = predefinedParts[0]; // Part I - Teaching
+            entryChapter = predefinedParts[0];
           } else if (trimmedEntry.toLowerCase().includes('introduction') || 
                     trimmedEntry.toLowerCase().includes('handbook') ||
                     trimmedEntry.toLowerCase().includes('glossary')) {
-            entryChapter = predefinedParts[1]; // Part II - Introductions
+            entryChapter = predefinedParts[1];
           } else if (trimmedEntry.toLowerCase().includes('edition') || 
                     trimmedEntry.toLowerCase().includes('writing')) {
-            entryChapter = predefinedParts[2]; // Part III - Editions
+            entryChapter = predefinedParts[2];
           } else if (trimmedEntry.toLowerCase().includes('biography') || 
                     trimmedEntry.toLowerCase().includes('life of')) {
-            entryChapter = predefinedParts[3]; // Part IV - Biographies
+            entryChapter = predefinedParts[3];
           } else if (trimmedEntry.toLowerCase().includes('bibliography')) {
-            entryChapter = predefinedParts[4]; // Part V - Bibliographies
+            entryChapter = predefinedParts[4];
           } else if (trimmedEntry.toLowerCase().includes('catalogue')) {
-            entryChapter = predefinedParts[5]; // Part VI - Catalogues
+            entryChapter = predefinedParts[5];
           } else if (trimmedEntry.toLowerCase().includes('study') || 
                     trimmedEntry.toLowerCase().includes('subject')) {
-            entryChapter = predefinedParts[6]; // Part VII - Studies
+            entryChapter = predefinedParts[6];
           } else if (publication.toLowerCase().includes('blake')) {
-            entryChapter = predefinedParts[7]; // Part VIII - Works by Blake
+            entryChapter = predefinedParts[7];
           } else if (trimmedEntry.toLowerCase().includes('essay') || 
                     trimmedEntry.toLowerCase().includes('collection')) {
-            entryChapter = predefinedParts[8]; // Part IX - Collections
+            entryChapter = predefinedParts[8];
           } else {
-            entryChapter = predefinedParts[9]; // Part X - Appendices (default)
+            entryChapter = predefinedParts[9];
+          }
+        }
+        
+        if (entryChapter && subheadings[entryChapter]) {
+          for (const subheading of subheadings[entryChapter]) {
+            if (trimmedEntry.includes(subheading) || 
+                title.includes(subheading)) {
+              entrySubheading = subheading;
+              break;
+            }
           }
         }
       }
       
-      // If we still don't have a chapter, distribute among parts evenly
       if (!entryChapter && predefinedParts.length > 0) {
         const partIndex = entryId % predefinedParts.length;
         entryChapter = predefinedParts[partIndex];
@@ -402,14 +411,13 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         year,
         publication,
         content: trimmedEntry,
-        category: 'academic_papers', // Default category
-        chapter: entryChapter
+        category: 'academic_papers',
+        chapter: entryChapter,
+        subheading: entrySubheading
       });
     }
     
-    setDebugInfo(prev => [...prev, `Parsed ${entries.length} bibliography entries`]);
-    
-    return entries;
+    return { entries, subheadings };
   };
   
   return (
@@ -440,7 +448,6 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({ onBibliographyExtracted }) =>
         </div>
       )}
       
-      {/* Debug info for development */}
       {debugInfo.length > 0 && (
         <div className="mt-4 p-3 border rounded-md bg-gray-50 max-h-60 overflow-auto">
           <h4 className="font-medium mb-2 text-sm">Processing Log:</h4>

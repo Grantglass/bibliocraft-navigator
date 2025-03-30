@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import BibliographySidebar from '@/components/BibliographySidebar';
 import BibliographyContent from '@/components/BibliographyContent';
@@ -16,8 +17,10 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubheading, setSelectedSubheading] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chapters, setChapters] = useState<string[]>([]);
+  const [subheadings, setSubheadings] = useState<Record<string, string[]>>({});
   const { toast } = useToast();
   
   // For responsiveness
@@ -145,24 +148,49 @@ const Index = () => {
   const handleSelectCategory = (categoryId: string) => {
     setIsLoading(true);
     setSearchQuery('');
-    setSelectedCategory(categoryId);
     
-    setTimeout(() => {
-      // Filter entries by the selected chapter
-      const chapterEntries = allEntries.filter(entry => {
-        // Match entries that have this exact chapter or are part of this chapter
-        return entry.chapter === categoryId || 
-               (entry.chapter && entry.chapter.startsWith(categoryId + '.'));
-      });
+    // Check if this is a category.subheading format
+    if (categoryId.includes('.')) {
+      const [chapter, subheading] = categoryId.split('.');
+      setSelectedCategory(chapter);
+      setSelectedSubheading(subheading);
       
-      setEntries(chapterEntries);
-      setIsLoading(false);
+      setTimeout(() => {
+        // Filter entries by the selected chapter and subheading
+        const subheadingEntries = allEntries.filter(entry => 
+          entry.chapter === chapter && entry.subheading === subheading
+        );
+        
+        setEntries(subheadingEntries);
+        setIsLoading(false);
+        
+        // On mobile, close sidebar after selection
+        if (window.innerWidth < 768) {
+          setIsSidebarOpen(false);
+        }
+      }, 300);
       
-      // On mobile, close sidebar after selection
-      if (window.innerWidth < 768) {
-        setIsSidebarOpen(false);
-      }
-    }, 300);
+    } else {
+      setSelectedCategory(categoryId);
+      setSelectedSubheading('');
+      
+      setTimeout(() => {
+        // Filter entries by the selected chapter
+        const chapterEntries = allEntries.filter(entry => {
+          // Match entries that have this exact chapter or are part of this chapter
+          return entry.chapter === categoryId || 
+                (entry.chapter && entry.chapter.startsWith(categoryId + '.'));
+        });
+        
+        setEntries(chapterEntries);
+        setIsLoading(false);
+        
+        // On mobile, close sidebar after selection
+        if (window.innerWidth < 768) {
+          setIsSidebarOpen(false);
+        }
+      }, 300);
+    }
   };
 
   const handleSelectEntry = (entryId: string) => {
@@ -172,6 +200,10 @@ const Index = () => {
     setTimeout(() => {
       const selectedEntry = allEntries.find(entry => entry.id === entryId);
       setEntries(selectedEntry ? [selectedEntry] : []);
+      if (selectedEntry?.chapter) {
+        setSelectedCategory(selectedEntry.chapter);
+        setSelectedSubheading(selectedEntry.subheading || '');
+      }
       setIsLoading(false);
       
       // On mobile, close sidebar after selection
@@ -187,6 +219,7 @@ const Index = () => {
     setIsLoading(true);
     setSearchQuery(query);
     setSelectedCategory('');
+    setSelectedSubheading('');
     
     setTimeout(() => {
       const results = searchEntries(query, allEntries);
@@ -200,11 +233,16 @@ const Index = () => {
     }, 300);
   };
 
-  const handleBibliographyExtracted = (extractedEntries: BibliographyEntry[]) => {
+  const handleBibliographyExtracted = (extractedEntries: BibliographyEntry[], extractedSubheadings?: Record<string, string[]>) => {
     // Categorize the entries
     const categorizedEntries = categorizeEntries(extractedEntries);
     setAllEntries(categorizedEntries);
     setEntries(categorizedEntries);
+    
+    // Set subheadings if provided
+    if (extractedSubheadings) {
+      setSubheadings(extractedSubheadings);
+    }
     
     toast({
       title: "Bibliography Imported",
@@ -234,6 +272,7 @@ const Index = () => {
           toggleSidebar={toggleSidebar}
           entries={allEntries}
           chapters={chapters}
+          subheadings={subheadings}
         />
         
         <div className="flex-1 overflow-auto transition-all duration-300 ease-in-out">
@@ -243,6 +282,7 @@ const Index = () => {
               isLoading={isLoading} 
               searchQuery={searchQuery}
               selectedCategory={selectedCategory}
+              selectedSubheading={selectedSubheading}
               onEntriesExtracted={handleBibliographyExtracted}
             />
           </div>

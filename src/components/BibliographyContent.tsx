@@ -8,7 +8,8 @@ interface BibliographyContentProps {
   isLoading?: boolean;
   searchQuery?: string;
   selectedCategory?: string;
-  onEntriesExtracted?: (entries: BibliographyEntry[]) => void;
+  selectedSubheading?: string;
+  onEntriesExtracted?: (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => void;
 }
 
 const BibliographyContent: React.FC<BibliographyContentProps> = ({ 
@@ -16,6 +17,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   isLoading, 
   searchQuery,
   selectedCategory,
+  selectedSubheading,
   onEntriesExtracted
 }) => {
   if (isLoading) {
@@ -29,6 +31,8 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
   const getPageTitle = () => {
     if (searchQuery) {
       return `Search Results for "${searchQuery}" (${entries.length} entries)`;
+    } else if (selectedCategory && selectedSubheading) {
+      return `${selectedCategory} - ${selectedSubheading}`;
     } else if (selectedCategory) {
       // Show the full category title
       return selectedCategory;
@@ -62,6 +66,13 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
               <h2 className="text-xl font-semibold text-biblio-navy">{entry.title}</h2>
               <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
               <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
+              {entry.subheading && (
+                <div className="mt-2 text-sm">
+                  <span className="bg-biblio-lightBlue text-biblio-navy px-2 py-1 rounded">
+                    {entry.subheading}
+                  </span>
+                </div>
+              )}
               <p className="mt-3 text-gray-700">{entry.content}</p>
             </div>
           ))}

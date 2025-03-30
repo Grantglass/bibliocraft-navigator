@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Search, Menu, BookOpen } from 'lucide-react';
+import { ChevronDown, ChevronRight, Search, Menu, BookOpen, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { BibliographyEntry } from '@/data/bibliographyData';
@@ -18,6 +18,7 @@ interface BibliographySidebarProps {
   toggleSidebar: () => void;
   entries?: BibliographyEntry[];
   chapters?: string[];
+  subheadings?: Record<string, string[]>;
 }
 
 const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
@@ -27,9 +28,11 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
   isSidebarOpen,
   toggleSidebar,
   entries = [],
-  chapters = []
+  chapters = [],
+  subheadings = {}
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [expandedSubheadings, setExpandedSubheadings] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState('');
   
   // Initialize expanded state for chapters when they change
@@ -37,27 +40,65 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
     if (chapters.length > 0) {
       const initialState = Object.fromEntries(chapters.map(chapter => [chapter, true]));
       setExpandedCategories(initialState);
+      
+      // Also initialize subheadings expanded state
+      const initialSubheadingState: Record<string, boolean> = {};
+      Object.keys(subheadings).forEach(chapter => {
+        subheadings[chapter].forEach(subheading => {
+          initialSubheadingState[`${chapter}:${subheading}`] = false;
+        });
+      });
+      setExpandedSubheadings(initialSubheadingState);
     }
-  }, [chapters]);
+  }, [chapters, subheadings]);
   
-  // Group entries by chapter
-  const entriesByChapter = React.useMemo(() => {
-    const result: Record<string, string[]> = {};
+  // Group entries by chapter and subheading
+  const entriesByCategory = React.useMemo(() => {
+    const result: Record<string, Record<string, string[]>> = {};
     
     chapters.forEach(chapter => {
-      // For each chapter, find entries that belong to it
-      result[chapter] = entries
-        .filter(entry => entry.chapter === chapter || (entry.chapter && entry.chapter.startsWith(chapter + '.')))
-        .map(entry => entry.id);
+      result[chapter] = { '_main': [] };
+      
+      // Add subheadings for this chapter
+      if (subheadings[chapter]) {
+        subheadings[chapter].forEach(subheading => {
+          result[chapter][subheading] = [];
+        });
+      }
+      
+      // Filter entries for this chapter and assign to appropriate subheading
+      const chapterEntries = entries.filter(entry => 
+        entry.chapter === chapter || 
+        (entry.chapter && entry.chapter.startsWith(chapter + '.'))
+      );
+      
+      chapterEntries.forEach(entry => {
+        const subheading = entry.subheading;
+        
+        if (subheading && result[chapter][subheading]) {
+          // Entry has a subheading that exists in our structure
+          result[chapter][subheading].push(entry.id);
+        } else {
+          // Entry has no subheading or unknown subheading - put in main chapter
+          result[chapter]['_main'].push(entry.id);
+        }
+      });
     });
     
     return result;
-  }, [entries, chapters]);
+  }, [entries, chapters, subheadings]);
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => ({
       ...prev,
       [categoryId]: !prev[categoryId]
+    }));
+  };
+  
+  const toggleSubheading = (key: string) => {
+    setExpandedSubheadings(prev => ({
+      ...prev,
+      [key]: !prev[key]
     }));
   };
 
@@ -69,6 +110,22 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
     if (e.key === 'Enter') {
       handleSearch();
     }
+  };
+  
+  // Count entries for a chapter including all its subheadings
+  const getChapterEntryCount = (chapter: string) => {
+    if (!entriesByCategory[chapter]) return 0;
+    
+    let count = entriesByCategory[chapter]['_main'].length;
+    
+    // Add entries from subheadings
+    Object.keys(entriesByCategory[chapter]).forEach(subheading => {
+      if (subheading !== '_main') {
+        count += entriesByCategory[chapter][subheading].length;
+      }
+    });
+    
+    return count;
   };
 
   return (
@@ -114,10 +171,10 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
         <div className="overflow-y-auto flex-grow">
           <div className="p-2">
             {chapters.length > 0 ? (
-              // Display PDF chapters using Collapsible component
+              // Display chapters using Collapsible component
               chapters.map((chapter) => {
-                const chapterEntries = entriesByChapter[chapter] || [];
-                const hasEntries = chapterEntries.length > 0;
+                const chapterEntries = getChapterEntryCount(chapter);
+                const hasEntries = chapterEntries > 0;
                 const isExpanded = expandedCategories[chapter] || false;
                 
                 return (
@@ -140,14 +197,15 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
                       >
                         <BookOpen size={16} className="mr-2" />
                         <span className="font-medium text-sm">{chapter}</span>
-                        {hasEntries && <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">{chapterEntries.length}</span>}
+                        {hasEntries && <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">{chapterEntries}</span>}
                       </div>
                     </div>
                     
                     <CollapsibleContent>
-                      {hasEntries && (
+                      {/* Main chapter entries */}
+                      {entriesByCategory[chapter] && entriesByCategory[chapter]['_main'].length > 0 && (
                         <div className="ml-6 pl-2 border-l border-sidebar-border">
-                          {chapterEntries.map((entryId) => {
+                          {entriesByCategory[chapter]['_main'].map((entryId) => {
                             const entry = entries.find(e => e.id === entryId);
                             return (
                               <div 
@@ -161,6 +219,62 @@ const BibliographySidebar: React.FC<BibliographySidebarProps> = ({
                           })}
                         </div>
                       )}
+                      
+                      {/* Subheadings */}
+                      {subheadings[chapter] && subheadings[chapter].map(subheading => {
+                        const subheadingKey = `${chapter}:${subheading}`;
+                        const isSubheadingExpanded = expandedSubheadings[subheadingKey] || false;
+                        const subheadingEntries = entriesByCategory[chapter][subheading] || [];
+                        
+                        return (
+                          <Collapsible
+                            key={subheadingKey}
+                            open={isSubheadingExpanded}
+                            onOpenChange={() => toggleSubheading(subheadingKey)}
+                            className="ml-6 pl-2 border-l border-sidebar-border"
+                          >
+                            <div className="flex items-center p-2 rounded-md cursor-pointer hover:bg-sidebar-accent w-full text-left">
+                              <CollapsibleTrigger asChild>
+                                <button className="mr-2 flex items-center justify-center">
+                                  {isSubheadingExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                </button>
+                              </CollapsibleTrigger>
+                              
+                              <div 
+                                className="flex items-center flex-1"
+                                onClick={() => onSelectCategory(`${chapter}.${subheading}`)}
+                              >
+                                <FileText size={14} className="mr-2" />
+                                <span className="font-medium text-xs">{subheading}</span>
+                                {subheadingEntries.length > 0 && (
+                                  <span className="ml-auto text-xs bg-sidebar-accent px-2 py-0.5 rounded-full">
+                                    {subheadingEntries.length}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <CollapsibleContent>
+                              {subheadingEntries.length > 0 && (
+                                <div className="ml-6 pl-2 border-l border-sidebar-border">
+                                  {subheadingEntries.map((entryId) => {
+                                    const entry = entries.find(e => e.id === entryId);
+                                    return (
+                                      <div 
+                                        key={entryId}
+                                        className="p-2 text-xs cursor-pointer hover:bg-sidebar-accent rounded-md my-1"
+                                        onClick={() => onSelectEntry(entryId)}
+                                      >
+                                        {entry ? entry.title.substring(0, 24) + (entry.title.length > 24 ? '...' : '') : entryId}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </CollapsibleContent>
+                          </Collapsible>
+                        );
+                      })}
                     </CollapsibleContent>
                   </Collapsible>
                 );
