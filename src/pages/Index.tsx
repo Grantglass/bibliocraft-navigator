@@ -40,14 +40,14 @@ const Index = () => {
           </p>
         </div>
         
-        {/* Hidden component that loads data in the background */}
+        {/* Hidden component that loads data in the background - enhanced version */}
         <PdfExtractor />
         
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-12">
           <h3 className="text-xl font-semibold text-biblio-navy mb-4">Welcome to the Blake Bibliography</h3>
           <p className="text-biblio-gray mb-4">
             This resource provides scholars, students, and enthusiasts with access to a comprehensive 
-            bibliography of William Blake's works and scholarly research about his art and poetry.
+            bibliography of over 1,700 entries covering William Blake's works and scholarly research about his art and poetry.
           </p>
           <div className="mt-4 flex justify-center">
             <Link to="/bibliography">

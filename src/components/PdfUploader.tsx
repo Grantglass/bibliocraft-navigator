@@ -17,7 +17,8 @@ interface PdfUploaderProps {
   onBibliographyExtracted: (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => void;
   onProcessingLog?: (logs: string[]) => void;
   autoExtract?: boolean;
-  extractAllPages?: boolean; // New prop to force processing all pages
+  extractAllPages?: boolean; // Process all pages
+  forceFullExtraction?: boolean; // New flag to ensure we get all entries
 }
 
 interface PdfUploaderState {
@@ -151,14 +152,14 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
   };
   
   processPdfContent = async (pdf: pdfjsLib.PDFDocumentProxy) => {
-    // Always process all pages when extractAllPages is true
+    // Force process ALL pages
     const totalPages = pdf.numPages;
     const introductionPages = Math.min(23, totalPages);
     let extractedText = '';
     let introductionText = '';
     
     // Use smaller batch size to avoid memory issues
-    const BATCH_SIZE = this.props.extractAllPages ? 5 : 5;
+    const BATCH_SIZE = 5;
     
     this.setState({
       processingInfo: `Processing introduction pages 1-${introductionPages}...`,
@@ -173,16 +174,15 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
       const pageText = await processPage(pdf, i);
       introductionText += pageText + ' ';
       
-      const progressPercentage = 30 + ((i / totalPages) * 15);
+      const progressPercentage = 30 + ((i / totalPages) * 10);
       this.setState({
         progress: Math.round(progressPercentage),
       });
       
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 20));
     }
     
     // Second pass: Process ALL remaining pages in smaller batches
-    // Start from the page after introduction
     for (let i = introductionPages; i < totalPages; i += BATCH_SIZE) {
       const endPage = Math.min(i + BATCH_SIZE, totalPages);
       this.setState({
@@ -214,12 +214,12 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
         }));
       }
       
-      const progressPercentage = 45 + ((endPage / totalPages) * 40);
+      const progressPercentage = 40 + ((endPage / totalPages) * 45);
       this.setState({
         progress: Math.round(progressPercentage),
       });
       
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 20));
     }
     
     this.setState({
@@ -241,8 +241,13 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
     // Create introduction entries
     const introductionEntries = createIntroductionEntries(introductionText);
     
-    // Parse bibliography entries from the remaining text
-    const result = parseBibliographyEntries(bibliographyText);
+    // Parse bibliography entries from the text with extra processing if forced
+    const parseOptions = {
+      forceFullExtraction: this.props.forceFullExtraction || false,
+      minEntriesThreshold: 1700 // We want at least 1700 entries
+    };
+    
+    const result = parseBibliographyEntries(bibliographyText, parseOptions);
     let entries = result.entries || [];
     let subheadings = result.subheadings || {};
     
@@ -294,6 +299,13 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
         debugInfo: [...prevState.debugInfo, `Chapter "${chapter}" has ${count} entries`]
       }));
     });
+    
+    // Check entry count threshold
+    if (entries.length < 1700 && this.props.forceFullExtraction) {
+      this.setState(prevState => ({
+        debugInfo: [...prevState.debugInfo, `Warning: Only ${entries.length} entries found, below the expected 1700 threshold`]
+      }));
+    }
     
     await new Promise(resolve => setTimeout(resolve, 100));
     

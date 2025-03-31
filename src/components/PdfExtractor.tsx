@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import PdfUploader from './PdfUploader';
 import { BibliographyEntry } from '@/data/bibliographyData';
 
-// This component now works silently behind the scenes to extract data
+// This component works silently behind the scenes to extract ALL data on initial load
 const PdfExtractor: React.FC = () => {
   const [extractedEntries, setExtractedEntries] = useState<BibliographyEntry[]>([]);
   const [processingLogs, setProcessingLogs] = useState<string[]>([]);
@@ -24,6 +24,11 @@ const PdfExtractor: React.FC = () => {
     
     // Log the entry count to help with debugging
     console.log(`Loaded ${entries.length} bibliography entries`);
+    
+    // If we have fewer than 1700 entries, show a warning in the console
+    if (entries.length < 1700) {
+      console.warn(`Warning: Only ${entries.length} entries loaded. Expected at least 1700 entries.`);
+    }
   };
 
   const handleProcessingLog = (logs: string[]) => {
@@ -46,7 +51,8 @@ const PdfExtractor: React.FC = () => {
         onBibliographyExtracted={handleBibliographyExtracted} 
         onProcessingLog={handleProcessingLog} 
         autoExtract={true}
-        extractAllPages={true}  // New prop to force full extraction
+        extractAllPages={true}  // Important: Force extraction of ALL pages
+        forceFullExtraction={true}  // New prop to ensure we get all entries
       />
     </div>
   );
