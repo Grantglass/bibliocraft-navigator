@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 interface PdfUploadProgressProps {
   isLoading: boolean;
@@ -19,6 +20,12 @@ const PdfUploadProgress: React.FC<PdfUploadProgressProps> = ({
   debugInfo,
   error
 }) => {
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
+  
+  const toggleDebugInfo = () => {
+    setShowDebugInfo(!showDebugInfo);
+  };
+  
   if (!isLoading) {
     return (
       <>
@@ -33,13 +40,36 @@ const PdfUploadProgress: React.FC<PdfUploadProgressProps> = ({
         )}
         
         {debugInfo.length > 0 && (
-          <div className="mt-4 p-3 border rounded-md bg-gray-50 max-h-60 overflow-auto">
-            <h4 className="font-medium mb-2 text-sm">Processing Log:</h4>
-            <ul className="text-xs space-y-1 text-gray-600">
-              {debugInfo.map((info, i) => (
-                <li key={i}>{info}</li>
-              ))}
-            </ul>
+          <div className="mt-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={toggleDebugInfo} 
+              className="flex items-center text-xs mb-2"
+            >
+              {showDebugInfo ? (
+                <>
+                  <ChevronUp className="h-3 w-3 mr-1" />
+                  Hide Processing Log
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-3 w-3 mr-1" />
+                  Show Processing Log
+                </>
+              )}
+            </Button>
+            
+            {showDebugInfo && (
+              <div className="p-3 border rounded-md bg-gray-50 max-h-60 overflow-auto">
+                <h4 className="font-medium mb-2 text-sm">Processing Log:</h4>
+                <ul className="text-xs space-y-1 text-gray-600">
+                  {debugInfo.map((info, i) => (
+                    <li key={i}>{info}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </>
@@ -54,13 +84,36 @@ const PdfUploadProgress: React.FC<PdfUploadProgressProps> = ({
       </p>
       
       {debugInfo.length > 0 && (
-        <div className="mt-4 p-3 border rounded-md bg-gray-50 max-h-60 overflow-auto">
-          <h4 className="font-medium mb-2 text-sm">Processing Log:</h4>
-          <ul className="text-xs space-y-1 text-gray-600">
-            {debugInfo.map((info, i) => (
-              <li key={i}>{info}</li>
-            ))}
-          </ul>
+        <div className="mt-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={toggleDebugInfo} 
+            className="flex items-center text-xs mb-2"
+          >
+            {showDebugInfo ? (
+              <>
+                <ChevronUp className="h-3 w-3 mr-1" />
+                Hide Processing Log
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-3 w-3 mr-1" />
+                Show Processing Log
+              </>
+            )}
+          </Button>
+          
+          {showDebugInfo && (
+            <div className="p-3 border rounded-md bg-gray-50 max-h-60 overflow-auto">
+              <h4 className="font-medium mb-2 text-sm">Processing Log:</h4>
+              <ul className="text-xs space-y-1 text-gray-600">
+                {debugInfo.map((info, i) => (
+                  <li key={i}>{info}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>
