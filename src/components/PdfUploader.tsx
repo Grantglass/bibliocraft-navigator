@@ -15,6 +15,8 @@ const PDF_FILE_PATH = '/blake_bibliography.pdf';
 
 interface PdfUploaderProps {
   onBibliographyExtracted: (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => void;
+  onProcessingLog?: (logs: string[]) => void;
+  autoExtract?: boolean;
 }
 
 interface PdfUploaderState {
@@ -36,9 +38,16 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
 
   // Automatically load the PDF when the component mounts
   componentDidMount() {
-    // Only auto-load if in the Bibliography page
-    if (window.location.pathname === '/bibliography') {
+    // Auto load on the Bibliography page or if autoExtract is true
+    if (window.location.pathname === '/bibliography' || this.props.autoExtract) {
       this.loadPdfFromPublicFolder();
+    }
+  }
+  
+  componentDidUpdate(prevProps: PdfUploaderProps, prevState: PdfUploaderState) {
+    // If debug info has changed and we have a callback, report the logs
+    if (prevState.debugInfo !== this.state.debugInfo && this.props.onProcessingLog) {
+      this.props.onProcessingLog(this.state.debugInfo);
     }
   }
   
@@ -277,29 +286,22 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
   
   render() {
     const { isLoading, progress, processingInfo, debugInfo, error } = this.state;
+    const { autoExtract } = this.props;
     
     return (
       <div className="w-full max-w-md mx-auto">
-        {!isLoading ? (
+        {!isLoading && !autoExtract ? (
           <div className="flex flex-col items-center justify-center">
             <Button 
               onClick={this.loadPdfFromPublicFolder}
               className="flex items-center gap-2"
             >
               <BookOpen size={16} />
-              Reload Bibliography Data
+              Load Bibliography Data
             </Button>
             <p className="text-sm text-biblio-gray mt-2">
               This will load the Blake bibliography data stored in the repository.
             </p>
-            
-            <PdfUploadProgress 
-              isLoading={isLoading}
-              progress={progress}
-              processingInfo={processingInfo}
-              debugInfo={debugInfo}
-              error={error}
-            />
           </div>
         ) : (
           <PdfUploadProgress 
@@ -311,14 +313,16 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
           />
         )}
         
-        <Alert className="mt-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Processing large PDF</AlertTitle>
-          <AlertDescription>
-            The bibliography is a large document that may take several minutes to process. 
-            Please be patient while loading.
-          </AlertDescription>
-        </Alert>
+        {!autoExtract && (
+          <Alert className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Processing large PDF</AlertTitle>
+            <AlertDescription>
+              The bibliography is a large document that may take several minutes to process. 
+              Please be patient while loading.
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
     );
   }

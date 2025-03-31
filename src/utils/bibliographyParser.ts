@@ -1,3 +1,4 @@
+
 import { BibliographyEntry } from '@/data/bibliographyData';
 import { createFallbackEntries, createIntroductionEntries } from './pdfProcessing';
 
@@ -178,8 +179,8 @@ export const parseBibliographyEntries = (text: string): { entries: BibliographyE
           content = nextParagraph.trim();
         }
         
-        // Clean up extracted text - Fixed regex here
-        title = title.replace(/["""""]/g, '').trim();
+        // Clean up extracted text - fixed regex to properly handle quotes
+        title = title.replace(/[""""""]/g, '').trim();
         author = author.replace(/\.$/, '').trim();
         
         // Create a unique ID
