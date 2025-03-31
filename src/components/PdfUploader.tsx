@@ -613,7 +613,7 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
           }
           
           // Clean up extracted text
-          title = title.replace(/["'""]/g, '').trim();
+          title = title.replace(/['"""""]/g, '').trim();
           author = author.replace(/\.$/, '').trim();
           
           // Create a unique ID
