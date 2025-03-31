@@ -17,6 +17,7 @@ interface PdfUploaderProps {
   onBibliographyExtracted: (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => void;
   onProcessingLog?: (logs: string[]) => void;
   autoExtract?: boolean;
+  extractAllPages?: boolean; // New prop to force processing all pages
 }
 
 interface PdfUploaderState {
@@ -150,17 +151,20 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
   };
   
   processPdfContent = async (pdf: pdfjsLib.PDFDocumentProxy) => {
-    const BATCH_SIZE = 5;
+    // Always process all pages when extractAllPages is true
     const totalPages = pdf.numPages;
+    const introductionPages = Math.min(23, totalPages);
     let extractedText = '';
     let introductionText = '';
     
-    // First pass: Process introduction pages (first 23 pages)
-    const introductionPages = Math.min(23, totalPages);
+    // Use smaller batch size to avoid memory issues
+    const BATCH_SIZE = this.props.extractAllPages ? 5 : 5;
+    
     this.setState({
       processingInfo: `Processing introduction pages 1-${introductionPages}...`,
     });
     
+    // First pass: Process introduction pages
     for (let i = 1; i <= introductionPages; i++) {
       this.setState(prevState => ({
         debugInfo: [...prevState.debugInfo, `Processing introduction page ${i}`]
@@ -169,7 +173,7 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
       const pageText = await processPage(pdf, i);
       introductionText += pageText + ' ';
       
-      const progressPercentage = 30 + ((i / totalPages) * 25);
+      const progressPercentage = 30 + ((i / totalPages) * 15);
       this.setState({
         progress: Math.round(progressPercentage),
       });
@@ -177,7 +181,8 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
       await new Promise(resolve => setTimeout(resolve, 50));
     }
     
-    // Second pass: Process remaining pages - Processing ALL pages to get more entries
+    // Second pass: Process ALL remaining pages in smaller batches
+    // Start from the page after introduction
     for (let i = introductionPages; i < totalPages; i += BATCH_SIZE) {
       const endPage = Math.min(i + BATCH_SIZE, totalPages);
       this.setState({
@@ -196,11 +201,20 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
       const batchText = batchResults.join(' ');
       extractedText += batchText;
       
+      const textLength = batchText.length;
       this.setState(prevState => ({
-        debugInfo: [...prevState.debugInfo, `Batch ${i + 1}-${endPage} extracted ${batchText.length} chars`]
+        debugInfo: [...prevState.debugInfo, `Batch ${i + 1}-${endPage} extracted ${textLength} chars`]
       }));
       
-      const progressPercentage = 55 + ((endPage / totalPages) * 30);
+      // Look for potential bibliography entries in this batch
+      const entryMatches = (batchText.match(/(?:\.\s+|\s+)[""]([^""]+)[""]\.|\b(\w+,\s+\w+\.\s+)/g) || []).length;
+      if (entryMatches > 0) {
+        this.setState(prevState => ({
+          debugInfo: [...prevState.debugInfo, `Found approximately ${entryMatches} potential entries in batch ${i + 1}-${endPage}`]
+        }));
+      }
+      
+      const progressPercentage = 45 + ((endPage / totalPages) * 40);
       this.setState({
         progress: Math.round(progressPercentage),
       });
@@ -232,8 +246,24 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
     let entries = result.entries || [];
     let subheadings = result.subheadings || {};
     
+    this.setState(prevState => ({
+      debugInfo: [...prevState.debugInfo, `Initial parsing found ${entries.length} entries`]
+    }));
+    
     // Add "INTRODUCTION" to the subheadings
-    subheadings["INTRODUCTION"] = ["Prefatory Material", "Table of Contents", "Guidelines", "Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"];
+    if (!subheadings["INTRODUCTION"]) {
+      subheadings["INTRODUCTION"] = [];
+    }
+    
+    // Ensure we have the standard introduction subheadings
+    const introSubheadings = ["Prefatory Material", "Table of Contents", "Guidelines", 
+      "Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"];
+    
+    introSubheadings.forEach(subheading => {
+      if (!subheadings["INTRODUCTION"].includes(subheading)) {
+        subheadings["INTRODUCTION"].push(subheading);
+      }
+    });
     
     // Combine introduction entries with bibliography entries
     entries = [...introductionEntries, ...entries];
@@ -242,7 +272,7 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
       progress: 95,
     });
     
-    // Check if subheadings object is valid before logging
+    // Log details about what we found
     const subheadingCount = subheadings ? 
       Object.keys(subheadings).reduce((sum, chapter) => 
         sum + (subheadings[chapter]?.length || 0), 0) : 0;
@@ -250,6 +280,20 @@ class PdfUploader extends React.Component<PdfUploaderProps, PdfUploaderState> {
     this.setState(prevState => ({
       debugInfo: [...prevState.debugInfo, `Parsed ${entries.length} bibliography entries (including introduction) and ${subheadingCount} subheadings`]
     }));
+    
+    // Log chapters and their entry counts
+    const chapterCounts: Record<string, number> = {};
+    entries.forEach(entry => {
+      if (entry.chapter) {
+        chapterCounts[entry.chapter] = (chapterCounts[entry.chapter] || 0) + 1;
+      }
+    });
+    
+    Object.entries(chapterCounts).forEach(([chapter, count]) => {
+      this.setState(prevState => ({
+        debugInfo: [...prevState.debugInfo, `Chapter "${chapter}" has ${count} entries`]
+      }));
+    });
     
     await new Promise(resolve => setTimeout(resolve, 100));
     

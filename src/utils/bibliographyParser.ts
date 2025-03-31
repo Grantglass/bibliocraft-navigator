@@ -32,15 +32,15 @@ export const parseBibliographyEntries = (text: string): { entries: BibliographyE
   // Add Introduction subheadings
   subheadings["INTRODUCTION"] = ["Prefatory Material", "Table of Contents", "Guidelines", "Digital Resources", "Citations, Annotations, and Links", "Different Blake Journals"];
   
-  // Improved subheading extraction
+  // Improve subheading extraction with a more specific regex
   const subheadingRegex = /(?:^|\n)([A-Z][A-Za-z\s,]+)(?:\s+\d+)?(?:\n|\r)/g;
   
   // Split the text by part markers for better organization
   const partMarkerRegex = /(PART [IVX]+\.\s+[A-Z\s]+)/g;
   const parts = text.split(partMarkerRegex);
   
-  // Improved entry extraction - looking for bibliographic entries
-  // Looking for patterns like "Author Name. Title. Publication details, Year."
+  // Enhanced entry extraction - looking for bibliographic entries
+  // Multiple patterns to catch different entry formats
   const entryRegexList = [
     // Match author year pattern (Author, Year. Title...)
     /([A-Z][a-z]+(?:,?\s+[A-Z]\.(?:\s*[A-Z]\.)*|\s+[A-Z][a-z]+)(?:,\s|\sand\s|,\sand\s|\s&\s)[A-Za-z\s,\.]+)(?:\.\s+|\s+)[""]?([^""\.\n]+)[""]?\.([^\.]+\d{4}[^\.]*\.)/g,
@@ -52,8 +52,38 @@ export const parseBibliographyEntries = (text: string): { entries: BibliographyE
     /([^\n<.]+)\s*<([A-Z]+\s*[^>]+)>([^\n<]+)/g,
     
     // Find entries that start with an author's last name and year
-    /([A-Z][a-z]+)(?:,\s|\s)([A-Za-z\s,\.]+)(?:\.\s+|\s+)(\d{4})/g
+    /([A-Z][a-z]+)(?:,\s|\s)([A-Za-z\s,\.]+)(?:\.\s+|\s+)(\d{4})/g,
+    
+    // Additional pattern to catch entries like "Author. Title. Publication. Year."
+    /([A-Z][a-z]+(?:,?\s+[A-Z]\.|\s+[A-Z][a-z]+)),?\s+([^\.]+)\.([^\.]+)\.([^\.]+\d{4})/g,
+    
+    // Pattern for entries with year at the beginning
+    /(\d{4})\.?\s+([A-Z][a-z]+(?:,?\s+[A-Z]\.|\s+and\s+[A-Z][a-z]+))\.?\s+[""]?([^""\.]+)[""]?/g,
+    
+    // Pattern for editor-style entries
+    /(?:ed\.|edited by)\s+([A-Z][a-z]+(?:,?\s+[A-Z]\.|\s+[A-Z][a-z]+))\.?\s+[""]?([^""\.]+)[""]?/g,
+    
+    // Blake-specific pattern - often entries about Blake's works have specific format
+    /Blake['']?s\s+([A-Za-z\s]+)(?:\.\s+|\s+)([^\.]+)\.([^\.]+\d{4})/g
   ];
+  
+  // Additional patterns specifically for Blake bibliography
+  const blakeSpecificRegexes = [
+    // Pattern for editions of Blake's work
+    /Edition[s]?\s+of\s+([A-Za-z\s]+)(?:\.\s+|\s+)([^\.]+)\.([^\.]+\d{4})/g,
+    
+    // Pattern for studies about Blake
+    /Studies\s+of\s+([A-Za-z\s]+)(?:\.\s+|\s+)([^\.]+)\.([^\.]+\d{4})/g,
+    
+    // Pattern for Blake's influence
+    /Blake['']?s\s+Influence\s+on\s+([A-Za-z\s]+)(?:\.\s+|\s+)([^\.]+)\.([^\.]+\d{4})/g,
+    
+    // Pattern for commentaries
+    /Commentary\s+on\s+([A-Za-z\s]+)(?:\.\s+|\s+)([^\.]+)\.([^\.]+\d{4})/g
+  ];
+  
+  // Combine all regex patterns
+  const allRegexPatterns = [...entryRegexList, ...blakeSpecificRegexes];
   
   // Process each part/section
   for (let i = 0; i < parts.length; i++) {
@@ -71,7 +101,7 @@ export const parseBibliographyEntries = (text: string): { entries: BibliographyE
       if (matchedPredefinedPart) {
         // Extract subheadings for this part
         let subheadingMatch;
-        let localSubheadingRegex = /(?:^|\n)([A-Z][A-Za-z\s,]+)(?:\s+\d+)?(?:\n|\r)/g;
+        let localSubheadingRegex = new RegExp(subheadingRegex);
         while ((subheadingMatch = localSubheadingRegex.exec(section)) !== null) {
           const potentialSubheading = subheadingMatch[1].trim();
           
@@ -114,91 +144,154 @@ export const parseBibliographyEntries = (text: string): { entries: BibliographyE
       }
     }
     
-    // Try different regex patterns to extract entries
-    for (const regex of entryRegexList) {
-      let match;
-      let localRegex = new RegExp(regex); // Create a new instance to reset lastIndex
-      
-      while ((match = localRegex.exec(section)) !== null) {
-        // Extract entry components based on the pattern that matched
-        let author = "";
-        let title = "";
-        let publication = "";
-        let year = "";
-        let content = "";
-        
-        if (match[0].includes("<")) {
-          // Citation pattern
-          author = match[1]?.trim() || "Unknown";
-          title = match[3]?.trim() || "Unknown";
-          publication = match[2]?.trim() || "";
-          
-          // Try to extract year
-          const yearMatch = match[0].match(/\b(19|20)\d{2}\b/);
-          year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
-          
-          // Collect content - the paragraph following this entry
-          const contentStart = match.index + match[0].length;
-          const nextParagraph = section.substring(contentStart, contentStart + 500).split(/\n\n|\r\n\r\n/)[0];
-          content = nextParagraph.trim();
-        } else if (match[0].includes('"') || match[0].includes('"')) {
-          // Title in quotes pattern
-          title = match[1]?.trim() || "Unknown";
-          author = match[2]?.trim() || "Unknown Author";
-          publication = match[3]?.trim() || "";
-          
-          // Try to extract year
-          const yearMatch = match[0].match(/\b(19|20)\d{2}\b/);
-          year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
-          
-          // Collect content
-          const contentStart = match.index + match[0].length;
-          const nextParagraph = section.substring(contentStart, contentStart + 500).split(/\n\n|\r\n\r\n/)[0];
-          content = nextParagraph.trim();
-        } else {
-          // Author year pattern
-          author = match[1]?.trim() || "Unknown";
-          if (match[2]) {
-            title = match[2]?.trim() || "Unknown";
-          } else {
-            title = "Unknown";
-          }
-          
-          // Try to extract publication and year
-          if (match[3]) {
-            publication = match[3]?.trim() || "";
-            const yearMatch = match[3].match(/\b(19|20)\d{2}\b/);
-            year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
-          } else {
-            year = new Date().getFullYear().toString();
-          }
-          
-          // Collect content
-          const contentStart = match.index + match[0].length;
-          const nextParagraph = section.substring(contentStart, contentStart + 500).split(/\n\n|\r\n\r\n/)[0];
-          content = nextParagraph.trim();
+    // Also check for subheadings within the section
+    let localSubheadingRegex = new RegExp(subheadingRegex);
+    let subheadingMatch;
+    while ((subheadingMatch = localSubheadingRegex.exec(section)) !== null) {
+      const foundSubheading = subheadingMatch[1].trim();
+      if (foundSubheading.length > 4 && 
+          foundSubheading.split(" ").length <= 8 &&
+          !foundSubheading.match(/^[IVX]+$/) &&
+          !foundSubheading.match(/^\d+$/)) {
+        sectionSubheading = foundSubheading;
+        // Also add to subheadings list if not there
+        if (!subheadings[sectionPart].includes(foundSubheading)) {
+          subheadings[sectionPart].push(foundSubheading);
         }
+      }
+    }
+    
+    // Break the section into paragraphs for more fine-grained processing
+    const paragraphs = section.split(/\n\n|\r\n\r\n/);
+    
+    for (const paragraph of paragraphs) {
+      if (paragraph.trim().length < 50) continue;
+      
+      // Try different regex patterns to extract entries
+      for (const regexPattern of allRegexPatterns) {
+        let match;
+        let localRegex = new RegExp(regexPattern, 'g'); // Create a new instance to reset lastIndex
         
-        // Clean up extracted text - fixed regex to properly handle quotes
-        title = title.replace(/[""""""]/g, '').trim();
-        author = author.replace(/\.$/, '').trim();
-        
-        // Create a unique ID
-        const id = `pdf_${entries.length + 1}_${author.substring(0, 10).replace(/\s/g, '_').toLowerCase()}`;
-        
-        // Only add if we have at least a title and either author or content
-        if (title && (author || content)) {
-          entries.push({
-            id,
-            title,
-            authors: author,
-            year,
-            publication,
-            content: content || match[0], // Use match text as fallback content
-            category: 'humanities',
-            chapter: sectionPart,
-            subheading: sectionSubheading
-          });
+        while ((match = localRegex.exec(paragraph)) !== null) {
+          // Extract entry components based on the pattern that matched
+          let author = "";
+          let title = "";
+          let publication = "";
+          let year = "";
+          let content = "";
+          
+          // Depending on the regex that matched, extract different components
+          if (match[0].includes("<")) {
+            // Citation pattern
+            author = match[1]?.trim() || "Unknown";
+            title = match[3]?.trim() || "Unknown";
+            publication = match[2]?.trim() || "";
+            
+            // Try to extract year
+            const yearMatch = match[0].match(/\b(19|20)\d{2}\b/);
+            year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+            
+            // Collect content - the paragraph following this entry
+            content = paragraph.substring(match.index).trim();
+          } else if (match[0].match(/[""]([^""]+)[""]/)) {
+            // Title in quotes pattern
+            // Find the quotes in the match
+            const quoteMatch = match[0].match(/[""]([^""]+)[""]/);
+            title = quoteMatch ? quoteMatch[1].trim() : "Unknown";
+            
+            // Extract author from what's before the title
+            const beforeTitle = match[0].substring(0, match[0].indexOf(title) - 1);
+            author = beforeTitle.trim() || match[2]?.trim() || "Unknown Author";
+            
+            // Extract publication and year
+            const afterTitle = match[0].substring(match[0].indexOf(title) + title.length + 1);
+            publication = afterTitle.trim() || match[3]?.trim() || "";
+            
+            // Try to extract year
+            const yearMatch = match[0].match(/\b(19|20)\d{2}\b/);
+            year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+            
+            // Collect content
+            content = paragraph.substring(match.index).trim();
+          } else if (match[0].match(/\d{4}/)) {
+            // Year pattern
+            const yearMatch = match[0].match(/\d{4}/);
+            year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+            
+            // Try to extract other components
+            if (match[1] && match[1].match(/[A-Z][a-z]+/)) {
+              author = match[1].trim();
+            } else if (match[2] && match[2].match(/[A-Z][a-z]+/)) {
+              author = match[2].trim();
+            } else {
+              author = "Unknown Author";
+            }
+            
+            // Find quoted title or use other captured group
+            const titleMatch = match[0].match(/[""]([^""]+)[""]/);
+            if (titleMatch) {
+              title = titleMatch[1].trim();
+            } else if (match[3]) {
+              title = match[3].trim();
+            } else {
+              title = "Unknown Title";
+            }
+            
+            // Publication might be after the title
+            publication = match[0].substring(match[0].indexOf(title) + title.length).trim() || "";
+            
+            // Collect content
+            content = paragraph.substring(match.index).trim();
+          } else {
+            // Author year pattern or default
+            author = match[1]?.trim() || "Unknown";
+            if (match[2]) {
+              title = match[2]?.trim() || "Unknown";
+            } else {
+              title = "Unknown";
+            }
+            
+            // Try to extract publication and year
+            if (match[3]) {
+              publication = match[3]?.trim() || "";
+              const yearMatch = match[3].match(/\b(19|20)\d{2}\b/);
+              year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
+            } else {
+              year = new Date().getFullYear().toString();
+            }
+            
+            // Collect content
+            content = paragraph.substring(match.index).trim();
+          }
+          
+          // Clean up extracted text
+          title = title.replace(/[""""""]/g, '').trim();
+          author = author.replace(/\.$/, '').trim();
+          
+          // Skip if we already have this exact entry
+          const isDuplicate = entries.some(entry => 
+            entry.title === title && entry.authors === author && entry.year === year
+          );
+          
+          if (!isDuplicate) {
+            // Create a unique ID
+            const id = `pdf_${entries.length + 1}_${author.substring(0, 10).replace(/\s/g, '_').toLowerCase()}`;
+            
+            // Only add if we have at least a title and either author or content
+            if (title && (author || content)) {
+              entries.push({
+                id,
+                title,
+                authors: author,
+                year,
+                publication,
+                content: content || match[0], // Use match text as fallback content
+                category: 'humanities',
+                chapter: sectionPart,
+                subheading: sectionSubheading
+              });
+            }
+          }
         }
       }
     }
@@ -277,6 +370,62 @@ export const parseBibliographyEntries = (text: string): { entries: BibliographyE
       });
     } else {
       subheadings[part] = [...knownSubheadings[part]];
+    }
+  });
+  
+  // Special processing for certain parts if they have few entries
+  predefinedParts.forEach(part => {
+    const partEntries = entries.filter(entry => entry.chapter === part);
+    if (partEntries.length < 10 && part !== "INTRODUCTION") {
+      // This part has few entries, try to find content in the original text
+      const partRegex = new RegExp(`${part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]{1,10000}?(?=PART |$)`, 'g');
+      const partMatch = partRegex.exec(text);
+      
+      if (partMatch && partMatch[0]) {
+        const partText = partMatch[0];
+        // Split into paragraphs and create entries
+        const paragraphs = partText.split(/\n\n|\r\n\r\n/).filter(p => p.trim().length > 100);
+        
+        paragraphs.forEach((paragraph, index) => {
+          if (index > 20) return; // Limit to 20 entries per part to avoid overwhelming
+          
+          // Identify possible title - first sentence or first line
+          let title = "";
+          const firstLine = paragraph.split(/\n|\r\n/)[0];
+          if (firstLine && firstLine.length < 100) {
+            title = firstLine.trim();
+          } else {
+            const firstSentence = paragraph.split(/\.|\?|!/)[0];
+            if (firstSentence && firstSentence.length < 100) {
+              title = firstSentence.trim() + ".";
+            } else {
+              title = part + " Entry " + (index + 1);
+            }
+          }
+          
+          // Create a unique ID
+          const id = `pdf_${entries.length + 1}_${part.substring(0, 10).replace(/\s/g, '_').toLowerCase()}_${index}`;
+          
+          // Only add if this doesn't duplicate existing entries
+          const isDuplicate = entries.some(entry => 
+            entry.chapter === part && entry.content.includes(paragraph.substring(0, 100))
+          );
+          
+          if (!isDuplicate && title) {
+            entries.push({
+              id,
+              title,
+              authors: "Extracted from " + part,
+              year: new Date().getFullYear().toString(),
+              publication: "",
+              content: paragraph,
+              category: 'humanities',
+              chapter: part,
+              subheading: subheadings[part][0] || "General"
+            });
+          }
+        });
+      }
     }
   });
   

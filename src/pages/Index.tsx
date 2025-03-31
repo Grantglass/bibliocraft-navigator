@@ -53,7 +53,7 @@ const Index = () => {
             <Link to="/bibliography">
               <Button className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
-                Browse Bibliography
+                Browse Complete Bibliography
               </Button>
             </Link>
           </div>
@@ -62,38 +62,15 @@ const Index = () => {
         <div className="flex flex-col md:flex-row gap-6 mt-12">
           <Card className="flex-1">
             <CardHeader>
-              <CardTitle>Browse Bibliography</CardTitle>
+              <CardTitle>About William Blake</CardTitle>
               <CardDescription>
-                Explore the full bibliography organized by categories.
+                Learn about the poet, painter, and printmaker.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-biblio-gray">
-                Navigate through hundreds of bibliographic entries categorized by chapter, 
-                subheading, and topic.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link to="/bibliography">
-                <Button className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  Browse Bibliography
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
-          
-          <Card className="flex-1">
-            <CardHeader>
-              <CardTitle>About This Project</CardTitle>
-              <CardDescription>
-                Learn more about the William Blake Bibliography project.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-biblio-gray">
-                Discover the purpose, history, and methodology behind this 
-                comprehensive bibliographic resource.
+                William Blake (1757-1827) was an English poet, painter, and printmaker who created some of 
+                the most iconic images in British art and deeply influenced the visual and literary arts.
               </p>
             </CardContent>
             <CardFooter>
@@ -101,6 +78,29 @@ const Index = () => {
                 <Button variant="outline" className="flex items-center gap-2">
                   <Info className="h-4 w-4" />
                   About Page
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+          
+          <Card className="flex-1">
+            <CardHeader>
+              <CardTitle>Scholarly Resources</CardTitle>
+              <CardDescription>
+                Access over 1,700 bibliographic entries.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-biblio-gray">
+                Browse our extensive collection of bibliographic entries including critical works, 
+                biographies, scholarly articles, and primary sources related to William Blake.
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Link to="/bibliography">
+                <Button className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Browse Bibliography
                 </Button>
               </Link>
             </CardFooter>
