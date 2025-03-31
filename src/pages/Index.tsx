@@ -40,7 +40,24 @@ const Index = () => {
           </p>
         </div>
         
+        {/* Hidden component that loads data in the background */}
         <PdfExtractor />
+        
+        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-12">
+          <h3 className="text-xl font-semibold text-biblio-navy mb-4">Welcome to the Blake Bibliography</h3>
+          <p className="text-biblio-gray mb-4">
+            This resource provides scholars, students, and enthusiasts with access to a comprehensive 
+            bibliography of William Blake's works and scholarly research about his art and poetry.
+          </p>
+          <div className="mt-4 flex justify-center">
+            <Link to="/bibliography">
+              <Button className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Browse Bibliography
+              </Button>
+            </Link>
+          </div>
+        </div>
         
         <div className="flex flex-col md:flex-row gap-6 mt-12">
           <Card className="flex-1">
