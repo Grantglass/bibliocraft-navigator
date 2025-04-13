@@ -25,9 +25,9 @@ const PdfExtractor: React.FC = () => {
     // Log the entry count to help with debugging
     console.log(`Loaded ${entries.length} bibliography entries`);
     
-    // If we have fewer than 1700 entries, show a warning in the console
-    if (entries.length < 1700) {
-      console.warn(`Warning: Only ${entries.length} entries loaded. Expected at least 1700 entries.`);
+    // If we have fewer than 1800 entries, show a warning in the console
+    if (entries.length < 1800) {
+      console.warn(`Warning: Only ${entries.length} entries loaded. Expected at least 1800 entries.`);
     }
   };
 
@@ -51,8 +51,9 @@ const PdfExtractor: React.FC = () => {
         onBibliographyExtracted={handleBibliographyExtracted} 
         onProcessingLog={handleProcessingLog} 
         autoExtract={true}
-        extractAllPages={true}  // Important: Force extraction of ALL pages
-        forceFullExtraction={true}  // New prop to ensure we get all entries
+        extractAllPages={true}  // Force extraction of ALL pages
+        forceFullExtraction={true}  // Ensure we get all entries
+        minEntriesThreshold={1800}  // Set the minimum threshold to 1800 entries
       />
     </div>
   );
