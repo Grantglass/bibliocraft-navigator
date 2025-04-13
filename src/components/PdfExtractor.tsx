@@ -46,31 +46,48 @@ const PdfExtractor: React.FC = () => {
     
     // Store entries in sessionStorage to ensure they're available across pages
     try {
+      // Limit the entries to a manageable size (first 2000 entries)
+      // This prevents the "Invalid string length" error
+      const limitedEntries = entries.slice(0, 2000);
+      
       // Store entries in chunks to avoid storage limits
       const entryChunks = [];
-      const chunkSize = 500;
-      for (let i = 0; i < entries.length; i += chunkSize) {
-        entryChunks.push(entries.slice(i, i + chunkSize));
+      const chunkSize = 100; // Reduce chunk size significantly
+      for (let i = 0; i < limitedEntries.length; i += chunkSize) {
+        entryChunks.push(limitedEntries.slice(i, i + chunkSize));
       }
       
       // Store the number of chunks
-      sessionStorage.setItem('bibliographyEntryCount', entries.length.toString());
+      sessionStorage.setItem('bibliographyEntryCount', limitedEntries.length.toString());
       sessionStorage.setItem('bibliographyChunkCount', entryChunks.length.toString());
+      
+      console.log(`Splitting ${limitedEntries.length} entries into ${entryChunks.length} chunks of size ${chunkSize}`);
       
       // Store each chunk separately
       entryChunks.forEach((chunk, index) => {
-        sessionStorage.setItem(`bibliographyEntries_${index}`, JSON.stringify(chunk));
+        try {
+          sessionStorage.setItem(`bibliographyEntries_${index}`, JSON.stringify(chunk));
+          console.log(`Successfully stored chunk ${index} with ${chunk.length} entries`);
+        } catch (error) {
+          console.error(`Error storing chunk ${index}:`, error);
+        }
       });
       
-      sessionStorage.setItem('bibliographySubheadings', JSON.stringify(subheadings || {}));
+      // Store subheadings separately
+      try {
+        sessionStorage.setItem('bibliographySubheadings', JSON.stringify(subheadings || {}));
+      } catch (error) {
+        console.error("Error storing subheadings:", error);
+      }
+      
       console.log(`Bibliography data saved to sessionStorage in ${entryChunks.length} chunks`);
       
       // Force global state update
       if (window.dispatchEvent) {
         window.dispatchEvent(new CustomEvent('bibliographyLoaded', { 
           detail: { 
-            count: entries.length,
-            chapters: [...new Set(entries.map(entry => entry.chapter).filter(Boolean))]
+            count: limitedEntries.length,
+            chapters: [...new Set(limitedEntries.map(entry => entry.chapter).filter(Boolean))]
           } 
         }));
       }
@@ -78,7 +95,7 @@ const PdfExtractor: React.FC = () => {
       console.error("Error saving to sessionStorage:", error);
       toast({
         title: "Storage Error",
-        description: "Could not save bibliography data to browser storage.",
+        description: "Could not save all bibliography data to browser storage. Limited to first 2000 entries.",
         variant: "destructive"
       });
     }
