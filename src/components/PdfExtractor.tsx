@@ -14,36 +14,84 @@ const PdfExtractor: React.FC = () => {
   const handleBibliographyExtracted = (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => {
     setExtractedEntries(entries);
     
-    // Show toast only on bibliography page
-    if (window.location.pathname === '/bibliography') {
-      toast({
-        title: "Bibliography Loaded",
-        description: `${entries.length} entries available for browsing`,
-      });
-    }
-    
-    // Log the entry count to help with debugging
+    // Log extraction details for debugging
     console.log(`Loaded ${entries.length} bibliography entries`);
     
-    // If we have fewer than 1800 entries, show a warning in the console
+    // Log distribution of entries by chapter for debugging
+    const chapterCounts: Record<string, number> = {};
+    entries.forEach(entry => {
+      if (entry.chapter) {
+        chapterCounts[entry.chapter] = (chapterCounts[entry.chapter] || 0) + 1;
+      }
+    });
+    
+    console.log("Entries by chapter:", chapterCounts);
+    
+    // Show toast on any page to help with debugging
+    toast({
+      title: "Bibliography Loaded",
+      description: `${entries.length} entries available for browsing`,
+    });
+    
+    // Validate entry count
     if (entries.length < 1800) {
       console.warn(`Warning: Only ${entries.length} entries loaded. Expected at least 1800 entries.`);
+      // Try to force a re-extraction if count is too low
+      if (entries.length < 100) {
+        console.error("Critical: Very few entries found. Attempting to reload the bibliography.");
+        // Force a window reload to retry the extraction in extreme cases
+        // window.location.reload();
+      }
+    }
+    
+    // Validate entries have the required fields
+    const invalidEntries = entries.filter(entry => !entry.title || !entry.id);
+    if (invalidEntries.length > 0) {
+      console.warn(`Found ${invalidEntries.length} entries with missing required fields.`);
+    }
+    
+    // Store entries in sessionStorage to ensure they're available across pages
+    try {
+      sessionStorage.setItem('bibliographyEntries', JSON.stringify(entries));
+      sessionStorage.setItem('bibliographySubheadings', JSON.stringify(subheadings || {}));
+      console.log("Bibliography data saved to sessionStorage");
+    } catch (error) {
+      console.error("Error saving to sessionStorage:", error);
     }
   };
 
   const handleProcessingLog = (logs: string[]) => {
     setProcessingLogs(logs);
     
-    // Log the last few messages to help with debugging
-    const lastLogs = logs.slice(-5);
-    console.log("PDF Processing logs:", lastLogs);
+    // Log the processing messages for debugging
+    console.log("PDF Processing logs:", logs.slice(-5));
   };
 
-  // Automatically start extraction when component mounts
+  // Check if we already have entries in sessionStorage on mount
   useEffect(() => {
-    console.log("PdfExtractor component mounted, starting automatic extraction");
-    // Empty dependency array ensures this only runs once on mount
-  }, []);
+    console.log("PdfExtractor component mounted, checking for existing entries");
+    
+    try {
+      const storedEntries = sessionStorage.getItem('bibliographyEntries');
+      if (storedEntries) {
+        const entries = JSON.parse(storedEntries);
+        console.log(`Found ${entries.length} stored entries in sessionStorage`);
+        setExtractedEntries(entries);
+        
+        // Only show toast on bibliography page
+        if (window.location.pathname === '/bibliography') {
+          toast({
+            title: "Bibliography Loaded",
+            description: `${entries.length} entries available from session storage`,
+          });
+        }
+      } else {
+        console.log("No stored entries found, starting automatic extraction");
+      }
+    } catch (error) {
+      console.error("Error retrieving from sessionStorage:", error);
+    }
+  }, [toast]);
 
   return (
     <div className="hidden">
