@@ -56,9 +56,14 @@ const PdfExtractor: React.FC = () => {
       sessionStorage.setItem('bibliographySubheadings', JSON.stringify(subheadings || {}));
       console.log("Bibliography data saved to sessionStorage");
       
-      // Force global state update (optional)
+      // Force global state update
       if (window.dispatchEvent) {
-        window.dispatchEvent(new CustomEvent('bibliographyLoaded', { detail: { count: entries.length } }));
+        window.dispatchEvent(new CustomEvent('bibliographyLoaded', { 
+          detail: { 
+            count: entries.length,
+            chapters: [...new Set(entries.map(entry => entry.chapter).filter(Boolean))]
+          } 
+        }));
       }
     } catch (error) {
       console.error("Error saving to sessionStorage:", error);
@@ -85,7 +90,12 @@ const PdfExtractor: React.FC = () => {
         
         // Dispatch event to notify other components
         if (window.dispatchEvent) {
-          window.dispatchEvent(new CustomEvent('bibliographyLoaded', { detail: { count: entries.length } }));
+          window.dispatchEvent(new CustomEvent('bibliographyLoaded', { 
+            detail: { 
+              count: entries.length,
+              chapters: [...new Set(entries.map(entry => entry.chapter).filter(Boolean))]
+            } 
+          }));
         }
         
         // Only show toast on bibliography page

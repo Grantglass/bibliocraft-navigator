@@ -10,7 +10,7 @@ import {
   categorizeEntries,
   bibliographySubheadings
 } from '@/data/bibliographyData';
-import { Menu, ArrowLeft, BookOpen, Filter } from 'lucide-react';
+import { Menu, ArrowLeft, BookOpen, Filter, Loader } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ const Bibliography = () => {
   const initialEntries = getAllEntries();
   const [entries, setEntries] = useState<BibliographyEntry[]>(initialEntries);
   const [allEntries, setAllEntries] = useState<BibliographyEntry[]>(initialEntries);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(chapterFromUrl);
   const [selectedSubheading, setSelectedSubheading] = useState('');
@@ -51,6 +51,76 @@ const Bibliography = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Load entries from sessionStorage on mount
+  useEffect(() => {
+    console.log("Bibliography component mounted, checking for entries in sessionStorage");
+    try {
+      const storedEntries = sessionStorage.getItem('bibliographyEntries');
+      if (storedEntries) {
+        const parsedEntries = JSON.parse(storedEntries);
+        console.log(`Bibliography: Found ${parsedEntries.length} entries in sessionStorage`);
+        setAllEntries(parsedEntries);
+        setIsLoading(false);
+        
+        // If no category is selected, show all entries
+        if (!selectedCategory) {
+          setEntries(parsedEntries);
+        }
+        
+        // Also load subheadings if available
+        const storedSubheadings = sessionStorage.getItem('bibliographySubheadings');
+        if (storedSubheadings) {
+          const parsedSubheadings = JSON.parse(storedSubheadings);
+          setSubheadings({...bibliographySubheadings, ...parsedSubheadings});
+        }
+      } else {
+        console.log("Bibliography: No entries found in sessionStorage, falling back to default data");
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Bibliography: Error reading from sessionStorage:", error);
+      setIsLoading(false);
+    }
+  }, [selectedCategory]);
+
+  // Listen for bibliographyLoaded event
+  useEffect(() => {
+    const handleBibliographyLoaded = (event: CustomEvent) => {
+      const count = event.detail?.count || 0;
+      const loadedChapters = event.detail?.chapters || [];
+      
+      console.log("Bibliography: Bibliography loaded event received, count:", count);
+      
+      try {
+        const storedEntries = sessionStorage.getItem('bibliographyEntries');
+        if (storedEntries) {
+          const parsedEntries = JSON.parse(storedEntries);
+          setAllEntries(parsedEntries);
+          
+          // If no category is selected, show all entries
+          if (!selectedCategory) {
+            setEntries(parsedEntries);
+          }
+          
+          toast({
+            title: "Bibliography Updated",
+            description: `${parsedEntries.length} entries now available`,
+          });
+          
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Bibliography: Error reading from sessionStorage after load event:", error);
+      }
+    };
+    
+    window.addEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
+    
+    return () => {
+      window.removeEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
+    };
+  }, [toast, selectedCategory]);
 
   // Process URL parameters when they change
   useEffect(() => {
@@ -157,6 +227,7 @@ const Bibliography = () => {
       });
       
       setChapters(sortedChapters);
+      console.log("Bibliography: Updated chapters list:", sortedChapters);
       
       // If chapters are available and no category is selected, select the first chapter
       if (sortedChapters.length > 0 && !selectedCategory) {
@@ -170,6 +241,7 @@ const Bibliography = () => {
   };
 
   const handleSelectCategory = (categoryId: string) => {
+    console.log("Bibliography: Selecting category:", categoryId);
     setIsLoading(true);
     setSearchQuery('');
     
@@ -185,6 +257,7 @@ const Bibliography = () => {
           entry.chapter === chapter && entry.subheading === subheading
         );
         
+        console.log(`Bibliography: Found ${subheadingEntries.length} entries for ${chapter} - ${subheading}`);
         setEntries(subheadingEntries);
         setIsLoading(false);
         
@@ -206,6 +279,7 @@ const Bibliography = () => {
                 (entry.chapter && entry.chapter.startsWith(categoryId + '.'));
         });
         
+        console.log(`Bibliography: Found ${chapterEntries.length} entries for ${categoryId}`);
         setEntries(chapterEntries);
         setIsLoading(false);
         
@@ -359,31 +433,45 @@ const Bibliography = () => {
             </Card>
           )}
           
-          <div className="max-w-4xl mx-auto p-6 bg-white shadow-sm rounded-md my-6 mx-4 md:mx-auto">
-            <BibliographyContent 
-              entries={entries} 
-              isLoading={isLoading} 
-              searchQuery={searchQuery}
-              selectedCategory={selectedCategory}
-              selectedSubheading={selectedSubheading}
-              onEntriesExtracted={handleBibliographyExtracted}
-            />
-            
-            {entries.length === 0 && !isLoading && !searchQuery && (
-              <div className="mt-8 text-center">
-                <Button 
-                  onClick={() => setShowPdfUploader(true)}
-                  className="flex items-center gap-2"
-                >
-                  <BookOpen size={16} />
-                  Process Bibliography PDF
-                </Button>
-                <p className="text-sm text-gray-500 mt-2">
-                  Click to extract more entries from the Blake bibliography PDF.
-                </p>
-              </div>
-            )}
-          </div>
+          {isLoading ? (
+            <div className="max-w-4xl mx-auto p-6 bg-white shadow-sm rounded-md my-6 mx-4 md:mx-auto flex flex-col items-center justify-center h-64">
+              <Loader className="h-8 w-8 animate-spin text-biblio-navy mb-4" />
+              <p className="text-biblio-navy">Loading bibliography entries...</p>
+            </div>
+          ) : (
+            <div className="max-w-4xl mx-auto p-6 bg-white shadow-sm rounded-md my-6 mx-4 md:mx-auto">
+              <BibliographyContent 
+                entries={entries} 
+                isLoading={isLoading} 
+                searchQuery={searchQuery}
+                selectedCategory={selectedCategory}
+                selectedSubheading={selectedSubheading}
+                onEntriesExtracted={handleBibliographyExtracted}
+              />
+              
+              {(entries.length === 0 || allEntries.length < 100) && !isLoading && !searchQuery && (
+                <div className="mt-8 text-center">
+                  <p className="mb-4 text-biblio-navy">
+                    {allEntries.length === 0 ? (
+                      "No entries loaded yet. Please process the PDF to load bibliography entries."
+                    ) : (
+                      `Currently loaded ${allEntries.length} entries. Need more?`
+                    )}
+                  </p>
+                  <Button 
+                    onClick={() => setShowPdfUploader(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <BookOpen size={16} />
+                    Process Bibliography PDF
+                  </Button>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Click to extract more entries from the Blake bibliography PDF.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

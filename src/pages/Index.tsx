@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Info, Home, Loader } from 'lucide-react';
+import { BookOpen, Info, Home, Loader, RefreshCw } from 'lucide-react';
 import PdfExtractor from '@/components/PdfExtractor';
 
 const Index = () => {
   const [entryCount, setEntryCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   
   useEffect(() => {
     const updateEntryCount = () => {
@@ -31,6 +33,7 @@ const Index = () => {
       console.log("Index: Bibliography loaded event received, count:", count);
       setEntryCount(count);
       setLoading(false);
+      setRefreshing(false);
     };
     
     window.addEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
@@ -47,6 +50,15 @@ const Index = () => {
       clearTimeout(timeoutId);
     };
   }, [entryCount]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    // Clear session storage to force a fresh load
+    sessionStorage.removeItem('bibliographyEntries');
+    sessionStorage.removeItem('bibliographySubheadings');
+    // Force a reload of the page to trigger the PdfExtractor
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-biblio-lightBlue">
@@ -91,19 +103,41 @@ const Index = () => {
           </p>
           
           <div className="my-4 p-3 bg-biblio-lightBlue/20 rounded-md">
-            {loading ? (
+            {loading || refreshing ? (
               <div className="flex items-center justify-center gap-2 text-biblio-navy">
                 <Loader className="h-4 w-4 animate-spin" />
-                <span>Loading bibliography entries...</span>
+                <span>{refreshing ? "Refreshing bibliography data..." : "Loading bibliography entries..."}</span>
               </div>
             ) : (
-              <p className="text-center text-biblio-navy">
+              <div className="text-center text-biblio-navy">
                 {entryCount > 0 ? (
-                  <span>Successfully loaded {entryCount.toLocaleString()} bibliography entries.</span>
+                  <div>
+                    <p className="mb-2">Successfully loaded {entryCount.toLocaleString()} bibliography entries.</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-2"
+                      onClick={handleRefresh}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      Refresh Data
+                    </Button>
+                  </div>
                 ) : (
-                  <span>Preparing bibliography data...</span>
+                  <div>
+                    <p className="mb-2">Preparing bibliography data...</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex items-center gap-2 mt-2"
+                      onClick={handleRefresh}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      Refresh Data
+                    </Button>
+                  </div>
                 )}
-              </p>
+              </div>
             )}
           </div>
           
