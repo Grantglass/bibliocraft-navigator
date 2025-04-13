@@ -55,6 +55,11 @@ const PdfExtractor: React.FC = () => {
       sessionStorage.setItem('bibliographyEntries', JSON.stringify(entries));
       sessionStorage.setItem('bibliographySubheadings', JSON.stringify(subheadings || {}));
       console.log("Bibliography data saved to sessionStorage");
+      
+      // Force global state update (optional)
+      if (window.dispatchEvent) {
+        window.dispatchEvent(new CustomEvent('bibliographyLoaded', { detail: { count: entries.length } }));
+      }
     } catch (error) {
       console.error("Error saving to sessionStorage:", error);
     }
@@ -77,6 +82,11 @@ const PdfExtractor: React.FC = () => {
         const entries = JSON.parse(storedEntries);
         console.log(`Found ${entries.length} stored entries in sessionStorage`);
         setExtractedEntries(entries);
+        
+        // Dispatch event to notify other components
+        if (window.dispatchEvent) {
+          window.dispatchEvent(new CustomEvent('bibliographyLoaded', { detail: { count: entries.length } }));
+        }
         
         // Only show toast on bibliography page
         if (window.location.pathname === '/bibliography') {

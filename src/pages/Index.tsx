@@ -1,12 +1,53 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Info, Home } from 'lucide-react';
+import { BookOpen, Info, Home, Loader } from 'lucide-react';
 import PdfExtractor from '@/components/PdfExtractor';
 
 const Index = () => {
+  const [entryCount, setEntryCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  useEffect(() => {
+    const updateEntryCount = () => {
+      try {
+        const storedEntries = sessionStorage.getItem('bibliographyEntries');
+        if (storedEntries) {
+          const entries = JSON.parse(storedEntries);
+          setEntryCount(entries.length);
+          setLoading(false);
+          console.log("Index: Updated entry count from session storage:", entries.length);
+        }
+      } catch (error) {
+        console.error("Error reading from sessionStorage:", error);
+      }
+    };
+    
+    updateEntryCount();
+    
+    const handleBibliographyLoaded = (event: CustomEvent) => {
+      const count = event.detail?.count || 0;
+      console.log("Index: Bibliography loaded event received, count:", count);
+      setEntryCount(count);
+      setLoading(false);
+    };
+    
+    window.addEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
+    
+    const timeoutId = setTimeout(() => {
+      if (entryCount === 0) {
+        console.log("Index: Checking entry count again after timeout");
+        updateEntryCount();
+      }
+    }, 5000);
+    
+    return () => {
+      window.removeEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
+      clearTimeout(timeoutId);
+    };
+  }, [entryCount]);
+
   return (
     <div className="min-h-screen bg-biblio-lightBlue">
       <header className="bg-biblio-navy text-white p-4">
@@ -40,7 +81,6 @@ const Index = () => {
           </p>
         </div>
         
-        {/* Hidden component that loads data in the background - enhanced version */}
         <PdfExtractor />
         
         <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-12">
@@ -49,6 +89,24 @@ const Index = () => {
             This resource provides scholars, students, and enthusiasts with access to a comprehensive 
             bibliography of over 1,700 entries covering William Blake's works and scholarly research about his art and poetry.
           </p>
+          
+          <div className="my-4 p-3 bg-biblio-lightBlue/20 rounded-md">
+            {loading ? (
+              <div className="flex items-center justify-center gap-2 text-biblio-navy">
+                <Loader className="h-4 w-4 animate-spin" />
+                <span>Loading bibliography entries...</span>
+              </div>
+            ) : (
+              <p className="text-center text-biblio-navy">
+                {entryCount > 0 ? (
+                  <span>Successfully loaded {entryCount.toLocaleString()} bibliography entries.</span>
+                ) : (
+                  <span>Preparing bibliography data...</span>
+                )}
+              </p>
+            )}
+          </div>
+          
           <div className="mt-4 flex justify-center">
             <Link to="/bibliography">
               <Button className="flex items-center gap-2">
