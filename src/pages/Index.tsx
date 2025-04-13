@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,15 +13,23 @@ const Index = () => {
   useEffect(() => {
     const updateEntryCount = () => {
       try {
-        const storedEntries = sessionStorage.getItem('bibliographyEntries');
-        if (storedEntries) {
-          const entries = JSON.parse(storedEntries);
-          setEntryCount(entries.length);
+        const entryCountStr = sessionStorage.getItem('bibliographyEntryCount');
+        if (entryCountStr) {
+          const count = parseInt(entryCountStr);
+          setEntryCount(count);
           setLoading(false);
-          console.log("Index: Updated entry count from session storage:", entries.length);
+          console.log("Index: Updated entry count from session storage:", count);
+        } else {
+          setTimeout(() => {
+            if (loading) {
+              setLoading(false);
+              console.log("Index: No entries found after timeout, stopping loading state");
+            }
+          }, 10000);
         }
       } catch (error) {
         console.error("Error reading from sessionStorage:", error);
+        setLoading(false);
       }
     };
     
@@ -39,24 +46,23 @@ const Index = () => {
     window.addEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
     
     const timeoutId = setTimeout(() => {
-      if (entryCount === 0) {
-        console.log("Index: Checking entry count again after timeout");
-        updateEntryCount();
-      }
-    }, 5000);
+      setLoading(false);
+    }, 15000);
     
     return () => {
       window.removeEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
       clearTimeout(timeoutId);
     };
-  }, [entryCount]);
+  }, [loading]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    // Clear session storage to force a fresh load
-    sessionStorage.removeItem('bibliographyEntries');
+    for (let i = 0; i < 100; i++) {
+      sessionStorage.removeItem(`bibliographyEntries_${i}`);
+    }
+    sessionStorage.removeItem('bibliographyEntryCount');
+    sessionStorage.removeItem('bibliographyChunkCount');
     sessionStorage.removeItem('bibliographySubheadings');
-    // Force a reload of the page to trigger the PdfExtractor
     window.location.reload();
   };
 
@@ -103,10 +109,15 @@ const Index = () => {
           </p>
           
           <div className="my-4 p-3 bg-biblio-lightBlue/20 rounded-md">
-            {loading || refreshing ? (
+            {loading ? (
               <div className="flex items-center justify-center gap-2 text-biblio-navy">
                 <Loader className="h-4 w-4 animate-spin" />
-                <span>{refreshing ? "Refreshing bibliography data..." : "Loading bibliography entries..."}</span>
+                <span>Loading bibliography entries... This may take a moment</span>
+              </div>
+            ) : refreshing ? (
+              <div className="flex items-center justify-center gap-2 text-biblio-navy">
+                <Loader className="h-4 w-4 animate-spin" />
+                <span>Refreshing bibliography data...</span>
               </div>
             ) : (
               <div className="text-center text-biblio-navy">
@@ -125,7 +136,7 @@ const Index = () => {
                   </div>
                 ) : (
                   <div>
-                    <p className="mb-2">Preparing bibliography data...</p>
+                    <p className="mb-2">No bibliography entries found. Please refresh to load data.</p>
                     <Button 
                       variant="outline" 
                       size="sm" 
@@ -133,7 +144,7 @@ const Index = () => {
                       onClick={handleRefresh}
                     >
                       <RefreshCw className="h-3 w-3" />
-                      Refresh Data
+                      Load Bibliography Data
                     </Button>
                   </div>
                 )}

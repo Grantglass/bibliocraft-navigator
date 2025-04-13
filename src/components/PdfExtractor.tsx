@@ -9,10 +9,12 @@ import { BibliographyEntry } from '@/data/bibliographyData';
 const PdfExtractor: React.FC = () => {
   const [extractedEntries, setExtractedEntries] = useState<BibliographyEntry[]>([]);
   const [processingLogs, setProcessingLogs] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
   const handleBibliographyExtracted = (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => {
     setExtractedEntries(entries);
+    setIsLoading(false);
     
     // Log extraction details for debugging
     console.log(`Loaded ${entries.length} bibliography entries`);
@@ -39,22 +41,29 @@ const PdfExtractor: React.FC = () => {
       // Try to force a re-extraction if count is too low
       if (entries.length < 100) {
         console.error("Critical: Very few entries found. Attempting to reload the bibliography.");
-        // Force a window reload to retry the extraction in extreme cases
-        // window.location.reload();
       }
-    }
-    
-    // Validate entries have the required fields
-    const invalidEntries = entries.filter(entry => !entry.title || !entry.id);
-    if (invalidEntries.length > 0) {
-      console.warn(`Found ${invalidEntries.length} entries with missing required fields.`);
     }
     
     // Store entries in sessionStorage to ensure they're available across pages
     try {
-      sessionStorage.setItem('bibliographyEntries', JSON.stringify(entries));
+      // Store entries in chunks to avoid storage limits
+      const entryChunks = [];
+      const chunkSize = 500;
+      for (let i = 0; i < entries.length; i += chunkSize) {
+        entryChunks.push(entries.slice(i, i + chunkSize));
+      }
+      
+      // Store the number of chunks
+      sessionStorage.setItem('bibliographyEntryCount', entries.length.toString());
+      sessionStorage.setItem('bibliographyChunkCount', entryChunks.length.toString());
+      
+      // Store each chunk separately
+      entryChunks.forEach((chunk, index) => {
+        sessionStorage.setItem(`bibliographyEntries_${index}`, JSON.stringify(chunk));
+      });
+      
       sessionStorage.setItem('bibliographySubheadings', JSON.stringify(subheadings || {}));
-      console.log("Bibliography data saved to sessionStorage");
+      console.log(`Bibliography data saved to sessionStorage in ${entryChunks.length} chunks`);
       
       // Force global state update
       if (window.dispatchEvent) {
@@ -67,6 +76,11 @@ const PdfExtractor: React.FC = () => {
       }
     } catch (error) {
       console.error("Error saving to sessionStorage:", error);
+      toast({
+        title: "Storage Error",
+        description: "Could not save bibliography data to browser storage.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -80,20 +94,39 @@ const PdfExtractor: React.FC = () => {
   // Check if we already have entries in sessionStorage on mount
   useEffect(() => {
     console.log("PdfExtractor component mounted, checking for existing entries");
+    setIsLoading(true);
     
     try {
-      const storedEntries = sessionStorage.getItem('bibliographyEntries');
-      if (storedEntries) {
-        const entries = JSON.parse(storedEntries);
-        console.log(`Found ${entries.length} stored entries in sessionStorage`);
-        setExtractedEntries(entries);
+      // Check if we have chunked entries
+      const entryCountStr = sessionStorage.getItem('bibliographyEntryCount');
+      const chunkCountStr = sessionStorage.getItem('bibliographyChunkCount');
+      
+      if (entryCountStr && chunkCountStr) {
+        const entryCount = parseInt(entryCountStr);
+        const chunkCount = parseInt(chunkCountStr);
+        
+        console.log(`Found ${entryCount} stored entries in ${chunkCount} chunks`);
+        
+        // Reconstruct entries from chunks
+        const allEntries: BibliographyEntry[] = [];
+        for (let i = 0; i < chunkCount; i++) {
+          const chunkStr = sessionStorage.getItem(`bibliographyEntries_${i}`);
+          if (chunkStr) {
+            const chunk = JSON.parse(chunkStr);
+            allEntries.push(...chunk);
+          }
+        }
+        
+        console.log(`Reconstructed ${allEntries.length} entries from storage`);
+        setExtractedEntries(allEntries);
+        setIsLoading(false);
         
         // Dispatch event to notify other components
         if (window.dispatchEvent) {
           window.dispatchEvent(new CustomEvent('bibliographyLoaded', { 
             detail: { 
-              count: entries.length,
-              chapters: [...new Set(entries.map(entry => entry.chapter).filter(Boolean))]
+              count: allEntries.length,
+              chapters: [...new Set(allEntries.map(entry => entry.chapter).filter(Boolean))]
             } 
           }));
         }
@@ -102,14 +135,16 @@ const PdfExtractor: React.FC = () => {
         if (window.location.pathname === '/bibliography') {
           toast({
             title: "Bibliography Loaded",
-            description: `${entries.length} entries available from session storage`,
+            description: `${allEntries.length} entries available from session storage`,
           });
         }
       } else {
         console.log("No stored entries found, starting automatic extraction");
+        // We leave isLoading as true until extraction completes
       }
     } catch (error) {
       console.error("Error retrieving from sessionStorage:", error);
+      setIsLoading(false);
     }
   }, [toast]);
 
