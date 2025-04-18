@@ -1,14 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Info, Home, Loader, RefreshCw } from 'lucide-react';
+import { BookOpen, Info, Home, Loader, RefreshCw, AlertCircle } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import PdfExtractor from '@/components/PdfExtractor';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [entryCount, setEntryCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [storageError, setStorageError] = useState<boolean>(false);
+  const { toast } = useToast();
   
   useEffect(() => {
     const updateEntryCount = () => {
@@ -18,18 +23,28 @@ const Index = () => {
           const count = parseInt(entryCountStr);
           setEntryCount(count);
           setLoading(false);
+          setStorageError(false);
           console.log("Index: Updated entry count from session storage:", count);
         } else {
+          // If entries aren't available after 15 seconds, stop loading
           setTimeout(() => {
             if (loading) {
               setLoading(false);
               console.log("Index: No entries found after timeout, stopping loading state");
+              
+              // Show a toast message to alert the user
+              toast({
+                title: "Bibliography Not Found",
+                description: "Bibliography data couldn't be loaded. Try refreshing the page.",
+                variant: "destructive"
+              });
             }
-          }, 10000);
+          }, 15000);
         }
       } catch (error) {
         console.error("Error reading from sessionStorage:", error);
         setLoading(false);
+        setStorageError(true);
       }
     };
     
@@ -41,6 +56,13 @@ const Index = () => {
       setEntryCount(count);
       setLoading(false);
       setRefreshing(false);
+      setStorageError(false);
+      
+      // Show success toast
+      toast({
+        title: "Bibliography Loaded",
+        description: `Successfully loaded ${count} bibliography entries.`,
+      });
     };
     
     window.addEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
@@ -53,17 +75,42 @@ const Index = () => {
       window.removeEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
       clearTimeout(timeoutId);
     };
-  }, [loading]);
+  }, [loading, toast]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    for (let i = 0; i < 100; i++) {
-      sessionStorage.removeItem(`bibliographyEntries_${i}`);
+    setStorageError(false);
+    
+    try {
+      // Clear all existing bibliography data
+      for (let i = 0; i < 100; i++) {
+        sessionStorage.removeItem(`bibliographyEntries_${i}`);
+      }
+      sessionStorage.removeItem('bibliographyEntryCount');
+      sessionStorage.removeItem('bibliographyChunkCount');
+      sessionStorage.removeItem('bibliographySubheadings');
+      
+      console.log("Index: Cleared session storage, refreshing page...");
+      
+      // Show toast indicating refresh
+      toast({
+        title: "Refreshing Bibliography",
+        description: "Clearing cache and reloading bibliography data...",
+      });
+      
+      // Reload the page to trigger fresh extraction
+      setTimeout(() => window.location.reload(), 500);
+    } catch (error) {
+      console.error("Error during refresh:", error);
+      setRefreshing(false);
+      
+      // Show error toast
+      toast({
+        title: "Refresh Failed",
+        description: "An error occurred while refreshing. Try again.",
+        variant: "destructive"
+      });
     }
-    sessionStorage.removeItem('bibliographyEntryCount');
-    sessionStorage.removeItem('bibliographyChunkCount');
-    sessionStorage.removeItem('bibliographySubheadings');
-    window.location.reload();
   };
 
   return (
@@ -101,12 +148,23 @@ const Index = () => {
         
         <PdfExtractor />
         
-        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-12">
+        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
           <h3 className="text-xl font-semibold text-biblio-navy mb-4">Welcome to the Blake Bibliography</h3>
           <p className="text-biblio-gray mb-4">
             This resource provides scholars, students, and enthusiasts with access to a comprehensive 
             bibliography of over 1,700 entries covering William Blake's works and scholarly research about his art and poetry.
           </p>
+          
+          {storageError && (
+            <Alert variant="destructive" className="my-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Browser Storage Error</AlertTitle>
+              <AlertDescription>
+                There was an error with browser storage. This might be due to private browsing mode or low storage space.
+                Try refreshing the page or using a different browser.
+              </AlertDescription>
+            </Alert>
+          )}
           
           <div className="my-4 p-3 bg-biblio-lightBlue/20 rounded-md">
             {loading ? (
@@ -124,15 +182,23 @@ const Index = () => {
                 {entryCount > 0 ? (
                   <div>
                     <p className="mb-2">Successfully loaded {entryCount.toLocaleString()} bibliography entries.</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex items-center gap-2"
-                      onClick={handleRefresh}
-                    >
-                      <RefreshCw className="h-3 w-3" />
-                      Refresh Data
-                    </Button>
+                    <div className="flex justify-center gap-2 mt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex items-center gap-2"
+                        onClick={handleRefresh}
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        Refresh Data
+                      </Button>
+                      <Link to="/bibliography">
+                        <Button size="sm" className="flex items-center gap-2">
+                          <BookOpen className="h-3 w-3" />
+                          Browse Bibliography
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 ) : (
                   <div>
@@ -150,15 +216,6 @@ const Index = () => {
                 )}
               </div>
             )}
-          </div>
-          
-          <div className="mt-4 flex justify-center">
-            <Link to="/bibliography">
-              <Button className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                Browse Complete Bibliography
-              </Button>
-            </Link>
           </div>
         </div>
         
