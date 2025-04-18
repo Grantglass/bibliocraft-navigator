@@ -57,13 +57,13 @@ const PdfExtractor: React.FC = () => {
       sessionStorage.removeItem('bibliographyChunkCount');
       sessionStorage.removeItem('bibliographySubheadings');
       
-      // Limit the entries to a manageable size (first 800 entries)
-      // This prevents the "Invalid string length" error and storage quota issues
-      const limitedEntries = entries.slice(0, 800);
+      // Limit the entries to a much smaller size (first 500 entries)
+      // This further reduces the chance of "Invalid string length" error and storage quota issues
+      const limitedEntries = entries.slice(0, 500);
       
       // Store entries in chunks to avoid storage limits
       const entryChunks = [];
-      const chunkSize = 10; // Further reduce chunk size for storage quotas
+      const chunkSize = 5; // Further reduce chunk size for storage quotas
       for (let i = 0; i < limitedEntries.length; i += chunkSize) {
         entryChunks.push(limitedEntries.slice(i, i + chunkSize));
       }
@@ -117,7 +117,7 @@ const PdfExtractor: React.FC = () => {
             }
             
             chunkIndex++;
-            setTimeout(storeNextChunk, 20); // Increase delay between chunks
+            setTimeout(storeNextChunk, 50); // Increase delay between chunks even more
           } catch (error) {
             console.error(`Error processing chunk ${chunkIndex}:`, error);
             
@@ -143,7 +143,7 @@ const PdfExtractor: React.FC = () => {
             }
             
             chunkIndex++;
-            setTimeout(storeNextChunk, 20);
+            setTimeout(storeNextChunk, 50);
           }
         } else {
           // All chunks stored, now store subheadings
@@ -168,6 +168,16 @@ const PdfExtractor: React.FC = () => {
               console.log(`Bibliography data partially saved to sessionStorage (${entriesStoredCount} entries in ${chunkIndex} chunks)`);
             } else {
               console.log(`Bibliography data saved to sessionStorage in ${entryChunks.length} chunks`);
+            }
+            
+            // Dispatch a dedicated event to notify about storage issues
+            if (quotaExceeded && window.dispatchEvent) {
+              window.dispatchEvent(new CustomEvent('bibliographyStorageExceeded', { 
+                detail: { 
+                  entriesStored: entriesStoredCount,
+                  totalEntries: entries.length
+                } 
+              }));
             }
           } catch (error) {
             console.error("Error storing subheadings:", error);
@@ -271,7 +281,7 @@ const PdfExtractor: React.FC = () => {
         autoExtract={true}
         extractAllPages={true}  // Force extraction of ALL pages
         forceFullExtraction={true}  // Ensure we get all entries
-        minEntriesThreshold={800}  // Reduced threshold to 800 entries due to storage limitations
+        minEntriesThreshold={500}  // Reduced threshold to 500 entries due to storage limitations
       />
     </div>
   );
