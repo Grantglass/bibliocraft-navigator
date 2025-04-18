@@ -10,11 +10,12 @@ import {
   categorizeEntries,
   bibliographySubheadings
 } from '@/data/bibliographyData';
-import { Menu, ArrowLeft, BookOpen, Filter, Loader } from 'lucide-react';
+import { Menu, ArrowLeft, BookOpen, Filter, Loader, RefreshCw, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const Bibliography = () => {
   const location = useLocation();
@@ -33,6 +34,7 @@ const Bibliography = () => {
   const [chapters, setChapters] = useState<string[]>([]);
   const [subheadings, setSubheadings] = useState<Record<string, string[]>>(bibliographySubheadings);
   const [showPdfUploader, setShowPdfUploader] = useState(false);
+  const [storageError, setStorageError] = useState(false);
   const { toast } = useToast();
   
   // For responsiveness
@@ -56,24 +58,63 @@ const Bibliography = () => {
   useEffect(() => {
     console.log("Bibliography component mounted, checking for entries in sessionStorage");
     try {
-      const storedEntries = sessionStorage.getItem('bibliographyEntries');
-      if (storedEntries) {
-        const parsedEntries = JSON.parse(storedEntries);
-        console.log(`Bibliography: Found ${parsedEntries.length} entries in sessionStorage`);
-        setAllEntries(parsedEntries);
-        setIsLoading(false);
+      // Check if we have chunked entries
+      const entryCountStr = sessionStorage.getItem('bibliographyEntryCount');
+      const chunkCountStr = sessionStorage.getItem('bibliographyChunkCount');
+      
+      if (entryCountStr && chunkCountStr) {
+        const entryCount = parseInt(entryCountStr);
+        const chunkCount = parseInt(chunkCountStr);
         
-        // If no category is selected, show all entries
-        if (!selectedCategory) {
-          setEntries(parsedEntries);
-        }
+        console.log(`Bibliography: Found ${entryCount} stored entries in ${chunkCount} chunks`);
         
-        // Also load subheadings if available
-        const storedSubheadings = sessionStorage.getItem('bibliographySubheadings');
-        if (storedSubheadings) {
-          const parsedSubheadings = JSON.parse(storedSubheadings);
-          setSubheadings({...bibliographySubheadings, ...parsedSubheadings});
-        }
+        // Reconstruct entries from chunks
+        const allEntries: BibliographyEntry[] = [];
+        
+        // Progressive loading with progress updates
+        let loadedChunks = 0;
+        setStorageError(false);
+        
+        const loadNextChunk = (index: number) => {
+          if (index < chunkCount) {
+            const chunkStr = sessionStorage.getItem(`bibliographyEntries_${index}`);
+            if (chunkStr) {
+              try {
+                const chunk = JSON.parse(chunkStr);
+                allEntries.push(...chunk);
+                loadedChunks++;
+                
+                // Load next chunk with a small delay to prevent UI freeze
+                setTimeout(() => loadNextChunk(index + 1), 5);
+              } catch (error) {
+                console.error(`Bibliography: Error parsing chunk ${index}:`, error);
+                setTimeout(() => loadNextChunk(index + 1), 5);
+              }
+            } else {
+              setTimeout(() => loadNextChunk(index + 1), 5);
+            }
+          } else {
+            // All chunks loaded
+            console.log(`Bibliography: Reconstructed ${allEntries.length} entries from storage`);
+            setAllEntries(allEntries);
+            setIsLoading(false);
+            
+            // If no category is selected, show all entries
+            if (!selectedCategory) {
+              setEntries(allEntries);
+            }
+            
+            // Also load subheadings if available
+            const storedSubheadings = sessionStorage.getItem('bibliographySubheadings');
+            if (storedSubheadings) {
+              const parsedSubheadings = JSON.parse(storedSubheadings);
+              setSubheadings({...bibliographySubheadings, ...parsedSubheadings});
+            }
+          }
+        };
+        
+        // Start loading chunks
+        loadNextChunk(0);
       } else {
         console.log("Bibliography: No entries found in sessionStorage, falling back to default data");
         setIsLoading(false);
@@ -81,6 +122,7 @@ const Bibliography = () => {
     } catch (error) {
       console.error("Bibliography: Error reading from sessionStorage:", error);
       setIsLoading(false);
+      setStorageError(true);
     }
   }, [selectedCategory]);
 
@@ -93,25 +135,65 @@ const Bibliography = () => {
       console.log("Bibliography: Bibliography loaded event received, count:", count);
       
       try {
-        const storedEntries = sessionStorage.getItem('bibliographyEntries');
-        if (storedEntries) {
-          const parsedEntries = JSON.parse(storedEntries);
-          setAllEntries(parsedEntries);
+        // Check if we have chunked entries
+        const entryCountStr = sessionStorage.getItem('bibliographyEntryCount');
+        const chunkCountStr = sessionStorage.getItem('bibliographyChunkCount');
+        
+        if (entryCountStr && chunkCountStr) {
+          const entryCount = parseInt(entryCountStr);
+          const chunkCount = parseInt(chunkCountStr);
           
-          // If no category is selected, show all entries
-          if (!selectedCategory) {
-            setEntries(parsedEntries);
-          }
+          console.log(`Bibliography: Found ${entryCount} stored entries in ${chunkCount} chunks`);
           
-          toast({
-            title: "Bibliography Updated",
-            description: `${parsedEntries.length} entries now available`,
-          });
+          // Reconstruct entries from chunks
+          const allEntries: BibliographyEntry[] = [];
           
-          setIsLoading(false);
+          // Progressive loading with progress updates
+          let loadedChunks = 0;
+          
+          const loadNextChunk = (index: number) => {
+            if (index < chunkCount) {
+              const chunkStr = sessionStorage.getItem(`bibliographyEntries_${index}`);
+              if (chunkStr) {
+                try {
+                  const chunk = JSON.parse(chunkStr);
+                  allEntries.push(...chunk);
+                  loadedChunks++;
+                  
+                  // Load next chunk with a small delay to prevent UI freeze
+                  setTimeout(() => loadNextChunk(index + 1), 5);
+                } catch (error) {
+                  console.error(`Bibliography: Error parsing chunk ${index}:`, error);
+                  setTimeout(() => loadNextChunk(index + 1), 5);
+                }
+              } else {
+                setTimeout(() => loadNextChunk(index + 1), 5);
+              }
+            } else {
+              // All chunks loaded
+              console.log(`Bibliography: Reconstructed ${allEntries.length} entries from storage`);
+              setAllEntries(allEntries);
+              
+              // If no category is selected, show all entries
+              if (!selectedCategory) {
+                setEntries(allEntries);
+              }
+              
+              toast({
+                title: "Bibliography Updated",
+                description: `${allEntries.length} entries now available`,
+              });
+              
+              setIsLoading(false);
+            }
+          };
+          
+          // Start loading chunks
+          loadNextChunk(0);
         }
       } catch (error) {
         console.error("Bibliography: Error reading from sessionStorage after load event:", error);
+        setStorageError(true);
       }
     };
     
@@ -385,6 +467,34 @@ const Bibliography = () => {
     }
   };
 
+  const handleRefresh = () => {
+    // Clear session storage
+    try {
+      // Clear all existing bibliography data
+      for (let i = 0; i < 100; i++) {
+        sessionStorage.removeItem(`bibliographyEntries_${i}`);
+      }
+      sessionStorage.removeItem('bibliographyEntryCount');
+      sessionStorage.removeItem('bibliographyChunkCount');
+      sessionStorage.removeItem('bibliographySubheadings');
+      
+      // Reload the page to trigger fresh extraction
+      window.location.reload();
+      
+      toast({
+        title: "Refreshing Bibliography",
+        description: "Clearing cache and reloading bibliography data...",
+      });
+    } catch (error) {
+      console.error("Error clearing sessionStorage:", error);
+      toast({
+        title: "Refresh Failed",
+        description: "Could not clear browser storage. Try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-biblio-lightBlue">
       {/* Mobile header with menu button and back link */}
@@ -426,10 +536,49 @@ const Bibliography = () => {
         />
         
         <div className="flex-1 overflow-auto transition-all duration-300 ease-in-out">
+          {storageError && (
+            <Alert variant="destructive" className="mx-4 mt-4 md:mx-auto md:max-w-4xl">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Storage Error</AlertTitle>
+              <AlertDescription>
+                Your browser's storage limit has been reached. Some bibliography entries couldn't be loaded.
+                Try using a different browser or clearing your browser data.
+                <div className="mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleRefresh}
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    Refresh Data
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {showPdfUploader && (
             <Card className="max-w-4xl mx-auto p-6 bg-white shadow-sm rounded-md mt-6 mx-4 md:mx-auto">
-              <h2 className="text-xl font-bold mb-4">Extract More Entries from PDF</h2>
+              <h2 className="text-xl font-bold mb-4">Process Bibliography PDF</h2>
+              <div className="mb-4">
+                <p className="text-biblio-gray text-sm">
+                  Due to browser storage limitations, only a subset of entries may be stored. 
+                  If you're experiencing issues, try using a different browser or clearing browser data.
+                </p>
+              </div>
               <PdfUploader onBibliographyExtracted={handleBibliographyExtracted} />
+              <div className="mt-4 flex justify-end">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2"
+                  onClick={handleRefresh}
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Clear & Refresh
+                </Button>
+              </div>
             </Card>
           )}
           
@@ -458,15 +607,25 @@ const Bibliography = () => {
                       `Currently loaded ${allEntries.length} entries. Need more?`
                     )}
                   </p>
-                  <Button 
-                    onClick={() => setShowPdfUploader(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <BookOpen size={16} />
-                    Process Bibliography PDF
-                  </Button>
+                  <div className="flex flex-col sm:flex-row justify-center gap-2">
+                    <Button 
+                      onClick={() => setShowPdfUploader(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <BookOpen size={16} />
+                      Process Bibliography PDF
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleRefresh}
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw size={16} />
+                      Clear & Refresh Data
+                    </Button>
+                  </div>
                   <p className="text-sm text-gray-500 mt-2">
-                    Click to extract more entries from the Blake bibliography PDF.
+                    Note: Browser storage limitations may prevent storing all entries.
                   </p>
                 </div>
               )}

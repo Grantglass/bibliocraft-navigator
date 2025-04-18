@@ -11,6 +11,8 @@ const PdfExtractor: React.FC = () => {
   const [processingLogs, setProcessingLogs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  const [storageQuotaExceeded, setStorageQuotaExceeded] = useState<boolean>(false);
+  const [entriesStoredCount, setEntriesStoredCount] = useState<number>(0);
   const { toast } = useToast();
 
   const handleBibliographyExtracted = (entries: BibliographyEntry[], subheadings?: Record<string, string[]>) => {
@@ -55,13 +57,13 @@ const PdfExtractor: React.FC = () => {
       sessionStorage.removeItem('bibliographyChunkCount');
       sessionStorage.removeItem('bibliographySubheadings');
       
-      // Limit the entries to a manageable size (first 2000 entries)
-      // This prevents the "Invalid string length" error
-      const limitedEntries = entries.slice(0, 2000);
+      // Limit the entries to a manageable size (first 1000 entries)
+      // This prevents the "Invalid string length" error and storage quota issues
+      const limitedEntries = entries.slice(0, 1000);
       
       // Store entries in chunks to avoid storage limits
       const entryChunks = [];
-      const chunkSize = 50; // Reduce chunk size even more
+      const chunkSize = 20; // Reduce chunk size even more for storage quotas
       for (let i = 0; i < limitedEntries.length; i += chunkSize) {
         entryChunks.push(limitedEntries.slice(i, i + chunkSize));
       }
@@ -74,21 +76,50 @@ const PdfExtractor: React.FC = () => {
       
       // Store each chunk separately with delay to prevent browser hang
       let chunkIndex = 0;
+      let quotaExceeded = false;
       
       const storeNextChunk = () => {
         if (chunkIndex < entryChunks.length) {
           try {
-            const chunk = entryChunks[chunkIndex];
-            sessionStorage.setItem(`bibliographyEntries_${chunkIndex}`, JSON.stringify(chunk));
-            console.log(`Successfully stored chunk ${chunkIndex} with ${chunk.length} entries`);
-            
-            // Update progress
-            setLoadingProgress(Math.round((chunkIndex / entryChunks.length) * 100));
+            if (!quotaExceeded) {
+              const chunk = entryChunks[chunkIndex];
+              sessionStorage.setItem(`bibliographyEntries_${chunkIndex}`, JSON.stringify(chunk));
+              console.log(`Successfully stored chunk ${chunkIndex} with ${chunk.length} entries`);
+              
+              // Update stored entries count
+              setEntriesStoredCount((prevCount) => prevCount + chunk.length);
+              
+              // Update progress
+              setLoadingProgress(Math.round((chunkIndex / entryChunks.length) * 100));
+            }
             
             chunkIndex++;
             setTimeout(storeNextChunk, 10); // Small delay between chunks
           } catch (error) {
             console.error(`Error storing chunk ${chunkIndex}:`, error);
+            
+            // Check if it's a quota exceeded error
+            if (error instanceof Error && error.name === 'QuotaExceededError') {
+              quotaExceeded = true;
+              setStorageQuotaExceeded(true);
+              
+              // Update storage count to reflect what we've stored so far
+              const storedChunks = chunkIndex;
+              const entriesStored = storedChunks * chunkSize;
+              setEntriesStoredCount(entriesStored);
+              
+              // Still save the count of what we could store
+              sessionStorage.setItem('bibliographyEntryCount', entriesStored.toString());
+              sessionStorage.setItem('bibliographyChunkCount', storedChunks.toString());
+              
+              // Show toast about storage limitation
+              toast({
+                title: "Storage Quota Exceeded",
+                description: `Only ${entriesStored} entries could be stored due to browser storage limits.`,
+                variant: "destructive"
+              });
+            }
+            
             chunkIndex++;
             setTimeout(storeNextChunk, 10);
           }
@@ -102,13 +133,17 @@ const PdfExtractor: React.FC = () => {
             if (window.dispatchEvent) {
               window.dispatchEvent(new CustomEvent('bibliographyLoaded', { 
                 detail: { 
-                  count: limitedEntries.length,
+                  count: quotaExceeded ? entriesStoredCount : limitedEntries.length,
                   chapters: [...new Set(limitedEntries.map(entry => entry.chapter).filter(Boolean))]
                 } 
               }));
             }
             
-            console.log(`Bibliography data saved to sessionStorage in ${entryChunks.length} chunks`);
+            if (quotaExceeded) {
+              console.log(`Bibliography data partially saved to sessionStorage (${entriesStoredCount} entries in ${chunkIndex} chunks)`);
+            } else {
+              console.log(`Bibliography data saved to sessionStorage in ${entryChunks.length} chunks`);
+            }
           } catch (error) {
             console.error("Error storing subheadings:", error);
             toast({
@@ -125,9 +160,11 @@ const PdfExtractor: React.FC = () => {
       
     } catch (error) {
       console.error("Error saving to sessionStorage:", error);
+      setStorageQuotaExceeded(true);
+      
       toast({
         title: "Storage Error",
-        description: "Could not save all bibliography data to browser storage. Limited to first 2000 entries.",
+        description: "Could not save bibliography data to browser storage. Limited functionality available.",
         variant: "destructive"
       });
     }
@@ -144,6 +181,8 @@ const PdfExtractor: React.FC = () => {
   useEffect(() => {
     console.log("PdfExtractor component mounted, checking for existing entries");
     setIsLoading(true);
+    setStorageQuotaExceeded(false);
+    setEntriesStoredCount(0);
     
     try {
       // Check if we have chunked entries
@@ -155,6 +194,7 @@ const PdfExtractor: React.FC = () => {
         const chunkCount = parseInt(chunkCountStr);
         
         console.log(`Found ${entryCount} stored entries in ${chunkCount} chunks`);
+        setEntriesStoredCount(entryCount);
         
         // Reconstruct entries from chunks
         const allEntries: BibliographyEntry[] = [];
@@ -201,7 +241,7 @@ const PdfExtractor: React.FC = () => {
             if (window.location.pathname === '/bibliography') {
               toast({
                 title: "Bibliography Loaded",
-                description: `${allEntries.length} entries available from session storage`,
+                description: `${allEntries.length} entries available from browser storage`,
               });
             }
           }
@@ -234,7 +274,7 @@ const PdfExtractor: React.FC = () => {
         autoExtract={true}
         extractAllPages={true}  // Force extraction of ALL pages
         forceFullExtraction={true}  // Ensure we get all entries
-        minEntriesThreshold={1800}  // Set the minimum threshold to 1800 entries
+        minEntriesThreshold={1000}  // Reduced threshold to 1000 entries due to storage limitations
       />
     </div>
   );
