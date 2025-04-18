@@ -57,13 +57,13 @@ const PdfExtractor: React.FC = () => {
       sessionStorage.removeItem('bibliographyChunkCount');
       sessionStorage.removeItem('bibliographySubheadings');
       
-      // Limit the entries to a manageable size (first 1000 entries)
+      // Limit the entries to a manageable size (first 800 entries)
       // This prevents the "Invalid string length" error and storage quota issues
-      const limitedEntries = entries.slice(0, 1000);
+      const limitedEntries = entries.slice(0, 800);
       
       // Store entries in chunks to avoid storage limits
       const entryChunks = [];
-      const chunkSize = 20; // Reduce chunk size even more for storage quotas
+      const chunkSize = 10; // Further reduce chunk size for storage quotas
       for (let i = 0; i < limitedEntries.length; i += chunkSize) {
         entryChunks.push(limitedEntries.slice(i, i + chunkSize));
       }
@@ -83,20 +83,43 @@ const PdfExtractor: React.FC = () => {
           try {
             if (!quotaExceeded) {
               const chunk = entryChunks[chunkIndex];
-              sessionStorage.setItem(`bibliographyEntries_${chunkIndex}`, JSON.stringify(chunk));
-              console.log(`Successfully stored chunk ${chunkIndex} with ${chunk.length} entries`);
+              const chunkString = JSON.stringify(chunk);
               
-              // Update stored entries count
-              setEntriesStoredCount((prevCount) => prevCount + chunk.length);
-              
-              // Update progress
-              setLoadingProgress(Math.round((chunkIndex / entryChunks.length) * 100));
+              try {
+                sessionStorage.setItem(`bibliographyEntries_${chunkIndex}`, chunkString);
+                console.log(`Successfully stored chunk ${chunkIndex} with ${chunk.length} entries (${chunkString.length} chars)`);
+                
+                // Update stored entries count
+                setEntriesStoredCount((prevCount) => prevCount + chunk.length);
+                
+                // Update progress
+                setLoadingProgress(Math.round((chunkIndex / entryChunks.length) * 100));
+              } catch (storageError) {
+                console.error(`Error storing chunk ${chunkIndex}:`, storageError);
+                quotaExceeded = true;
+                setStorageQuotaExceeded(true);
+                
+                // Update the stored count to what we've stored so far
+                const storedChunks = chunkIndex;
+                const entriesStored = storedChunks * chunkSize;
+                setEntriesStoredCount(entriesStored);
+                
+                // Update the entry and chunk count in sessionStorage
+                sessionStorage.setItem('bibliographyEntryCount', entriesStored.toString());
+                sessionStorage.setItem('bibliographyChunkCount', storedChunks.toString());
+                
+                toast({
+                  title: "Storage Quota Exceeded",
+                  description: `Only ${entriesStored} entries could be stored due to browser storage limits.`,
+                  variant: "destructive"
+                });
+              }
             }
             
             chunkIndex++;
-            setTimeout(storeNextChunk, 10); // Small delay between chunks
+            setTimeout(storeNextChunk, 20); // Increase delay between chunks
           } catch (error) {
-            console.error(`Error storing chunk ${chunkIndex}:`, error);
+            console.error(`Error processing chunk ${chunkIndex}:`, error);
             
             // Check if it's a quota exceeded error
             if (error instanceof Error && error.name === 'QuotaExceededError') {
@@ -112,7 +135,6 @@ const PdfExtractor: React.FC = () => {
               sessionStorage.setItem('bibliographyEntryCount', entriesStored.toString());
               sessionStorage.setItem('bibliographyChunkCount', storedChunks.toString());
               
-              // Show toast about storage limitation
               toast({
                 title: "Storage Quota Exceeded",
                 description: `Only ${entriesStored} entries could be stored due to browser storage limits.`,
@@ -121,12 +143,15 @@ const PdfExtractor: React.FC = () => {
             }
             
             chunkIndex++;
-            setTimeout(storeNextChunk, 10);
+            setTimeout(storeNextChunk, 20);
           }
         } else {
           // All chunks stored, now store subheadings
           try {
-            sessionStorage.setItem('bibliographySubheadings', JSON.stringify(subheadings || {}));
+            if (subheadings) {
+              const subheadingsStr = JSON.stringify(subheadings);
+              sessionStorage.setItem('bibliographySubheadings', subheadingsStr);
+            }
             setLoadingProgress(100);
             
             // Force global state update
@@ -196,59 +221,31 @@ const PdfExtractor: React.FC = () => {
         console.log(`Found ${entryCount} stored entries in ${chunkCount} chunks`);
         setEntriesStoredCount(entryCount);
         
-        // Reconstruct entries from chunks
-        const allEntries: BibliographyEntry[] = [];
+        // We don't need to load all entries here, just verify they exist
+        setIsLoading(false);
         
-        // Progressive loading with progress updates
-        let loadedChunks = 0;
-        
-        const loadNextChunk = (index: number) => {
-          if (index < chunkCount) {
-            const chunkStr = sessionStorage.getItem(`bibliographyEntries_${index}`);
-            if (chunkStr) {
-              try {
-                const chunk = JSON.parse(chunkStr);
-                allEntries.push(...chunk);
-                loadedChunks++;
-                setLoadingProgress(Math.round((loadedChunks / chunkCount) * 100));
-                
-                // Load next chunk with a small delay to prevent UI freeze
-                setTimeout(() => loadNextChunk(index + 1), 5);
-              } catch (error) {
-                console.error(`Error parsing chunk ${index}:`, error);
-                setTimeout(() => loadNextChunk(index + 1), 5);
-              }
-            } else {
-              setTimeout(() => loadNextChunk(index + 1), 5);
+        // Dispatch event to notify other components that data is available
+        if (window.dispatchEvent) {
+          const chapters = [];
+          try {
+            // Try to get some chapter data from the first chunk
+            const firstChunkStr = sessionStorage.getItem('bibliographyEntries_0');
+            if (firstChunkStr) {
+              const firstChunk = JSON.parse(firstChunkStr);
+              const uniqueChapters = [...new Set(firstChunk.map((entry: BibliographyEntry) => entry.chapter).filter(Boolean))];
+              chapters.push(...uniqueChapters);
             }
-          } else {
-            // All chunks loaded
-            console.log(`Reconstructed ${allEntries.length} entries from storage`);
-            setExtractedEntries(allEntries);
-            setIsLoading(false);
-            
-            // Dispatch event to notify other components
-            if (window.dispatchEvent) {
-              window.dispatchEvent(new CustomEvent('bibliographyLoaded', { 
-                detail: { 
-                  count: allEntries.length,
-                  chapters: [...new Set(allEntries.map(entry => entry.chapter).filter(Boolean))]
-                } 
-              }));
-            }
-            
-            // Only show toast on bibliography page
-            if (window.location.pathname === '/bibliography') {
-              toast({
-                title: "Bibliography Loaded",
-                description: `${allEntries.length} entries available from browser storage`,
-              });
-            }
+          } catch (e) {
+            console.error("Error parsing first chunk for chapters:", e);
           }
-        };
-        
-        // Start loading chunks
-        loadNextChunk(0);
+          
+          window.dispatchEvent(new CustomEvent('bibliographyLoaded', { 
+            detail: { 
+              count: entryCount,
+              chapters: chapters
+            } 
+          }));
+        }
       } else {
         console.log("No stored entries found, starting automatic extraction");
         // We leave isLoading as true until extraction completes
@@ -274,7 +271,7 @@ const PdfExtractor: React.FC = () => {
         autoExtract={true}
         extractAllPages={true}  // Force extraction of ALL pages
         forceFullExtraction={true}  // Ensure we get all entries
-        minEntriesThreshold={1000}  // Reduced threshold to 1000 entries due to storage limitations
+        minEntriesThreshold={800}  // Reduced threshold to 800 entries due to storage limitations
       />
     </div>
   );

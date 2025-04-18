@@ -35,6 +35,7 @@ const Bibliography = () => {
   const [subheadings, setSubheadings] = useState<Record<string, string[]>>(bibliographySubheadings);
   const [showPdfUploader, setShowPdfUploader] = useState(false);
   const [storageError, setStorageError] = useState(false);
+  const [loadAttempted, setLoadAttempted] = useState(false);
   const { toast } = useToast();
   
   // For responsiveness
@@ -57,6 +58,8 @@ const Bibliography = () => {
   // Load entries from sessionStorage on mount
   useEffect(() => {
     console.log("Bibliography component mounted, checking for entries in sessionStorage");
+    setIsLoading(true);
+    
     try {
       // Check if we have chunked entries
       const entryCountStr = sessionStorage.getItem('bibliographyEntryCount');
@@ -70,13 +73,14 @@ const Bibliography = () => {
         
         // Reconstruct entries from chunks
         const allEntries: BibliographyEntry[] = [];
+        setStorageError(false);
         
         // Progressive loading with progress updates
         let loadedChunks = 0;
-        setStorageError(false);
+        let errorOccurred = false;
         
         const loadNextChunk = (index: number) => {
-          if (index < chunkCount) {
+          if (index < chunkCount && !errorOccurred) {
             const chunkStr = sessionStorage.getItem(`bibliographyEntries_${index}`);
             if (chunkStr) {
               try {
@@ -85,30 +89,54 @@ const Bibliography = () => {
                 loadedChunks++;
                 
                 // Load next chunk with a small delay to prevent UI freeze
-                setTimeout(() => loadNextChunk(index + 1), 5);
+                setTimeout(() => loadNextChunk(index + 1), 10);
               } catch (error) {
                 console.error(`Bibliography: Error parsing chunk ${index}:`, error);
-                setTimeout(() => loadNextChunk(index + 1), 5);
+                errorOccurred = true;
+                setStorageError(true);
+                setIsLoading(false);
+                setLoadAttempted(true);
+                toast({
+                  title: "Data Error",
+                  description: "There was an error loading the bibliography data. Try refreshing the page.",
+                  variant: "destructive"
+                });
               }
             } else {
-              setTimeout(() => loadNextChunk(index + 1), 5);
+              console.log(`Bibliography: Missing chunk ${index}`);
+              setTimeout(() => loadNextChunk(index + 1), 10);
             }
           } else {
-            // All chunks loaded
-            console.log(`Bibliography: Reconstructed ${allEntries.length} entries from storage`);
-            setAllEntries(allEntries);
-            setIsLoading(false);
-            
-            // If no category is selected, show all entries
-            if (!selectedCategory) {
-              setEntries(allEntries);
-            }
-            
-            // Also load subheadings if available
-            const storedSubheadings = sessionStorage.getItem('bibliographySubheadings');
-            if (storedSubheadings) {
-              const parsedSubheadings = JSON.parse(storedSubheadings);
-              setSubheadings({...bibliographySubheadings, ...parsedSubheadings});
+            if (!errorOccurred) {
+              // All chunks loaded or there was an error
+              console.log(`Bibliography: Reconstructed ${allEntries.length} entries from storage`);
+              
+              if (allEntries.length > 0) {
+                setAllEntries(allEntries);
+                
+                // If no category is selected, show all entries
+                if (!selectedCategory) {
+                  setEntries(allEntries);
+                }
+                
+                // Also load subheadings if available
+                const storedSubheadings = sessionStorage.getItem('bibliographySubheadings');
+                if (storedSubheadings) {
+                  try {
+                    const parsedSubheadings = JSON.parse(storedSubheadings);
+                    setSubheadings({...bibliographySubheadings, ...parsedSubheadings});
+                  } catch (error) {
+                    console.error("Error parsing subheadings:", error);
+                  }
+                }
+              } else {
+                // No entries were loaded, use the default ones
+                console.log("No entries loaded from sessionStorage, using default entries");
+                setStorageError(true);
+              }
+              
+              setIsLoading(false);
+              setLoadAttempted(true);
             }
           }
         };
@@ -117,14 +145,23 @@ const Bibliography = () => {
         loadNextChunk(0);
       } else {
         console.log("Bibliography: No entries found in sessionStorage, falling back to default data");
+        setStorageError(true);
         setIsLoading(false);
+        setLoadAttempted(true);
       }
     } catch (error) {
       console.error("Bibliography: Error reading from sessionStorage:", error);
       setIsLoading(false);
       setStorageError(true);
+      setLoadAttempted(true);
+      
+      toast({
+        title: "Storage Error",
+        description: "Failed to access browser storage. Try using a different browser.",
+        variant: "destructive"
+      });
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, toast]);
 
   // Listen for bibliographyLoaded event
   useEffect(() => {
@@ -150,9 +187,10 @@ const Bibliography = () => {
           
           // Progressive loading with progress updates
           let loadedChunks = 0;
+          let errorOccurred = false;
           
           const loadNextChunk = (index: number) => {
-            if (index < chunkCount) {
+            if (index < chunkCount && !errorOccurred) {
               const chunkStr = sessionStorage.getItem(`bibliographyEntries_${index}`);
               if (chunkStr) {
                 try {
@@ -161,30 +199,47 @@ const Bibliography = () => {
                   loadedChunks++;
                   
                   // Load next chunk with a small delay to prevent UI freeze
-                  setTimeout(() => loadNextChunk(index + 1), 5);
+                  setTimeout(() => loadNextChunk(index + 1), 10);
                 } catch (error) {
                   console.error(`Bibliography: Error parsing chunk ${index}:`, error);
-                  setTimeout(() => loadNextChunk(index + 1), 5);
+                  errorOccurred = true;
+                  setStorageError(true);
+                  setIsLoading(false);
+                  
+                  toast({
+                    title: "Data Error",
+                    description: "There was an error loading some bibliography data.",
+                    variant: "destructive"
+                  });
                 }
               } else {
-                setTimeout(() => loadNextChunk(index + 1), 5);
+                console.log(`Bibliography: Missing chunk ${index}`);
+                setTimeout(() => loadNextChunk(index + 1), 10);
               }
             } else {
-              // All chunks loaded
-              console.log(`Bibliography: Reconstructed ${allEntries.length} entries from storage`);
-              setAllEntries(allEntries);
-              
-              // If no category is selected, show all entries
-              if (!selectedCategory) {
-                setEntries(allEntries);
+              if (!errorOccurred) {
+                // All chunks loaded
+                console.log(`Bibliography: Reconstructed ${allEntries.length} entries from storage`);
+                
+                if (allEntries.length > 0) {
+                  setAllEntries(allEntries);
+                  
+                  // If no category is selected, show all entries
+                  if (!selectedCategory) {
+                    setEntries(allEntries);
+                  }
+                  
+                  toast({
+                    title: "Bibliography Updated",
+                    description: `${allEntries.length} entries now available`,
+                  });
+                } else {
+                  setStorageError(true);
+                }
+                
+                setIsLoading(false);
+                setLoadAttempted(true);
               }
-              
-              toast({
-                title: "Bibliography Updated",
-                description: `${allEntries.length} entries now available`,
-              });
-              
-              setIsLoading(false);
             }
           };
           
@@ -194,6 +249,7 @@ const Bibliography = () => {
       } catch (error) {
         console.error("Bibliography: Error reading from sessionStorage after load event:", error);
         setStorageError(true);
+        setLoadAttempted(true);
       }
     };
     
@@ -541,8 +597,8 @@ const Bibliography = () => {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Storage Error</AlertTitle>
               <AlertDescription>
-                Your browser's storage limit has been reached. Some bibliography entries couldn't be loaded.
-                Try using a different browser or clearing your browser data.
+                Your browser's storage limit has been reached or there was an error loading the bibliography. 
+                Some entries couldn't be loaded.
                 <div className="mt-2">
                   <Button 
                     variant="outline" 
@@ -567,7 +623,10 @@ const Bibliography = () => {
                   If you're experiencing issues, try using a different browser or clearing browser data.
                 </p>
               </div>
-              <PdfUploader onBibliographyExtracted={handleBibliographyExtracted} />
+              <PdfUploader 
+                onBibliographyExtracted={handleBibliographyExtracted}
+                minEntriesThreshold={800} // Reduced threshold to match PdfExtractor
+              />
               <div className="mt-4 flex justify-end">
                 <Button 
                   variant="outline" 
