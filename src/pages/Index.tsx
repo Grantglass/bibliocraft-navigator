@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Info, Home, Loader, RefreshCw, AlertCircle } from 'lucide-react';
+import { BookOpen, Info, Home, Loader, RefreshCw, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import PdfExtractor from '@/components/PdfExtractor';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ const Index = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [storageError, setStorageError] = useState<boolean>(false);
+  const [quotaError, setQuotaError] = useState<boolean>(false);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -25,6 +26,14 @@ const Index = () => {
           setLoading(false);
           setStorageError(false);
           console.log("Index: Updated entry count from session storage:", count);
+          
+          // Show success toast only if we have a reasonable number of entries
+          if (count > 0) {
+            toast({
+              title: "Bibliography Loaded",
+              description: `Successfully loaded ${count} bibliography entries.`,
+            });
+          }
         } else {
           // If entries aren't available after 15 seconds, stop loading
           setTimeout(() => {
@@ -45,6 +54,12 @@ const Index = () => {
         console.error("Error reading from sessionStorage:", error);
         setLoading(false);
         setStorageError(true);
+        
+        toast({
+          title: "Storage Error",
+          description: "There was an error accessing browser storage. Try using a different browser.",
+          variant: "destructive"
+        });
       }
     };
     
@@ -58,14 +73,37 @@ const Index = () => {
       setRefreshing(false);
       setStorageError(false);
       
-      // Show success toast
+      // Show success toast only if we have entries
+      if (count > 0) {
+        toast({
+          title: "Bibliography Loaded",
+          description: `Successfully loaded ${count} bibliography entries.`,
+        });
+      } else {
+        toast({
+          title: "No Bibliography Entries",
+          description: "No entries could be loaded. Try refreshing the page.",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    const handleStorageExceeded = (event: CustomEvent) => {
+      const entriesStored = event.detail?.entriesStored || 0;
+      const totalEntries = event.detail?.totalEntries || 0;
+      console.log(`Index: Storage quota exceeded. Stored ${entriesStored}/${totalEntries} entries`);
+      
+      setQuotaError(true);
+      
       toast({
-        title: "Bibliography Loaded",
-        description: `Successfully loaded ${count} bibliography entries.`,
+        title: "Storage Limit Reached",
+        description: `Your browser could only store ${entriesStored} of ${totalEntries} entries due to storage limitations.`,
+        variant: "destructive"
       });
     };
     
     window.addEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
+    window.addEventListener('bibliographyStorageExceeded', handleStorageExceeded as EventListener);
     
     const timeoutId = setTimeout(() => {
       setLoading(false);
@@ -73,6 +111,7 @@ const Index = () => {
     
     return () => {
       window.removeEventListener('bibliographyLoaded', handleBibliographyLoaded as EventListener);
+      window.removeEventListener('bibliographyStorageExceeded', handleStorageExceeded as EventListener);
       clearTimeout(timeoutId);
     };
   }, [loading, toast]);
@@ -80,6 +119,7 @@ const Index = () => {
   const handleRefresh = () => {
     setRefreshing(true);
     setStorageError(false);
+    setQuotaError(false);
     
     try {
       // Clear all existing bibliography data
@@ -155,13 +195,27 @@ const Index = () => {
             bibliography of over 1,700 entries covering William Blake's works and scholarly research about his art and poetry.
           </p>
           
-          {storageError && (
+          {(storageError || quotaError) && (
             <Alert variant="destructive" className="my-4">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Browser Storage Error</AlertTitle>
+              <AlertTitle>
+                {quotaError ? "Storage Limit Reached" : "Browser Storage Error"}
+              </AlertTitle>
               <AlertDescription>
-                There was an error with browser storage. This might be due to private browsing mode or low storage space.
-                Try refreshing the page or using a different browser.
+                {quotaError ? 
+                  "Your browser's storage limit has been reached. Only a subset of bibliography entries could be loaded. Try using a different browser or clearing your browser data." :
+                  "There was an error with browser storage. This might be due to private browsing mode or low storage space. Try refreshing the page or using a different browser."}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {(entryCount === 0 && !loading && !refreshing) && (
+            <Alert variant="destructive" className="my-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Bibliography Not Available</AlertTitle>
+              <AlertDescription>
+                No bibliography entries could be loaded. This may be due to browser storage limitations or network issues.
+                Please try refreshing the page or using a different browser.
               </AlertDescription>
             </Alert>
           )}
@@ -181,7 +235,9 @@ const Index = () => {
               <div className="text-center text-biblio-navy">
                 {entryCount > 0 ? (
                   <div>
-                    <p className="mb-2">Successfully loaded {entryCount.toLocaleString()} bibliography entries.</p>
+                    <p className="mb-2">Successfully loaded {entryCount.toLocaleString()} bibliography entries.
+                    {quotaError && " (Limited by browser storage capacity)"}
+                    </p>
                     <div className="flex justify-center gap-2 mt-2">
                       <Button 
                         variant="outline" 
