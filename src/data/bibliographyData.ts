@@ -20,11 +20,11 @@ export interface BibliographyCategory {
   entries?: string[];
 }
 
-// Base entries from the pre-built data - use these directly instead of trying to augment with runtime data
-export const bibliographyEntries: BibliographyEntry[] = prebuiltData.entries;
+// Directly use the prebuilt data instead of trying to load from sessionStorage
+export const bibliographyEntries: BibliographyEntry[] = prebuiltData.entries || [];
 
 // Convert the JSON subheadings to the correct type
-export const bibliographySubheadings: Record<string, string[]> = prebuiltData.subheadings;
+export const bibliographySubheadings: Record<string, string[]> = prebuiltData.subheadings || {};
 
 // Fix the subheadings for PART I
 if (bibliographySubheadings["PART I. TEACHING WILLIAM BLAKE"]) {
@@ -82,6 +82,8 @@ export const bibliographyCategories: BibliographyCategory[] = [
   }
 ];
 
+// Functions to work with the bibliography data
+
 export const getEntriesByChapterAndSubheading = (
   chapter: string, 
   subheading?: string, 
@@ -96,6 +98,7 @@ export const getEntriesByChapterAndSubheading = (
 };
 
 export const getAllEntries = (): BibliographyEntry[] => {
+  // Always return all entries from prebuilt data, not from sessionStorage
   return bibliographyEntries;
 };
 

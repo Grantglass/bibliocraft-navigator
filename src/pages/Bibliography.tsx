@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import BibliographySidebar from '@/components/BibliographySidebar';
 import BibliographyContent from '@/components/BibliographyContent';
@@ -8,6 +7,7 @@ import {
   searchEntries,
   BibliographyEntry,
   categorizeEntries,
+  bibliographyEntries,
   bibliographySubheadings
 } from '@/data/bibliographyData';
 import { Menu, ArrowLeft, BookOpen, Filter, Loader, RefreshCw, AlertCircle } from 'lucide-react';
@@ -22,11 +22,10 @@ const Bibliography = () => {
   const queryParams = new URLSearchParams(location.search);
   const chapterFromUrl = queryParams.get('chapter') || '';
 
-  // Initialize with all entries from the data function
-  const initialEntries = getAllEntries();
-  const [entries, setEntries] = useState<BibliographyEntry[]>(initialEntries);
-  const [allEntries, setAllEntries] = useState<BibliographyEntry[]>(initialEntries);
-  const [isLoading, setIsLoading] = useState(true);
+  // Initialize with all entries directly from the prebuilt data
+  const [entries, setEntries] = useState<BibliographyEntry[]>(bibliographyEntries);
+  const [allEntries, setAllEntries] = useState<BibliographyEntry[]>(bibliographyEntries);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(chapterFromUrl);
   const [selectedSubheading, setSelectedSubheading] = useState('');
@@ -592,6 +591,13 @@ const Bibliography = () => {
         />
         
         <div className="flex-1 overflow-auto transition-all duration-300 ease-in-out">
+          {/* Entry count information */}
+          <div className="bg-biblio-navy text-white py-2 px-4">
+            <p className="text-sm">
+              Showing {entries.length} of {allEntries.length} total entries
+            </p>
+          </div>
+          
           {storageError && (
             <Alert variant="destructive" className="mx-4 mt-4 md:mx-auto md:max-w-4xl">
               <AlertCircle className="h-4 w-4" />
