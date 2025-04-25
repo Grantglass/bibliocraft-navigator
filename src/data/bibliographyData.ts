@@ -115,15 +115,19 @@ export const getEntryById = (entryId: string, entries: BibliographyEntry[] = bib
 export const searchEntries = (query: string, entries: BibliographyEntry[] = bibliographyEntries): BibliographyEntry[] => {
   const lowercaseQuery = query.toLowerCase();
   return entries.filter(entry => 
-    entry.title.toLowerCase().includes(lowercaseQuery) ||
-    entry.authors.toLowerCase().includes(lowercaseQuery) ||
-    entry.content.toLowerCase().includes(lowercaseQuery)
+    (entry.title?.toLowerCase().includes(lowercaseQuery) || false) ||
+    (entry.authors?.toLowerCase().includes(lowercaseQuery) || false) ||
+    (entry.content?.toLowerCase().includes(lowercaseQuery) || false)
   );
 };
 
-// Add the missing categorizeEntries function
+// Add the missing categorizeEntries function with better error handling
 export const categorizeEntries = (entries: BibliographyEntry[]): BibliographyEntry[] => {
+  if (!entries || !Array.isArray(entries)) return [];
+  
   return entries.map(entry => {
+    if (!entry) return entry;
+    
     // If entry already has a category, use it
     if (entry.category) return entry;
     
@@ -158,4 +162,3 @@ export const categorizeEntries = (entries: BibliographyEntry[]): BibliographyEnt
     };
   });
 };
-

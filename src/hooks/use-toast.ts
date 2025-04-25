@@ -8,7 +8,7 @@ import type {
 
 // Increase the toast limit to allow multiple notifications
 const TOAST_LIMIT = 5
-const TOAST_REMOVE_DELAY = 10000 // 10 seconds for toast visibility
+const TOAST_REMOVE_DELAY = 5000 // 5 seconds for toast visibility
 
 type ToasterToast = ToastProps & {
   id: string
@@ -190,4 +190,3 @@ function useToast() {
 }
 
 export { useToast, toast }
-

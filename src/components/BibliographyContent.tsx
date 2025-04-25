@@ -15,16 +15,16 @@ interface BibliographyContentProps {
 }
 
 const BibliographyContent: React.FC<BibliographyContentProps> = ({ 
-  entries, 
-  isLoading, 
-  searchQuery,
-  selectedCategory,
-  selectedSubheading,
+  entries = [], 
+  isLoading = false, 
+  searchQuery = '',
+  selectedCategory = '',
+  selectedSubheading = '',
   onEntriesExtracted
 }) => {
   // Group entries by subheading for better organization
   const entriesBySubheading = React.useMemo(() => {
-    if (!selectedCategory || searchQuery) return null;
+    if (!selectedCategory || searchQuery || !entries?.length) return null;
 
     // Special case for PART I - don't group by subheading
     if (selectedCategory === "PART I. TEACHING WILLIAM BLAKE") {
@@ -48,7 +48,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
       }
       
       // Then by author name
-      return a.authors.localeCompare(b.authors);
+      return (a.authors || '').localeCompare(b.authors || '');
     });
     
     // Group by subheading (except for PART I)
@@ -92,7 +92,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
 
   const getPageTitle = () => {
     if (searchQuery) {
-      return `Search Results for "${searchQuery}" (${entries.length} entries)`;
+      return `Search Results for "${searchQuery}" (${entries?.length || 0} entries)`;
     } else if (selectedCategory === "INTRODUCTION") {
       return selectedSubheading ? `Introduction - ${selectedSubheading}` : 'Introduction';
     } else if (selectedCategory && selectedSubheading) {
@@ -118,10 +118,10 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
     <div className="bibliography-content">
       <div className="border-b border-biblio-lightGray pb-4 mb-6">
         <h1 className="text-3xl font-bold text-biblio-navy">{getPageTitle()}</h1>
-        {searchQuery && entries.length === 0 && (
+        {searchQuery && (!entries || entries.length === 0) && (
           <p className="text-biblio-gray mt-2">No entries found for your search.</p>
         )}
-        {selectedCategory && !searchQuery && (
+        {selectedCategory && !searchQuery && entries && (
           <p className="text-biblio-gray mt-2">{entries.length} entries found</p>
         )}
       </div>
@@ -148,16 +148,16 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
                       ? 'border-biblio-navy bg-biblio-lightBlue/10' 
                       : 'border-biblio-lightGray'
                   }`}>
-                    <h3 className="text-lg font-semibold text-biblio-navy">{entry.title}</h3>
-                    <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
-                    <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
+                    <h3 className="text-lg font-semibold text-biblio-navy">{entry.title || 'No Title'}</h3>
+                    <p className="text-biblio-darkGray mt-1">{entry.authors || 'Unknown'} ({entry.year || 'N/A'})</p>
+                    <p className="text-biblio-gray italic mt-1">{entry.publication || 'No Publication'}</p>
                     <div className="mt-2">
                       <Badge variant="outline" className="bg-biblio-lightBlue/20 text-biblio-navy border-biblio-navy">
-                        {entry.chapter}
+                        {entry.chapter || 'Uncategorized'}
                         {entry.subheading && !isPart1 && ` - ${entry.subheading}`}
                       </Badge>
                     </div>
-                    <p className="mt-3 text-gray-700">{entry.content}</p>
+                    <p className="mt-3 text-gray-700">{entry.content || 'No content available'}</p>
                   </div>
                 ))}
               </div>
@@ -172,12 +172,12 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
                   ? 'border-biblio-navy bg-biblio-lightBlue/10' 
                   : 'border-biblio-lightGray'
               }`}>
-                <h2 className="text-xl font-semibold text-biblio-navy">{entry.title}</h2>
-                <p className="text-biblio-darkGray mt-1">{entry.authors} ({entry.year})</p>
-                <p className="text-biblio-gray italic mt-1">{entry.publication}</p>
+                <h2 className="text-xl font-semibold text-biblio-navy">{entry.title || 'No Title'}</h2>
+                <p className="text-biblio-darkGray mt-1">{entry.authors || 'Unknown'} ({entry.year || 'N/A'})</p>
+                <p className="text-biblio-gray italic mt-1">{entry.publication || 'No Publication'}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <Badge variant="outline" className="bg-biblio-navy/10 text-biblio-navy">
-                    {entry.chapter}
+                    {entry.chapter || 'Uncategorized'}
                   </Badge>
                   {entry.subheading && !isPart1 && (
                     <Badge variant="outline" className={`${
@@ -189,7 +189,7 @@ const BibliographyContent: React.FC<BibliographyContentProps> = ({
                     </Badge>
                   )}
                 </div>
-                <p className="mt-3 text-gray-700">{entry.content}</p>
+                <p className="mt-3 text-gray-700">{entry.content || 'No content available'}</p>
               </div>
             ))}
           </div>
